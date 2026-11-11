@@ -13,6 +13,12 @@ engine and graphical interface, corresponding to assignment section 4.1.
 
 ## 2. Requests and resulting assistance
 
+Deployment follow-up: the user supplied GitHub Actions logs showing retries during
+Ubuntu package-index downloads. The assistant removed the workflow's apt update
+and FFmpeg installation commands, added a pinned `imageio-ffmpeg` build dependency,
+and made asset staging fall back to its bundled executable when FFmpeg is absent
+from PATH. The change was prepared locally for the team to push to `web-deploy`.
+
 Browser-deployment request on 12 November 2026: the assistant added a Pygbag
 entry point, asynchronous Pygame loop, cooperative semantic search, generated
 web asset staging with OGG music conversion, and a GitHub Actions Pages workflow.

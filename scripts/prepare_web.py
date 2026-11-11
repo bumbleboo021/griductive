@@ -10,9 +10,15 @@ STAGE = ROOT/'build'/'web-src'
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--ffmpeg', default='ffmpeg', help='FFmpeg executable path')
+    parser.add_argument('--ffmpeg', help='Optional FFmpeg executable path')
     args = parser.parse_args()
-    ffmpeg = shutil.which(args.ffmpeg)
+    ffmpeg = shutil.which(args.ffmpeg or 'ffmpeg')
+    if ffmpeg is None and args.ffmpeg is None:
+        try:
+            from imageio_ffmpeg import get_ffmpeg_exe
+            ffmpeg = get_ffmpeg_exe()
+        except (ImportError, RuntimeError):
+            parser.error('Install requirements-web.txt to obtain the bundled FFmpeg executable.')
     if ffmpeg is None:
         parser.error('Install FFmpeg or pass --ffmpeg with its executable path.')
     if STAGE.resolve().parent != (ROOT/'build').resolve():

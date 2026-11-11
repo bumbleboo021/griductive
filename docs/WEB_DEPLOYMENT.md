@@ -8,7 +8,8 @@ for another action.
 
 ## Local setup
 
-Use Python 3.12 and FFmpeg. Create a separate environment for the web tools.
+Use Python 3.12. Create a separate environment for the web tools. The web
+requirements include an FFmpeg executable through `imageio-ffmpeg`.
 
 ```powershell
 python -m venv .venv-web
@@ -22,6 +23,8 @@ the Python and Pygame WebAssembly runtime from Pygbag's CDN. Internet access is
 required. Music starts through the game's Music or Tracks buttons.
 
 If FFmpeg is outside PATH, use `scripts/prepare_web.py --ffmpeg "C:/path/to/ffmpeg.exe"`.
+With no explicit path, staging uses FFmpeg from PATH when available and otherwise
+uses the executable bundled with `imageio-ffmpeg`.
 The staging command recreates `build/web-src` from the current source, assets,
 and puzzle files. It converts music to OGG inside that generated directory.
 Run staging again after editing source or assets, then restart Pygbag.
@@ -46,7 +49,8 @@ web environment are excluded from Git.
 4. Open the URL reported by the deployment job, normally
    `https://YOUR_USERNAME.github.io/YOUR_REPOSITORY/`.
 
-The workflow in `.github/workflows/web.yml` installs FFmpeg and pinned build tools,
+The workflow in `.github/workflows/web.yml` installs pinned Python build tools
+and bundled FFmpeg through pip,
 stages the game, builds it, uploads the web artifact, and deploys it through Pages.
 If the default branch has another name, update the workflow's push branch.
 
