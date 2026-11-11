@@ -26,10 +26,8 @@ jobs:
           cache-dependency-path: requirements-web.txt
       - name: Install build dependencies
         run: python -m pip install -r requirements-web.txt
-      - name: Prepare game assets
-        run: python scripts/prepare_web.py
       - name: Build browser package
-        run: python -m pygbag --build --title Griductive --width 1180 --height 850 build/web-src
+        run: python -u scripts/build_web.py
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -13,6 +13,13 @@ engine and graphical interface, corresponding to assignment section 4.1.
 
 ## 2. Requests and resulting assistance
 
+Browser presentation follow-up: the assistant added a loading card using the
+project's heading font, an animated loading indicator, and a Play button tied
+to the runtime's readiness. The supplied background now fills the browser page,
+including the margins around the game canvas. A build wrapper copies these
+static assets and applies the page styling. The game reveals its canvas after
+drawing its first frame.
+
 Deployment follow-up: the user supplied GitHub Actions logs showing retries during
 Ubuntu package-index downloads. The assistant removed the workflow's apt update
 and FFmpeg installation commands, added a pinned `imageio-ffmpeg` build dependency,

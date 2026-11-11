@@ -16,6 +16,8 @@ async def main():
                           root/'data/puzzles', 'Browser semantic analyzer | development mode')
         # Recalculate CSS sizing after SDL establishes the actual canvas dimensions.
         platform.window.window_resize()
+        view.draw()
+        platform.window.eval('window.griductiveGameReady && window.griductiveGameReady()')
         await view.run_web()
     finally:
         pygame.quit()

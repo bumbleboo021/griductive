@@ -14,25 +14,25 @@ requirements include an FFmpeg executable through `imageio-ffmpeg`.
 ```powershell
 python -m venv .venv-web
 .\.venv-web\Scripts\python.exe -m pip install -r requirements-web.txt
-.\.venv-web\Scripts\python.exe scripts/prepare_web.py
-.\.venv-web\Scripts\python.exe -m pygbag --title Griductive --width 1180 --height 850 build/web-src
+.\.venv-web\Scripts\python.exe scripts/build_web.py
+.\.venv-web\Scripts\python.exe -m http.server 8000 --directory build/web-src/build/web
 ```
 
-Open `http://localhost:8000` and click the page to start. The first visit downloads
+Open `http://localhost:8000` and press Play when the loading screen is ready. The first visit downloads
 the Python and Pygame WebAssembly runtime from Pygbag's CDN. Internet access is
 required. Music starts through the game's Music or Tracks buttons.
 
-If FFmpeg is outside PATH, use `scripts/prepare_web.py --ffmpeg "C:/path/to/ffmpeg.exe"`.
+If FFmpeg is outside PATH, use `scripts/build_web.py --ffmpeg "C:/path/to/ffmpeg.exe"`.
 With no explicit path, staging uses FFmpeg from PATH when available and otherwise
 uses the executable bundled with `imageio-ffmpeg`.
 The staging command recreates `build/web-src` from the current source, assets,
 and puzzle files. It converts music to OGG inside that generated directory.
-Run staging again after editing source or assets, then restart Pygbag.
+Run `scripts/build_web.py` again after editing source or assets, then refresh the page.
 
-To build files without starting a server, run the following command after staging.
+The build command prepares assets, packages the game, and adds the browser page.
 
 ```powershell
-.\.venv-web\Scripts\python.exe -m pygbag --build --title Griductive --width 1180 --height 850 build/web-src
+.\.venv-web\Scripts\python.exe scripts/build_web.py
 ```
 
 The deployable output is `build/web-src/build/web/`. Serve that directory over
@@ -42,17 +42,28 @@ web environment are excluded from Git.
 
 ## GitHub Pages
 
-1. Push the source changes to the repository's `main` branch.
+1. Push the source changes to the repository's `web-deploy` branch.
 2. Open the repository's Settings, then Pages, and select GitHub Actions as the
    build and deployment source.
-3. Open Actions and run **Deploy browser game**, or push another change to `main`.
+3. Open Actions and run **Deploy browser game**, or push another change to `web-deploy`.
 4. Open the URL reported by the deployment job, normally
    `https://YOUR_USERNAME.github.io/YOUR_REPOSITORY/`.
 
 The workflow in `.github/workflows/web.yml` installs pinned Python build tools
 and bundled FFmpeg through pip,
 stages the game, builds it, uploads the web artifact, and deploys it through Pages.
-If the default branch has another name, update the workflow's push branch.
+The workflow's push trigger names `web-deploy`.
+
+## Loading screen and page background
+
+`web/page.css` styles the loading card, spinner, Play button, and full-browser
+background. `web/page.js` follows the runtime's loading status and reveals the
+game after its first frame is drawn. The page background fills the space beside
+the canvas while the game keeps its original proportions.
+
+The build copies `config.BACKGROUND_FILE` and `config.HEADING_FONT` into the page's
+static assets so they can appear before Python finishes loading. Change the
+background dimming in `web/page.css` through the `body::before` overlay opacity.
 
 ## Browser checks
 
