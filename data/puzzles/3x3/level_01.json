@@ -1,0 +1,191 @@
+{
+  "title": "3x3 - Quiet Rows",
+  "size": 3,
+  "initially_revealed": [
+    "A1"
+  ],
+  "metadata": {
+    "author": "Project team with AI assistance",
+    "seed": 301,
+    "source": "Original project level; not an imported official puzzle",
+    "design": "Regional counts, overlap deductions and odd parity",
+    "pre_pruning_construction_plan": [
+      {
+        "owner": "A1",
+        "forces": [
+          "B1",
+          "C1"
+        ]
+      },
+      {
+        "owner": "B1",
+        "forces": [
+          "A3",
+          "C3"
+        ]
+      },
+      {
+        "owner": "C1",
+        "forces": [
+          "B3"
+        ]
+      },
+      {
+        "owner": "A3",
+        "forces": [
+          "B2"
+        ]
+      },
+      {
+        "owner": "C3",
+        "forces": [
+          "A2",
+          "C2"
+        ]
+      }
+    ],
+    "quote_cells": [
+      "A2",
+      "B2",
+      "C2",
+      "B3"
+    ]
+  },
+  "characters": [
+    {
+      "cell": "A1",
+      "name": "Arlecchino",
+      "origin": "Khaenri'ah",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-A1",
+        "type": "EXACTLY",
+        "region": {
+          "type": "row",
+          "index": 1
+        },
+        "count": 3,
+        "target_status": "INNOCENT"
+      }
+    },
+    {
+      "cell": "B1",
+      "name": "Ayaka",
+      "origin": "Inazuma",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-B1",
+        "type": "EXACTLY",
+        "region": {
+          "type": "intersection",
+          "regions": [
+            {
+              "type": "neighbors",
+              "cell": "B3"
+            },
+            {
+              "type": "row",
+              "index": 3
+            }
+          ]
+        },
+        "count": 0
+      }
+    },
+    {
+      "cell": "C1",
+      "name": "Chiori",
+      "origin": "Inazuma",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-C1",
+        "type": "AT_LEAST",
+        "region": {
+          "type": "row",
+          "index": 3
+        },
+        "count": 1
+      }
+    },
+    {
+      "cell": "A2",
+      "name": "Columbina",
+      "origin": "Snezhnaya",
+      "status": "CRIMINAL",
+      "clue": {
+        "id": "clue-A2",
+        "type": "QUOTE"
+      }
+    },
+    {
+      "cell": "B2",
+      "name": "Escoffier",
+      "origin": "Fontaine",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-B2",
+        "type": "QUOTE"
+      }
+    },
+    {
+      "cell": "C2",
+      "name": "Eula",
+      "origin": "Mondstadt",
+      "status": "CRIMINAL",
+      "clue": {
+        "id": "clue-C2",
+        "type": "QUOTE"
+      }
+    },
+    {
+      "cell": "A3",
+      "name": "Furina",
+      "origin": "Fontaine",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-A3",
+        "type": "ODD",
+        "region": {
+          "type": "column",
+          "label": "B"
+        }
+      }
+    },
+    {
+      "cell": "B3",
+      "name": "Ganyu",
+      "origin": "Liyue",
+      "status": "CRIMINAL",
+      "clue": {
+        "id": "clue-B3",
+        "type": "QUOTE"
+      }
+    },
+    {
+      "cell": "C3",
+      "name": "Hu Tao",
+      "origin": "Liyue",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-C3",
+        "type": "EXACTLY",
+        "region": {
+          "type": "intersection",
+          "regions": [
+            {
+              "type": "neighbors",
+              "cell": "B3"
+            },
+            {
+              "type": "row",
+              "index": 2
+            }
+          ]
+        },
+        "count": 1,
+        "target_status": "INNOCENT"
+      }
+    }
+  ],
+  "name": "3x3 - Quiet Rows"
+}

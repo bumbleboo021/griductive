@@ -1,0 +1,4148 @@
+[
+  {
+    "path": "data\\puzzles\\3x3\\level_01.json",
+    "size": 3,
+    "all_clues_true": true,
+    "unique": true,
+    "progressively_solvable": true,
+    "initial_reveals": [
+      "A1"
+    ],
+    "steps": 8,
+    "clue_types": {
+      "EXACTLY": 3,
+      "AT_LEAST": 1,
+      "QUOTE": 4,
+      "ODD": 1
+    },
+    "region_types": {
+      "row": 2,
+      "intersection": 2,
+      "cells": 4,
+      "column": 1
+    },
+    "trace": [
+      {
+        "step": 1,
+        "cell": "B1",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1"
+        ],
+        "revealed_clue": "clue-B1"
+      },
+      {
+        "step": 2,
+        "cell": "C1",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1"
+        ],
+        "revealed_clue": "clue-C1"
+      },
+      {
+        "step": 3,
+        "cell": "A3",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1"
+        ],
+        "revealed_clue": "clue-A3"
+      },
+      {
+        "step": 4,
+        "cell": "B2",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-A3"
+        ],
+        "revealed_clue": "clue-B2"
+      },
+      {
+        "step": 5,
+        "cell": "B3",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-B2",
+          "clue-A3"
+        ],
+        "revealed_clue": "clue-B3"
+      },
+      {
+        "step": 6,
+        "cell": "C3",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-B2",
+          "clue-A3",
+          "clue-B3"
+        ],
+        "revealed_clue": "clue-C3"
+      },
+      {
+        "step": 7,
+        "cell": "A2",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-B2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3"
+        ],
+        "revealed_clue": "clue-A2"
+      },
+      {
+        "step": 8,
+        "cell": "C2",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-A2",
+          "clue-B2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3"
+        ],
+        "revealed_clue": "clue-C2"
+      }
+    ]
+  },
+  {
+    "path": "data\\puzzles\\3x3\\level_02.json",
+    "size": 3,
+    "all_clues_true": true,
+    "unique": true,
+    "progressively_solvable": true,
+    "initial_reveals": [
+      "A1"
+    ],
+    "steps": 8,
+    "clue_types": {
+      "EXACTLY": 5,
+      "ODD": 1,
+      "QUOTE": 3
+    },
+    "region_types": {
+      "row": 1,
+      "neighbors": 3,
+      "intersection": 2,
+      "cells": 3
+    },
+    "trace": [
+      {
+        "step": 1,
+        "cell": "B1",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1"
+        ],
+        "revealed_clue": "clue-B1"
+      },
+      {
+        "step": 2,
+        "cell": "C1",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1"
+        ],
+        "revealed_clue": "clue-C1"
+      },
+      {
+        "step": 3,
+        "cell": "A2",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1"
+        ],
+        "revealed_clue": "clue-A2"
+      },
+      {
+        "step": 4,
+        "cell": "B2",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-A2"
+        ],
+        "revealed_clue": "clue-B2"
+      },
+      {
+        "step": 5,
+        "cell": "C2",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-A2",
+          "clue-B2"
+        ],
+        "revealed_clue": "clue-C2"
+      },
+      {
+        "step": 6,
+        "cell": "A3",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2"
+        ],
+        "revealed_clue": "clue-A3"
+      },
+      {
+        "step": 7,
+        "cell": "B3",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-A3"
+        ],
+        "revealed_clue": "clue-B3"
+      },
+      {
+        "step": 8,
+        "cell": "C3",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-A3",
+          "clue-B3"
+        ],
+        "revealed_clue": "clue-C3"
+      }
+    ]
+  },
+  {
+    "path": "data\\puzzles\\3x3\\level_03.json",
+    "size": 3,
+    "all_clues_true": true,
+    "unique": true,
+    "progressively_solvable": true,
+    "initial_reveals": [
+      "A1",
+      "C1"
+    ],
+    "steps": 7,
+    "clue_types": {
+      "CONNECTED": 1,
+      "COUNT_COMPARE": 1,
+      "FACT": 1,
+      "EVEN": 1,
+      "IMPLIES": 1,
+      "QUOTE": 3,
+      "EXACTLY": 1
+    },
+    "region_types": {
+      "row": 1,
+      "neighbors": 1,
+      "direction": 1,
+      "common_neighbors": 1,
+      "cells": 4,
+      "boundary": 1
+    },
+    "trace": [
+      {
+        "step": 1,
+        "cell": "B1",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-C1"
+        ],
+        "revealed_clue": "clue-B1"
+      },
+      {
+        "step": 2,
+        "cell": "A2",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1"
+        ],
+        "revealed_clue": "clue-A2"
+      },
+      {
+        "step": 3,
+        "cell": "B2",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-A2"
+        ],
+        "revealed_clue": "clue-B2"
+      },
+      {
+        "step": 4,
+        "cell": "A3",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-A2",
+          "clue-B2"
+        ],
+        "revealed_clue": "clue-A3"
+      },
+      {
+        "step": 5,
+        "cell": "C2",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-A2",
+          "clue-B2",
+          "clue-A3"
+        ],
+        "revealed_clue": "clue-C2"
+      },
+      {
+        "step": 6,
+        "cell": "B3",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-A3"
+        ],
+        "revealed_clue": "clue-B3"
+      },
+      {
+        "step": 7,
+        "cell": "C3",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-A3",
+          "clue-B3"
+        ],
+        "revealed_clue": "clue-C3"
+      }
+    ]
+  },
+  {
+    "path": "data\\puzzles\\3x3\\level_04.json",
+    "size": 3,
+    "all_clues_true": true,
+    "unique": true,
+    "progressively_solvable": true,
+    "initial_reveals": [
+      "A1",
+      "C1"
+    ],
+    "steps": 7,
+    "clue_types": {
+      "CONNECTED": 1,
+      "COUNT_COMPARE": 1,
+      "FACT": 1,
+      "QUOTE": 2,
+      "EXACTLY": 2,
+      "EVEN": 1,
+      "IMPLIES": 1
+    },
+    "region_types": {
+      "row": 1,
+      "direction": 1,
+      "cells": 4,
+      "boundary": 1,
+      "common_neighbors": 1,
+      "intersection": 1
+    },
+    "trace": [
+      {
+        "step": 1,
+        "cell": "B1",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-C1"
+        ],
+        "revealed_clue": "clue-B1"
+      },
+      {
+        "step": 2,
+        "cell": "C2",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1"
+        ],
+        "revealed_clue": "clue-C2"
+      },
+      {
+        "step": 3,
+        "cell": "B2",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-C2"
+        ],
+        "revealed_clue": "clue-B2"
+      },
+      {
+        "step": 4,
+        "cell": "C3",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-B2",
+          "clue-C2"
+        ],
+        "revealed_clue": "clue-C3"
+      },
+      {
+        "step": 5,
+        "cell": "A3",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-B2",
+          "clue-C2",
+          "clue-C3"
+        ],
+        "revealed_clue": "clue-A3"
+      },
+      {
+        "step": 6,
+        "cell": "A2",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-B2",
+          "clue-C2",
+          "clue-A3",
+          "clue-C3"
+        ],
+        "revealed_clue": "clue-A2"
+      },
+      {
+        "step": 7,
+        "cell": "B3",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-A3",
+          "clue-C3"
+        ],
+        "revealed_clue": "clue-B3"
+      }
+    ]
+  },
+  {
+    "path": "data\\puzzles\\4x4\\level_01.json",
+    "size": 4,
+    "all_clues_true": true,
+    "unique": true,
+    "progressively_solvable": true,
+    "initial_reveals": [
+      "A1"
+    ],
+    "steps": 15,
+    "clue_types": {
+      "EXACTLY": 7,
+      "QUOTE": 8,
+      "AT_LEAST": 1
+    },
+    "region_types": {
+      "row": 2,
+      "cells": 8,
+      "intersection": 4,
+      "neighbors": 2
+    },
+    "trace": [
+      {
+        "step": 1,
+        "cell": "B1",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1"
+        ],
+        "revealed_clue": "clue-B1"
+      },
+      {
+        "step": 2,
+        "cell": "C1",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1"
+        ],
+        "revealed_clue": "clue-C1"
+      },
+      {
+        "step": 3,
+        "cell": "D1",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1"
+        ],
+        "revealed_clue": "clue-D1"
+      },
+      {
+        "step": 4,
+        "cell": "C2",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1"
+        ],
+        "revealed_clue": "clue-C2"
+      },
+      {
+        "step": 5,
+        "cell": "D2",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-C2"
+        ],
+        "revealed_clue": "clue-D2"
+      },
+      {
+        "step": 6,
+        "cell": "A3",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-C2",
+          "clue-D2"
+        ],
+        "revealed_clue": "clue-A3"
+      },
+      {
+        "step": 7,
+        "cell": "B3",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-C2",
+          "clue-D2",
+          "clue-A3"
+        ],
+        "revealed_clue": "clue-B3"
+      },
+      {
+        "step": 8,
+        "cell": "C3",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-C2",
+          "clue-D2",
+          "clue-A3",
+          "clue-B3"
+        ],
+        "revealed_clue": "clue-C3"
+      },
+      {
+        "step": 9,
+        "cell": "B2",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-C2",
+          "clue-D2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3"
+        ],
+        "revealed_clue": "clue-B2"
+      },
+      {
+        "step": 10,
+        "cell": "D3",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3"
+        ],
+        "revealed_clue": "clue-D3"
+      },
+      {
+        "step": 11,
+        "cell": "B4",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3"
+        ],
+        "revealed_clue": "clue-B4"
+      },
+      {
+        "step": 12,
+        "cell": "C4",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-B4"
+        ],
+        "revealed_clue": "clue-C4"
+      },
+      {
+        "step": 13,
+        "cell": "A2",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-B4",
+          "clue-C4"
+        ],
+        "revealed_clue": "clue-A2"
+      },
+      {
+        "step": 14,
+        "cell": "A4",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-B4",
+          "clue-C4"
+        ],
+        "revealed_clue": "clue-A4"
+      },
+      {
+        "step": 15,
+        "cell": "D4",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-A4",
+          "clue-B4",
+          "clue-C4"
+        ],
+        "revealed_clue": "clue-D4"
+      }
+    ]
+  },
+  {
+    "path": "data\\puzzles\\4x4\\level_02.json",
+    "size": 4,
+    "all_clues_true": true,
+    "unique": true,
+    "progressively_solvable": true,
+    "initial_reveals": [
+      "A1"
+    ],
+    "steps": 15,
+    "clue_types": {
+      "EXACTLY": 5,
+      "QUOTE": 6,
+      "ODD": 4,
+      "AT_LEAST": 1
+    },
+    "region_types": {
+      "row": 1,
+      "cells": 6,
+      "intersection": 5,
+      "neighbors": 3,
+      "column": 1
+    },
+    "trace": [
+      {
+        "step": 1,
+        "cell": "B1",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1"
+        ],
+        "revealed_clue": "clue-B1"
+      },
+      {
+        "step": 2,
+        "cell": "C1",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1"
+        ],
+        "revealed_clue": "clue-C1"
+      },
+      {
+        "step": 3,
+        "cell": "D1",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1"
+        ],
+        "revealed_clue": "clue-D1"
+      },
+      {
+        "step": 4,
+        "cell": "A2",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1"
+        ],
+        "revealed_clue": "clue-A2"
+      },
+      {
+        "step": 5,
+        "cell": "B2",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-A2"
+        ],
+        "revealed_clue": "clue-B2"
+      },
+      {
+        "step": 6,
+        "cell": "C2",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-A2",
+          "clue-B2"
+        ],
+        "revealed_clue": "clue-C2"
+      },
+      {
+        "step": 7,
+        "cell": "D2",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2"
+        ],
+        "revealed_clue": "clue-D2"
+      },
+      {
+        "step": 8,
+        "cell": "D3",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2"
+        ],
+        "revealed_clue": "clue-D3"
+      },
+      {
+        "step": 9,
+        "cell": "D4",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-D3"
+        ],
+        "revealed_clue": "clue-D4"
+      },
+      {
+        "step": 10,
+        "cell": "C3",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-D3",
+          "clue-D4"
+        ],
+        "revealed_clue": "clue-C3"
+      },
+      {
+        "step": 11,
+        "cell": "A3",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-C3",
+          "clue-D3",
+          "clue-D4"
+        ],
+        "revealed_clue": "clue-A3"
+      },
+      {
+        "step": 12,
+        "cell": "B3",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-A3",
+          "clue-C3",
+          "clue-D3",
+          "clue-D4"
+        ],
+        "revealed_clue": "clue-B3"
+      },
+      {
+        "step": 13,
+        "cell": "B4",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-D4"
+        ],
+        "revealed_clue": "clue-B4"
+      },
+      {
+        "step": 14,
+        "cell": "A4",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-B4",
+          "clue-D4"
+        ],
+        "revealed_clue": "clue-A4"
+      },
+      {
+        "step": 15,
+        "cell": "C4",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-A4",
+          "clue-B4",
+          "clue-D4"
+        ],
+        "revealed_clue": "clue-C4"
+      }
+    ]
+  },
+  {
+    "path": "data\\puzzles\\4x4\\level_03.json",
+    "size": 4,
+    "all_clues_true": true,
+    "unique": true,
+    "progressively_solvable": true,
+    "initial_reveals": [
+      "A1",
+      "D1"
+    ],
+    "steps": 14,
+    "clue_types": {
+      "CONNECTED": 1,
+      "COUNT_COMPARE": 2,
+      "IMPLIES": 1,
+      "FACT": 1,
+      "AT_LEAST": 1,
+      "SAME": 1,
+      "ODD": 1,
+      "DIFFERENT": 1,
+      "QUOTE": 4,
+      "EXACTLY": 2,
+      "AT_MOST": 1
+    },
+    "region_types": {
+      "row": 1,
+      "cells": 9,
+      "common_neighbors": 2,
+      "neighbors": 2,
+      "boundary": 1,
+      "intersection": 1
+    },
+    "trace": [
+      {
+        "step": 1,
+        "cell": "B1",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-D1"
+        ],
+        "revealed_clue": "clue-B1"
+      },
+      {
+        "step": 2,
+        "cell": "C1",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-D1"
+        ],
+        "revealed_clue": "clue-C1"
+      },
+      {
+        "step": 3,
+        "cell": "C2",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1"
+        ],
+        "revealed_clue": "clue-C2"
+      },
+      {
+        "step": 4,
+        "cell": "D2",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-C2"
+        ],
+        "revealed_clue": "clue-D2"
+      },
+      {
+        "step": 5,
+        "cell": "A3",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-C2",
+          "clue-D2"
+        ],
+        "revealed_clue": "clue-A3"
+      },
+      {
+        "step": 6,
+        "cell": "D3",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-C2",
+          "clue-D2",
+          "clue-A3"
+        ],
+        "revealed_clue": "clue-D3"
+      },
+      {
+        "step": 7,
+        "cell": "A2",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-C2",
+          "clue-D2",
+          "clue-A3",
+          "clue-D3"
+        ],
+        "revealed_clue": "clue-A2"
+      },
+      {
+        "step": 8,
+        "cell": "B2",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-A2",
+          "clue-C2",
+          "clue-D2",
+          "clue-A3",
+          "clue-D3"
+        ],
+        "revealed_clue": "clue-B2"
+      },
+      {
+        "step": 9,
+        "cell": "B3",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-A3",
+          "clue-D3"
+        ],
+        "revealed_clue": "clue-B3"
+      },
+      {
+        "step": 10,
+        "cell": "C3",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-A3",
+          "clue-B3",
+          "clue-D3"
+        ],
+        "revealed_clue": "clue-C3"
+      },
+      {
+        "step": 11,
+        "cell": "C4",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3"
+        ],
+        "revealed_clue": "clue-C4"
+      },
+      {
+        "step": 12,
+        "cell": "A4",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-C4"
+        ],
+        "revealed_clue": "clue-A4"
+      },
+      {
+        "step": 13,
+        "cell": "B4",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-A4",
+          "clue-C4"
+        ],
+        "revealed_clue": "clue-B4"
+      },
+      {
+        "step": 14,
+        "cell": "D4",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-A4",
+          "clue-B4",
+          "clue-C4"
+        ],
+        "revealed_clue": "clue-D4"
+      }
+    ]
+  },
+  {
+    "path": "data\\puzzles\\4x4\\level_04.json",
+    "size": 4,
+    "all_clues_true": true,
+    "unique": true,
+    "progressively_solvable": true,
+    "initial_reveals": [
+      "A1",
+      "D1"
+    ],
+    "steps": 14,
+    "clue_types": {
+      "CONNECTED": 1,
+      "QUOTE": 5,
+      "IMPLIES": 1,
+      "FACT": 1,
+      "DIFFERENT": 1,
+      "EXACTLY": 2,
+      "COUNT_COMPARE": 1,
+      "AT_LEAST": 1,
+      "ODD": 1,
+      "EVEN": 1,
+      "SAME": 1
+    },
+    "region_types": {
+      "row": 1,
+      "cells": 9,
+      "common_neighbors": 2,
+      "neighbors": 1,
+      "intersection": 2,
+      "boundary": 1
+    },
+    "trace": [
+      {
+        "step": 1,
+        "cell": "B1",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-D1"
+        ],
+        "revealed_clue": "clue-B1"
+      },
+      {
+        "step": 2,
+        "cell": "C1",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-D1"
+        ],
+        "revealed_clue": "clue-C1"
+      },
+      {
+        "step": 3,
+        "cell": "B3",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1"
+        ],
+        "revealed_clue": "clue-B3"
+      },
+      {
+        "step": 4,
+        "cell": "C3",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-B3"
+        ],
+        "revealed_clue": "clue-C3"
+      },
+      {
+        "step": 5,
+        "cell": "B4",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-B3",
+          "clue-C3"
+        ],
+        "revealed_clue": "clue-B4"
+      },
+      {
+        "step": 6,
+        "cell": "D2",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-B3",
+          "clue-C3",
+          "clue-B4"
+        ],
+        "revealed_clue": "clue-D2"
+      },
+      {
+        "step": 7,
+        "cell": "A2",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-D2",
+          "clue-B3",
+          "clue-C3",
+          "clue-B4"
+        ],
+        "revealed_clue": "clue-A2"
+      },
+      {
+        "step": 8,
+        "cell": "B2",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-A2",
+          "clue-D2",
+          "clue-B3",
+          "clue-C3",
+          "clue-B4"
+        ],
+        "revealed_clue": "clue-B2"
+      },
+      {
+        "step": 9,
+        "cell": "C2",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-A2",
+          "clue-B2",
+          "clue-D2",
+          "clue-B3",
+          "clue-C3",
+          "clue-B4"
+        ],
+        "revealed_clue": "clue-C2"
+      },
+      {
+        "step": 10,
+        "cell": "A3",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-B3",
+          "clue-C3",
+          "clue-B4"
+        ],
+        "revealed_clue": "clue-A3"
+      },
+      {
+        "step": 11,
+        "cell": "D3",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-B4"
+        ],
+        "revealed_clue": "clue-D3"
+      },
+      {
+        "step": 12,
+        "cell": "C4",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-B4"
+        ],
+        "revealed_clue": "clue-C4"
+      },
+      {
+        "step": 13,
+        "cell": "A4",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-B4",
+          "clue-C4"
+        ],
+        "revealed_clue": "clue-A4"
+      },
+      {
+        "step": 14,
+        "cell": "D4",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-A4",
+          "clue-B4",
+          "clue-C4"
+        ],
+        "revealed_clue": "clue-D4"
+      }
+    ]
+  },
+  {
+    "path": "data\\puzzles\\5x5\\level_01.json",
+    "size": 5,
+    "all_clues_true": true,
+    "unique": true,
+    "progressively_solvable": true,
+    "initial_reveals": [
+      "A1"
+    ],
+    "steps": 24,
+    "clue_types": {
+      "EXACTLY": 10,
+      "QUOTE": 14,
+      "ODD": 1
+    },
+    "region_types": {
+      "row": 1,
+      "cells": 14,
+      "intersection": 3,
+      "column": 2,
+      "neighbors": 5
+    },
+    "trace": [
+      {
+        "step": 1,
+        "cell": "B1",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1"
+        ],
+        "revealed_clue": "clue-B1"
+      },
+      {
+        "step": 2,
+        "cell": "C1",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1"
+        ],
+        "revealed_clue": "clue-C1"
+      },
+      {
+        "step": 3,
+        "cell": "D1",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1"
+        ],
+        "revealed_clue": "clue-D1"
+      },
+      {
+        "step": 4,
+        "cell": "E1",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1"
+        ],
+        "revealed_clue": "clue-E1"
+      },
+      {
+        "step": 5,
+        "cell": "B4",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1"
+        ],
+        "revealed_clue": "clue-B4"
+      },
+      {
+        "step": 6,
+        "cell": "D2",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-B4"
+        ],
+        "revealed_clue": "clue-D2"
+      },
+      {
+        "step": 7,
+        "cell": "D3",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-D2",
+          "clue-B4"
+        ],
+        "revealed_clue": "clue-D3"
+      },
+      {
+        "step": 8,
+        "cell": "E3",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-D2",
+          "clue-D3",
+          "clue-B4"
+        ],
+        "revealed_clue": "clue-E3"
+      },
+      {
+        "step": 9,
+        "cell": "E2",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-D2",
+          "clue-D3",
+          "clue-E3",
+          "clue-B4"
+        ],
+        "revealed_clue": "clue-E2"
+      },
+      {
+        "step": 10,
+        "cell": "C4",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-D2",
+          "clue-E2",
+          "clue-D3",
+          "clue-E3",
+          "clue-B4"
+        ],
+        "revealed_clue": "clue-C4"
+      },
+      {
+        "step": 11,
+        "cell": "D4",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-D2",
+          "clue-E2",
+          "clue-D3",
+          "clue-E3",
+          "clue-B4",
+          "clue-C4"
+        ],
+        "revealed_clue": "clue-D4"
+      },
+      {
+        "step": 12,
+        "cell": "B2",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-D2",
+          "clue-E2",
+          "clue-D3",
+          "clue-E3",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4"
+        ],
+        "revealed_clue": "clue-B2"
+      },
+      {
+        "step": 13,
+        "cell": "A3",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-B2",
+          "clue-D2",
+          "clue-E2",
+          "clue-D3",
+          "clue-E3",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4"
+        ],
+        "revealed_clue": "clue-A3"
+      },
+      {
+        "step": 14,
+        "cell": "B3",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-B2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-D3",
+          "clue-E3",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4"
+        ],
+        "revealed_clue": "clue-B3"
+      },
+      {
+        "step": 15,
+        "cell": "E4",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-B2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-D3",
+          "clue-E3",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4"
+        ],
+        "revealed_clue": "clue-E4"
+      },
+      {
+        "step": 16,
+        "cell": "A5",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-B2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-D3",
+          "clue-E3",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4"
+        ],
+        "revealed_clue": "clue-A5"
+      },
+      {
+        "step": 17,
+        "cell": "A4",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-B2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-D3",
+          "clue-E3",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4",
+          "clue-A5"
+        ],
+        "revealed_clue": "clue-A4"
+      },
+      {
+        "step": 18,
+        "cell": "B5",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-B2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-D3",
+          "clue-E3",
+          "clue-A4",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4",
+          "clue-A5"
+        ],
+        "revealed_clue": "clue-B5"
+      },
+      {
+        "step": 19,
+        "cell": "C5",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-B2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-D3",
+          "clue-E3",
+          "clue-A4",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4",
+          "clue-A5",
+          "clue-B5"
+        ],
+        "revealed_clue": "clue-C5"
+      },
+      {
+        "step": 20,
+        "cell": "C3",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-B2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-D3",
+          "clue-E3",
+          "clue-A4",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4",
+          "clue-A5",
+          "clue-B5",
+          "clue-C5"
+        ],
+        "revealed_clue": "clue-C3"
+      },
+      {
+        "step": 21,
+        "cell": "D5",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-B2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-E3",
+          "clue-A4",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4",
+          "clue-A5",
+          "clue-B5",
+          "clue-C5"
+        ],
+        "revealed_clue": "clue-D5"
+      },
+      {
+        "step": 22,
+        "cell": "C2",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-B2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-E3",
+          "clue-A4",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4",
+          "clue-A5",
+          "clue-B5",
+          "clue-C5",
+          "clue-D5"
+        ],
+        "revealed_clue": "clue-C2"
+      },
+      {
+        "step": 23,
+        "cell": "E5",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-E3",
+          "clue-A4",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4",
+          "clue-A5",
+          "clue-B5",
+          "clue-C5",
+          "clue-D5"
+        ],
+        "revealed_clue": "clue-E5"
+      },
+      {
+        "step": 24,
+        "cell": "A2",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-E3",
+          "clue-A4",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4",
+          "clue-A5",
+          "clue-B5",
+          "clue-C5",
+          "clue-D5",
+          "clue-E5"
+        ],
+        "revealed_clue": "clue-A2"
+      }
+    ]
+  },
+  {
+    "path": "data\\puzzles\\5x5\\level_02.json",
+    "size": 5,
+    "all_clues_true": true,
+    "unique": true,
+    "progressively_solvable": true,
+    "initial_reveals": [
+      "A1"
+    ],
+    "steps": 24,
+    "clue_types": {
+      "EXACTLY": 12,
+      "QUOTE": 9,
+      "ODD": 3,
+      "AT_LEAST": 1
+    },
+    "region_types": {
+      "row": 2,
+      "intersection": 8,
+      "cells": 9,
+      "neighbors": 5,
+      "column": 1
+    },
+    "trace": [
+      {
+        "step": 1,
+        "cell": "B1",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1"
+        ],
+        "revealed_clue": "clue-B1"
+      },
+      {
+        "step": 2,
+        "cell": "C1",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1"
+        ],
+        "revealed_clue": "clue-C1"
+      },
+      {
+        "step": 3,
+        "cell": "D1",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1"
+        ],
+        "revealed_clue": "clue-D1"
+      },
+      {
+        "step": 4,
+        "cell": "E1",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1"
+        ],
+        "revealed_clue": "clue-E1"
+      },
+      {
+        "step": 5,
+        "cell": "C3",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1"
+        ],
+        "revealed_clue": "clue-C3"
+      },
+      {
+        "step": 6,
+        "cell": "D3",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-C3"
+        ],
+        "revealed_clue": "clue-D3"
+      },
+      {
+        "step": 7,
+        "cell": "D2",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-C3",
+          "clue-D3"
+        ],
+        "revealed_clue": "clue-D2"
+      },
+      {
+        "step": 8,
+        "cell": "E2",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-D2",
+          "clue-C3",
+          "clue-D3"
+        ],
+        "revealed_clue": "clue-E2"
+      },
+      {
+        "step": 9,
+        "cell": "E3",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-D2",
+          "clue-E2",
+          "clue-C3",
+          "clue-D3"
+        ],
+        "revealed_clue": "clue-E3"
+      },
+      {
+        "step": 10,
+        "cell": "B2",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-D2",
+          "clue-E2",
+          "clue-C3",
+          "clue-D3",
+          "clue-E3"
+        ],
+        "revealed_clue": "clue-B2"
+      },
+      {
+        "step": 11,
+        "cell": "D4",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-B2",
+          "clue-D2",
+          "clue-E2",
+          "clue-C3",
+          "clue-D3",
+          "clue-E3"
+        ],
+        "revealed_clue": "clue-D4"
+      },
+      {
+        "step": 12,
+        "cell": "E4",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-B2",
+          "clue-D2",
+          "clue-E2",
+          "clue-C3",
+          "clue-D3",
+          "clue-E3",
+          "clue-D4"
+        ],
+        "revealed_clue": "clue-E4"
+      },
+      {
+        "step": 13,
+        "cell": "E5",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-B2",
+          "clue-D2",
+          "clue-E2",
+          "clue-C3",
+          "clue-D3",
+          "clue-E3",
+          "clue-D4",
+          "clue-E4"
+        ],
+        "revealed_clue": "clue-E5"
+      },
+      {
+        "step": 14,
+        "cell": "C5",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-B2",
+          "clue-D2",
+          "clue-E2",
+          "clue-C3",
+          "clue-D3",
+          "clue-E3",
+          "clue-D4",
+          "clue-E4",
+          "clue-E5"
+        ],
+        "revealed_clue": "clue-C5"
+      },
+      {
+        "step": 15,
+        "cell": "D5",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-B2",
+          "clue-D2",
+          "clue-E2",
+          "clue-C3",
+          "clue-D3",
+          "clue-E3",
+          "clue-D4",
+          "clue-E4",
+          "clue-C5",
+          "clue-E5"
+        ],
+        "revealed_clue": "clue-D5"
+      },
+      {
+        "step": 16,
+        "cell": "A4",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-B2",
+          "clue-D2",
+          "clue-E2",
+          "clue-C3",
+          "clue-D3",
+          "clue-E3",
+          "clue-D4",
+          "clue-E4",
+          "clue-C5",
+          "clue-D5",
+          "clue-E5"
+        ],
+        "revealed_clue": "clue-A4"
+      },
+      {
+        "step": 17,
+        "cell": "A3",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-B2",
+          "clue-D2",
+          "clue-E2",
+          "clue-C3",
+          "clue-D3",
+          "clue-E3",
+          "clue-A4",
+          "clue-D4",
+          "clue-E4",
+          "clue-C5",
+          "clue-D5",
+          "clue-E5"
+        ],
+        "revealed_clue": "clue-A3"
+      },
+      {
+        "step": 18,
+        "cell": "A2",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-B2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-C3",
+          "clue-D3",
+          "clue-E3",
+          "clue-A4",
+          "clue-D4",
+          "clue-E4",
+          "clue-C5",
+          "clue-D5",
+          "clue-E5"
+        ],
+        "revealed_clue": "clue-A2"
+      },
+      {
+        "step": 19,
+        "cell": "B3",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-C3",
+          "clue-D3",
+          "clue-E3",
+          "clue-A4",
+          "clue-D4",
+          "clue-E4",
+          "clue-C5",
+          "clue-D5",
+          "clue-E5"
+        ],
+        "revealed_clue": "clue-B3"
+      },
+      {
+        "step": 20,
+        "cell": "B4",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-E3",
+          "clue-A4",
+          "clue-D4",
+          "clue-E4",
+          "clue-C5",
+          "clue-D5",
+          "clue-E5"
+        ],
+        "revealed_clue": "clue-B4"
+      },
+      {
+        "step": 21,
+        "cell": "C4",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-E3",
+          "clue-A4",
+          "clue-B4",
+          "clue-D4",
+          "clue-E4",
+          "clue-C5",
+          "clue-D5",
+          "clue-E5"
+        ],
+        "revealed_clue": "clue-C4"
+      },
+      {
+        "step": 22,
+        "cell": "A5",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-E3",
+          "clue-A4",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4",
+          "clue-C5",
+          "clue-D5",
+          "clue-E5"
+        ],
+        "revealed_clue": "clue-A5"
+      },
+      {
+        "step": 23,
+        "cell": "B5",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-E3",
+          "clue-A4",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4",
+          "clue-A5",
+          "clue-C5",
+          "clue-D5",
+          "clue-E5"
+        ],
+        "revealed_clue": "clue-B5"
+      },
+      {
+        "step": 24,
+        "cell": "C2",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-E3",
+          "clue-A4",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4",
+          "clue-A5",
+          "clue-B5",
+          "clue-C5",
+          "clue-D5",
+          "clue-E5"
+        ],
+        "revealed_clue": "clue-C2"
+      }
+    ]
+  },
+  {
+    "path": "data\\puzzles\\5x5\\level_03.json",
+    "size": 5,
+    "all_clues_true": true,
+    "unique": true,
+    "progressively_solvable": true,
+    "initial_reveals": [
+      "A1",
+      "E1"
+    ],
+    "steps": 23,
+    "clue_types": {
+      "CONNECTED": 1,
+      "QUOTE": 10,
+      "IMPLIES": 1,
+      "FACT": 1,
+      "EXACTLY": 3,
+      "AT_MOST": 2,
+      "SAME": 1,
+      "ODD": 2,
+      "COUNT_COMPARE": 2,
+      "DIFFERENT": 2
+    },
+    "region_types": {
+      "row": 1,
+      "cells": 15,
+      "common_neighbors": 2,
+      "intersection": 3,
+      "neighbors": 2,
+      "boundary": 1,
+      "corners": 1
+    },
+    "trace": [
+      {
+        "step": 1,
+        "cell": "B1",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-E1"
+        ],
+        "revealed_clue": "clue-B1"
+      },
+      {
+        "step": 2,
+        "cell": "C1",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-E1"
+        ],
+        "revealed_clue": "clue-C1"
+      },
+      {
+        "step": 3,
+        "cell": "D1",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-E1"
+        ],
+        "revealed_clue": "clue-D1"
+      },
+      {
+        "step": 4,
+        "cell": "B4",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1"
+        ],
+        "revealed_clue": "clue-B4"
+      },
+      {
+        "step": 5,
+        "cell": "C4",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-B4"
+        ],
+        "revealed_clue": "clue-C4"
+      },
+      {
+        "step": 6,
+        "cell": "A2",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-B4",
+          "clue-C4"
+        ],
+        "revealed_clue": "clue-A2"
+      },
+      {
+        "step": 7,
+        "cell": "C3",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B4",
+          "clue-C4"
+        ],
+        "revealed_clue": "clue-C3"
+      },
+      {
+        "step": 8,
+        "cell": "B5",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-C3",
+          "clue-B4",
+          "clue-C4"
+        ],
+        "revealed_clue": "clue-B5"
+      },
+      {
+        "step": 9,
+        "cell": "C5",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-C3",
+          "clue-B4",
+          "clue-C4",
+          "clue-B5"
+        ],
+        "revealed_clue": "clue-C5"
+      },
+      {
+        "step": 10,
+        "cell": "A5",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-C3",
+          "clue-B4",
+          "clue-C4",
+          "clue-B5",
+          "clue-C5"
+        ],
+        "revealed_clue": "clue-A5"
+      },
+      {
+        "step": 11,
+        "cell": "B2",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-C3",
+          "clue-B4",
+          "clue-C4",
+          "clue-A5",
+          "clue-B5",
+          "clue-C5"
+        ],
+        "revealed_clue": "clue-B2"
+      },
+      {
+        "step": 12,
+        "cell": "C2",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C3",
+          "clue-B4",
+          "clue-C4",
+          "clue-A5",
+          "clue-B5",
+          "clue-C5"
+        ],
+        "revealed_clue": "clue-C2"
+      },
+      {
+        "step": 13,
+        "cell": "D2",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-C3",
+          "clue-B4",
+          "clue-C4",
+          "clue-A5",
+          "clue-B5",
+          "clue-C5"
+        ],
+        "revealed_clue": "clue-D2"
+      },
+      {
+        "step": 14,
+        "cell": "B3",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-C3",
+          "clue-B4",
+          "clue-C4",
+          "clue-A5",
+          "clue-B5",
+          "clue-C5"
+        ],
+        "revealed_clue": "clue-B3"
+      },
+      {
+        "step": 15,
+        "cell": "E2",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-B3",
+          "clue-C3",
+          "clue-B4",
+          "clue-C4",
+          "clue-A5",
+          "clue-B5",
+          "clue-C5"
+        ],
+        "revealed_clue": "clue-E2"
+      },
+      {
+        "step": 16,
+        "cell": "D3",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-E2",
+          "clue-B3",
+          "clue-C3",
+          "clue-B4",
+          "clue-C4",
+          "clue-A5",
+          "clue-B5",
+          "clue-C5"
+        ],
+        "revealed_clue": "clue-D3"
+      },
+      {
+        "step": 17,
+        "cell": "D4",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-E2",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-B4",
+          "clue-C4",
+          "clue-A5",
+          "clue-B5",
+          "clue-C5"
+        ],
+        "revealed_clue": "clue-D4"
+      },
+      {
+        "step": 18,
+        "cell": "E4",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-E2",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-A5",
+          "clue-B5",
+          "clue-C5"
+        ],
+        "revealed_clue": "clue-E4"
+      },
+      {
+        "step": 19,
+        "cell": "E3",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-E2",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4",
+          "clue-A5",
+          "clue-B5",
+          "clue-C5"
+        ],
+        "revealed_clue": "clue-E3"
+      },
+      {
+        "step": 20,
+        "cell": "A3",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-E2",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-E3",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4",
+          "clue-A5",
+          "clue-B5",
+          "clue-C5"
+        ],
+        "revealed_clue": "clue-A3"
+      },
+      {
+        "step": 21,
+        "cell": "A4",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-E3",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4",
+          "clue-A5",
+          "clue-B5",
+          "clue-C5"
+        ],
+        "revealed_clue": "clue-A4"
+      },
+      {
+        "step": 22,
+        "cell": "D5",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-E3",
+          "clue-A4",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4",
+          "clue-A5",
+          "clue-B5",
+          "clue-C5"
+        ],
+        "revealed_clue": "clue-D5"
+      },
+      {
+        "step": 23,
+        "cell": "E5",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-E3",
+          "clue-A4",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4",
+          "clue-A5",
+          "clue-B5",
+          "clue-C5",
+          "clue-D5"
+        ],
+        "revealed_clue": "clue-E5"
+      }
+    ]
+  },
+  {
+    "path": "data\\puzzles\\5x5\\level_04.json",
+    "size": 5,
+    "all_clues_true": true,
+    "unique": true,
+    "progressively_solvable": true,
+    "initial_reveals": [
+      "A1",
+      "E1"
+    ],
+    "steps": 23,
+    "clue_types": {
+      "CONNECTED": 1,
+      "QUOTE": 10,
+      "IMPLIES": 1,
+      "EVEN": 1,
+      "ODD": 2,
+      "AT_LEAST": 2,
+      "EXACTLY": 3,
+      "DIFFERENT": 2,
+      "COUNT_COMPARE": 1,
+      "SAME": 1,
+      "AT_MOST": 1
+    },
+    "region_types": {
+      "row": 1,
+      "cells": 14,
+      "common_neighbors": 6,
+      "intersection": 1,
+      "boundary": 1,
+      "neighbors": 2
+    },
+    "trace": [
+      {
+        "step": 1,
+        "cell": "B1",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-E1"
+        ],
+        "revealed_clue": "clue-B1"
+      },
+      {
+        "step": 2,
+        "cell": "C1",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-E1"
+        ],
+        "revealed_clue": "clue-C1"
+      },
+      {
+        "step": 3,
+        "cell": "D1",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-E1"
+        ],
+        "revealed_clue": "clue-D1"
+      },
+      {
+        "step": 4,
+        "cell": "D2",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1"
+        ],
+        "revealed_clue": "clue-D2"
+      },
+      {
+        "step": 5,
+        "cell": "D4",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-D2"
+        ],
+        "revealed_clue": "clue-D4"
+      },
+      {
+        "step": 6,
+        "cell": "E5",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-D2",
+          "clue-D4"
+        ],
+        "revealed_clue": "clue-E5"
+      },
+      {
+        "step": 7,
+        "cell": "E4",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-D2",
+          "clue-D4",
+          "clue-E5"
+        ],
+        "revealed_clue": "clue-E4"
+      },
+      {
+        "step": 8,
+        "cell": "A2",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-D2",
+          "clue-D4",
+          "clue-E4",
+          "clue-E5"
+        ],
+        "revealed_clue": "clue-A2"
+      },
+      {
+        "step": 9,
+        "cell": "B2",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-D2",
+          "clue-D4",
+          "clue-E4",
+          "clue-E5"
+        ],
+        "revealed_clue": "clue-B2"
+      },
+      {
+        "step": 10,
+        "cell": "D5",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-D2",
+          "clue-D4",
+          "clue-E4",
+          "clue-E5"
+        ],
+        "revealed_clue": "clue-D5"
+      },
+      {
+        "step": 11,
+        "cell": "C3",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-D2",
+          "clue-D4",
+          "clue-E4",
+          "clue-D5",
+          "clue-E5"
+        ],
+        "revealed_clue": "clue-C3"
+      },
+      {
+        "step": 12,
+        "cell": "C5",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-D2",
+          "clue-C3",
+          "clue-D4",
+          "clue-E4",
+          "clue-D5",
+          "clue-E5"
+        ],
+        "revealed_clue": "clue-C5"
+      },
+      {
+        "step": 13,
+        "cell": "B4",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-D2",
+          "clue-C3",
+          "clue-D4",
+          "clue-E4",
+          "clue-C5",
+          "clue-D5",
+          "clue-E5"
+        ],
+        "revealed_clue": "clue-B4"
+      },
+      {
+        "step": 14,
+        "cell": "C4",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-D2",
+          "clue-C3",
+          "clue-B4",
+          "clue-D4",
+          "clue-E4",
+          "clue-C5",
+          "clue-D5",
+          "clue-E5"
+        ],
+        "revealed_clue": "clue-C4"
+      },
+      {
+        "step": 15,
+        "cell": "A3",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-D2",
+          "clue-C3",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4",
+          "clue-C5",
+          "clue-D5",
+          "clue-E5"
+        ],
+        "revealed_clue": "clue-A3"
+      },
+      {
+        "step": 16,
+        "cell": "E2",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-D2",
+          "clue-A3",
+          "clue-C3",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4",
+          "clue-C5",
+          "clue-D5",
+          "clue-E5"
+        ],
+        "revealed_clue": "clue-E2"
+      },
+      {
+        "step": 17,
+        "cell": "B3",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-C3",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4",
+          "clue-C5",
+          "clue-D5",
+          "clue-E5"
+        ],
+        "revealed_clue": "clue-B3"
+      },
+      {
+        "step": 18,
+        "cell": "D3",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4",
+          "clue-C5",
+          "clue-D5",
+          "clue-E5"
+        ],
+        "revealed_clue": "clue-D3"
+      },
+      {
+        "step": 19,
+        "cell": "E3",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4",
+          "clue-C5",
+          "clue-D5",
+          "clue-E5"
+        ],
+        "revealed_clue": "clue-E3"
+      },
+      {
+        "step": 20,
+        "cell": "C2",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-E3",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4",
+          "clue-C5",
+          "clue-D5",
+          "clue-E5"
+        ],
+        "revealed_clue": "clue-C2"
+      },
+      {
+        "step": 21,
+        "cell": "A4",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-E3",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4",
+          "clue-C5",
+          "clue-D5",
+          "clue-E5"
+        ],
+        "revealed_clue": "clue-A4"
+      },
+      {
+        "step": 22,
+        "cell": "A5",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-E3",
+          "clue-A4",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4",
+          "clue-C5",
+          "clue-D5",
+          "clue-E5"
+        ],
+        "revealed_clue": "clue-A5"
+      },
+      {
+        "step": 23,
+        "cell": "B5",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-E3",
+          "clue-A4",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4",
+          "clue-A5",
+          "clue-C5",
+          "clue-D5",
+          "clue-E5"
+        ],
+        "revealed_clue": "clue-B5"
+      }
+    ]
+  },
+  {
+    "path": "data\\puzzles\\5x5\\level_05.json",
+    "size": 5,
+    "all_clues_true": true,
+    "unique": true,
+    "progressively_solvable": true,
+    "initial_reveals": [
+      "A1",
+      "E1"
+    ],
+    "steps": 23,
+    "clue_types": {
+      "CONNECTED": 1,
+      "COUNT_COMPARE": 3,
+      "IMPLIES": 1,
+      "EVEN": 1,
+      "FACT": 1,
+      "ODD": 3,
+      "QUOTE": 7,
+      "EXACTLY": 3,
+      "AT_LEAST": 2,
+      "DIFFERENT": 1,
+      "AT_MOST": 1,
+      "SAME": 1
+    },
+    "region_types": {
+      "row": 1,
+      "direction": 2,
+      "cells": 10,
+      "common_neighbors": 7,
+      "neighbors": 3,
+      "intersection": 1,
+      "group": 1
+    },
+    "trace": [
+      {
+        "step": 1,
+        "cell": "B1",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-E1"
+        ],
+        "revealed_clue": "clue-B1"
+      },
+      {
+        "step": 2,
+        "cell": "C1",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-E1"
+        ],
+        "revealed_clue": "clue-C1"
+      },
+      {
+        "step": 3,
+        "cell": "D1",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-E1"
+        ],
+        "revealed_clue": "clue-D1"
+      },
+      {
+        "step": 4,
+        "cell": "C2",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1"
+        ],
+        "revealed_clue": "clue-C2"
+      },
+      {
+        "step": 5,
+        "cell": "B2",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-C2"
+        ],
+        "revealed_clue": "clue-B2"
+      },
+      {
+        "step": 6,
+        "cell": "D2",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-B2",
+          "clue-C2"
+        ],
+        "revealed_clue": "clue-D2"
+      },
+      {
+        "step": 7,
+        "cell": "E2",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2"
+        ],
+        "revealed_clue": "clue-E2"
+      },
+      {
+        "step": 8,
+        "cell": "C3",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-E2"
+        ],
+        "revealed_clue": "clue-C3"
+      },
+      {
+        "step": 9,
+        "cell": "A2",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-E2",
+          "clue-C3"
+        ],
+        "revealed_clue": "clue-A2"
+      },
+      {
+        "step": 10,
+        "cell": "A3",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-E2",
+          "clue-C3"
+        ],
+        "revealed_clue": "clue-A3"
+      },
+      {
+        "step": 11,
+        "cell": "B3",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-C3"
+        ],
+        "revealed_clue": "clue-B3"
+      },
+      {
+        "step": 12,
+        "cell": "B4",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3"
+        ],
+        "revealed_clue": "clue-B4"
+      },
+      {
+        "step": 13,
+        "cell": "E4",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-B4"
+        ],
+        "revealed_clue": "clue-E4"
+      },
+      {
+        "step": 14,
+        "cell": "C4",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-B4",
+          "clue-E4"
+        ],
+        "revealed_clue": "clue-C4"
+      },
+      {
+        "step": 15,
+        "cell": "D4",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-B4",
+          "clue-C4",
+          "clue-E4"
+        ],
+        "revealed_clue": "clue-D4"
+      },
+      {
+        "step": 16,
+        "cell": "D3",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4"
+        ],
+        "revealed_clue": "clue-D3"
+      },
+      {
+        "step": 17,
+        "cell": "E3",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4"
+        ],
+        "revealed_clue": "clue-E3"
+      },
+      {
+        "step": 18,
+        "cell": "A5",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-E3",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4"
+        ],
+        "revealed_clue": "clue-A5"
+      },
+      {
+        "step": 19,
+        "cell": "D5",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-E3",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4",
+          "clue-A5"
+        ],
+        "revealed_clue": "clue-D5"
+      },
+      {
+        "step": 20,
+        "cell": "B5",
+        "verdict": "CRIMINAL",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-E3",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4",
+          "clue-A5",
+          "clue-D5"
+        ],
+        "revealed_clue": "clue-B5"
+      },
+      {
+        "step": 21,
+        "cell": "A4",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-E3",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4",
+          "clue-A5",
+          "clue-B5",
+          "clue-D5"
+        ],
+        "revealed_clue": "clue-A4"
+      },
+      {
+        "step": 22,
+        "cell": "C5",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-E3",
+          "clue-A4",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4",
+          "clue-A5",
+          "clue-B5",
+          "clue-D5"
+        ],
+        "revealed_clue": "clue-C5"
+      },
+      {
+        "step": 23,
+        "cell": "E5",
+        "verdict": "INNOCENT",
+        "active_clues": [
+          "clue-A1",
+          "clue-B1",
+          "clue-C1",
+          "clue-D1",
+          "clue-E1",
+          "clue-A2",
+          "clue-B2",
+          "clue-C2",
+          "clue-D2",
+          "clue-E2",
+          "clue-A3",
+          "clue-B3",
+          "clue-C3",
+          "clue-D3",
+          "clue-E3",
+          "clue-A4",
+          "clue-B4",
+          "clue-C4",
+          "clue-D4",
+          "clue-E4",
+          "clue-A5",
+          "clue-B5",
+          "clue-C5",
+          "clue-D5"
+        ],
+        "revealed_clue": "clue-E5"
+      }
+    ]
+  }
+]

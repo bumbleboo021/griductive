@@ -5,9 +5,14 @@ it never turns an incomplete search into a verdict or UNKNOWN.
 """
 from time import monotonic
 from griductive.domain.models import Analysis, PublicState, Status
+from griductive.engine.advanced_clues import advanced_possible
 
 
 def possible(clue, values):
+    if clue.kind in ('COUNT_COMPARE','CONNECTED','IMPLIES'):
+        return advanced_possible(clue,values)
+    if clue.kind == 'QUOTE':
+        return True
     known = [values[c] for c in clue.cells if c in values]
     missing = len(clue.cells) - len(known)
     total = sum(known)

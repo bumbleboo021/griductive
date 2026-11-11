@@ -11,7 +11,7 @@ from griductive.engine.reference import ReferenceAnalyzer
 def check(factory):
     checks = 0
     for size in (3, 4, 5):
-        puzzle = load_puzzle(ROOT/f'data/puzzles/{size}x{size}/tutorial.json')
+        puzzle = load_puzzle(ROOT/f'data/puzzles/{size}x{size}/level_01.json')
         engine = GameEngine(puzzle, factory())
         oracle = ReferenceAnalyzer()
         while not engine.solved:
@@ -24,7 +24,7 @@ def check(factory):
             outcome = engine.step()
             if outcome.code not in ('ACCEPTED', 'SOLVED'):
                 raise AssertionError(outcome)
-    puzzle = load_puzzle(ROOT/'data/puzzles/3x3/tutorial.json')
+    puzzle = load_puzzle(ROOT/'data/puzzles/3x3/level_01.json')
     base = GameEngine(puzzle, ReferenceAnalyzer()).public_state()
     cases = [(), (Clue('bad', 'FACT', ('A1',), status=Status.CRIMINAL),)]
     for kind in ('SAME', 'DIFFERENT'):

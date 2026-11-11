@@ -1,6 +1,13 @@
 # Start integrating your module
 
-Person 1's engine and Pygame UI are implemented. No external assets are required.
+Person 1's engine and Pygame UI are implemented. Local Genshin portraits and fonts
+are loaded from `assets/`. Portrait filenames use `Name · Origin · Game.png`;
+the second segment is displayed verbatim, including custom labels such as Chef.
+The stage files use alphabetical source casts drawn from these assets. New puzzles should
+set `name` to the portrait name and `origin` to its label. Legacy `profession`
+fields still load, and `Character.origin` aliases that existing model field.
+An unmatched character displays an initial placeholder. Font files fall back to
+Pygame defaults if missing. Keep `assets/images/NOTICE.txt` with the artwork.
 The default analyzer is a temporary semantic backtracking implementation. It is
 not the required CNF encoder, DPLL solver, deduction trace, uniqueness checker,
 or experiment suite. Those remain the responsibilities of Persons 2-5.
@@ -12,17 +19,18 @@ From the repository root:
 
 ```text
 python main.py
-python main.py --puzzle data/puzzles/4x4/tutorial.json
+python main.py --puzzle data/puzzles/4x4/level_01.json
 python main.py --headless
 python -m pytest tests -q
 python -m griductive.check_analyzer
 ```
 
-All three tutorial files use a simple chain of FACT clues, deliberately making
-integration failures easy to locate. A1 starts revealed; each clue forces the
-next row-major card. These are integration fixtures, not final experiment puzzles.
+The Stage picker contains 13 original stages. Development FACT-chain fixtures
+are stored under tests/fixtures/ and are excluded from the picker. The default
+stage is 3x3/level_01.json. See docs/LEVELS.md for the full catalog.
 
-In the GUI, select a card and click Criminal or Innocent. Select a revealed clue
+In the GUI, click an unresolved card and choose Criminal or Innocent in its popup.
+Cancel, Escape, or an outside click dismisses it. Select a revealed clue
 to highlight its referenced cells. Hint selects a forced character without revealing
 it. Auto Solve reveals one card at a time; Stop stops after the current analysis.
 Load lists JSON files under `data/puzzles/` and also accepts a typed file path.
@@ -70,12 +78,52 @@ accidental hidden-data access; do not read puzzle files inside an analyzer.
 
 ## Person 2: consume the public models
 
+### Extended stage schema
+
+The public Clue model now includes the following templates and fields. Update
+your independent evaluator and CNF encoder before running levels 03 and above.
+
+| Kind | Fields and meaning |
+| --- | --- |
+| `COUNT_COMPARE` | Count `target_status` in `cells` versus `other_cells`, with operator `GT`, `LT`, or `EQ`. `other_region_label` provides the second region's display wording. These targets are used directly, without count normalization. |
+| `CONNECTED` | Cells with `target_status` inside `cells` must be linked by orthogonal steps entirely within that region. Empty/singleton groups satisfy the constraint. |
+| `IMPLIES` | `cells[0]` with `antecedent_status` implies `cells[1]` with `consequent_status`. Cell order is significant. |
+
+Use `clue.referenced_cells` to highlight both comparison regions or both
+conditional cells. Core cardinality/parity clues still normalize to criminal
+constraints, as described below. Their stored `target_status` preserves wording.
+The new comparison and connectivity templates retain their actual target status.
+
+```json
+{"id":"compare","type":"COUNT_COMPARE","region":{"type":"neighbors","cell":"B2"},"other_region":{"type":"neighbors","cell":"C2"},"operator":"GT","target_status":"CRIMINAL"}
+{"id":"connected","type":"CONNECTED","region":{"type":"row","index":1},"target_status":"INNOCENT"}
+{"id":"conditional","type":"IMPLIES","if":{"cell":"A1","status":"CRIMINAL"},"then":{"cell":"B1","status":"INNOCENT"}}
+```
+
+Additional regions are `grid`, `boundary`, `corners`, `common_neighbors`
+with two distinct `cells`, and `direction` with a reference `cell` plus `direction`
+(`above`, `below`, `left`, `right`). Directional references outside the board fail
+validation. A `group` region has fixed `cells` and a human-readable `label`.
+Use root `fixed_cast: true` when the group's wording depends on the source cast.
+The stage with a Liyue-origin count uses this option.
+
+Updated clue support: `QUOTE` is a nonlogical remark with no cells; ignore it
+when encoding constraints (equivalently, encode True). `region_label` preserves
+human-readable region wording. `target_status` records whether the source clue
+counts innocents or criminals, but `kind` and `count` are ALWAYS normalized to
+criminal counts by the loader. Do not convert innocent counts a second time.
+For example, 1 innocent in a three-cell column becomes EXACTLY 2 criminals.
+The UI reconstructs the original wording. New `rows`/`columns` region forms
+accept `indices`/`labels` lists and expand their union; intersection remains
+available to restrict neighbors to multiple rows. GUI quotes are drawn from
+`config.CHARACTER_QUOTES` and are never passed as factual constraints.
+
 `griductive/domain/models.py` defines frozen dataclasses:
 
 | Field | Meaning |
 | --- | --- |
 | `PublicState.size` | Grid width/height, 3, 4, or 5 |
-| `characters` | Tuple of `Character(cell, name, profession)` in row-major order |
+| `characters` | Tuple of `Character(cell, name, profession)` in row-major order; `origin` aliases profession |
 | `verdicts` | Tuple of `(cell, Status)` for revealed cards only |
 | `clues` | Tuple of currently revealed `Clue` objects only |
 | `Clue.id` | Unique clue identifier |
@@ -100,7 +148,7 @@ and timing belong in solver results, not in Pygame code.
 
 ## Person 5: write fixtures and integration checks
 
-Copy a tutorial JSON and change its data. File shape:
+Copy a stage JSON and change its data. File shape:
 
 ```json
 {
@@ -148,7 +196,7 @@ from griductive.engine.game import GameEngine
 from griductive.engine.puzzle import load_puzzle
 from griductive.engine.reference import ReferenceAnalyzer
 
-engine = GameEngine(load_puzzle("data/puzzles/3x3/tutorial.json"), ReferenceAnalyzer())
+engine = GameEngine(load_puzzle("data/puzzles/3x3/level_01.json"), ReferenceAnalyzer())
 snapshot = engine.public_state()
 hint = engine.hint()  # No mutation.
 outcome = engine.step()  # One entailed verdict and reveal, or a terminal result.
@@ -163,7 +211,9 @@ an existing analyzer must handle arbitrary snapshots, including restarts.
 
 The GUI has been tested with actual Pygame offscreen rendering and synthetic mouse
 events. Run it on your team's desktops to check display scaling and window sizing.
-The fixed window is 1180x820. Long names/professions are clipped to their card;
-keep fixture labels short. Clues have a scrollable panel. Shapes/text need no PNGs.
+The logical window is 1180x1020 and Pygame scales it to fit the display.
+Vertical cards fill the left board area. Long names/origins are clipped to their card;
+keep fixture labels short. Clues have a scrollable panel. Portraits are cached by
+character name and render size. `ui/assets.py` manages artwork and font loading.
 Review the final DPLL-backed flow with Person 4 and record the demonstration video
 after the team completes its algorithms and experiments.

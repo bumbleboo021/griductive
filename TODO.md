@@ -1,195 +1,220 @@
-# Griductive implementation plan
+﻿# Griductive team handoff and remaining work
 
-## Goal and scope
+This checklist reflects the current repository. Replace Person 1-5 with names and
+student IDs. Checked items describe implemented work. Unchecked items describe
+remaining implementation or team review. Record actual contributions separately
+when preparing the report.
 
-Build a playable Pygame grid-deduction game with a no-guess logic agent. Encode
-structured clues automatically as CNF, implement DPLL ourselves, and accept a
-verdict only when it follows from currently public information. A successful
-verdict reveals the character's clue and enables the next deduction.
+Requirements are in [AI - Project 2.pdf](AI%20-%20Project%202.pdf), sections 4.1-4.7.
+Use [README.md](README.md) to install, run and check the project.
 
-Requirements source: [AI - Project 2.pdf](AI%20-%20Project%202.pdf), particularly
-sections 2-3 and 4.1-4.5 (pages 5-7). Gameplay reference:
-[Griductive](https://knotwise.games/games/griductive). The assignment defines the
-required implementation scope. Daily online puzzles, accounts, and subscriptions
-are outside this project. Person 1's engine and GUI are implemented. A temporary semantic analyzer makes
-the game playable; the assessed CNF/DPLL agent and experiment suite remain pending.
-See [the integration guide](docs/INTEGRATION.md) for the implemented contracts.
+## Current ownership
 
-## Five-person ownership
+| Owner | Assignment area | Existing work to reuse | Next deliverable |
+| --- | --- | --- | --- |
+| Person 1 | 4.1 Game and GUI, 10 pts | Engine, Pygame UI, assets, public-state boundary, stage picker, controls and animations | Review the final agent integration and record the GUI demonstration |
+| Person 2 | 4.2 Representation and CNF, 10 pts | Frozen Clue/PublicState models, loader, regions and semantic examples | Automatic encoder with core and extended clue coverage |
+| Person 3 | 4.3 DPLL, 10 pts | Public integration contract and semantic oracles for comparison | Custom DPLL with complete models, assumptions and metrics |
+| Person 4 | 4.4 Deduction agent, 20 pts | GameEngine lifecycle, Analyzer protocol and plugin CLI | DPLL-backed adapter, deduction trace and uniqueness API |
+| Person 5 | 4.5 Experiments, 10 pts | Thirteen validated stages, negative tests, offline validator and traces | Reproducible benchmark runner and report tables |
 
-Replace the placeholders with names/student IDs before starting. Each owner writes
-tests and a report contribution for their area; completion starts at 0% and must
-be updated from actual contributions, not estimated from assigned points.
+`logic/`, `sat/`, `agent/`, and `experiments/` under `griductive/` currently contain
+package placeholders. The default game uses `engine/reference.py` and
+`engine/advanced_clues.py` for semantic backtracking. The assessed CNF/DPLL path
+and its measurements remain to be implemented.
 
-| Owner | PDF requirement | Main directories | Reviewer | Completion |
-| --- | --- | --- | --- | --- |
-| Person 1 | 4.1 Reimplement the Game (10 pts) | `engine/`, `ui/`, `app.py`, assets | Person 4 | Implemented; team review pending |
-| Person 2 | 4.2 Automatic Logical Representation and CNF Encoding (10 pts) | `domain/`, `logic/` | Person 3 | 0% |
-| Person 3 | 4.3 DPLL SAT Solver (10 pts) | `sat/` | Person 2 | 0% |
-| Person 4 | 4.4 Deductive Logic Agent (20 pts) | `agent/` | Person 1 | 0% |
-| Person 5 | 4.5 Experiments (10 pts) | `experiments/`, puzzle data, integration tests, results | Person 4 | 0% |
+## Begin here
 
-Paths above are relative to `griductive/` for Python packages. Person 5 also
-coordinates integration and report assembly; Persons 2 and 3 support Person 4's
-larger workload through entailment fixtures and SAT-query debugging.
+- [ ] All members run the setup and four baseline commands in README.md.
+- [ ] Read `domain/models.py`, `engine/puzzle.py`, and `engine/game.py` before
+  changing interfaces. Review [docs/INTEGRATION.md](docs/INTEGRATION.md).
+- [ ] Persons 2-4 agree the internal CNF and SAT-result types, assumption handling,
+  declared variable counts, metrics fields, and timeout representation.
+- [ ] Persons 2-4 implement the six core clue templates and QUOTE handling first,
+  connect the adapter, and pass the existing public-state checker.
+- [ ] Add parity, comparisons, connectivity and implication support, then run the
+  adapter against all stages. Levels 03 and above exercise the richer templates.
+- [ ] Person 5 select and freeze the experiment manifest with stage paths and seeds.
+- [ ] All members update this checklist as deliverables are reviewed.
 
-## Agree on shared interfaces first
+Proposed internal APIs are `encode(public_state) -> CNF` and
+`solve(cnf, assumptions=()) -> SatResult`. Persons 2-4 should settle their concrete
+return fields together. The implemented external boundary is
+`analyze(PublicState) -> Analysis` and must stay compatible with GameEngine.
 
-The public models, puzzle loader, engine, and `Analyzer.analyze(PublicState)`
-boundary now exist; see `docs/INTEGRATION.md`. The encoder and SAT APIs below
-remain proposals for Persons 2-4. Review shared types before changing them.
+## Person 1 - game and interface
 
-- [ ] Persons 1, 2, 4: define `Character`, `Clue`, `Puzzle`, `PublicState`, status
-  enums, and immutable/public snapshots in `domain/`. Fix coordinate conversion
-  (A1 is top-left), row-major cell ordering, and alphabetical display-name ordering.
-- [ ] Persons 1, 2, 5: define and document the puzzle JSON schema: size, stable cell
-  IDs, names, professions, hidden statuses, one structured clue per card, and initial
-  face-up cells. The loader validates these and exposes only public data to the agent.
-- [ ] Person 2: `encode(public_state) -> CNF` with integer literals, deterministic
-  primary variable IDs, separate auxiliary IDs, and variable/clause statistics.
-- [ ] Person 3: `solve(cnf, assumptions=()) -> SatResult` containing SAT/UNSAT,
-  a complete model when SAT, and decisions/propagations/backtracks/runtime.
-  Calls must not mutate their input or retain temporary assumptions.
-- [ ] Person 4: `classify(public_state)` checks consistency first, then classifies
-  unresolved cells; `next_move(public_state)` picks the first forced row-major cell.
-- [ ] Persons 1, 4: `submit_verdict(cell_id, status)` checks entailment, accepts and
-  reveals through the engine, or returns NOT_PROVABLE/CONTRADICTED unchanged.
-  Define an INCONSISTENT result that stops play without revealing anything.
-- [ ] Persons 4, 5: define trace/metrics records and a separate offline full-puzzle
-  validation API. Hidden data must never enter live hint or deduction calls.
+### Implemented
 
-## Person 1 - 4.1 Reimplement the Game
+- [x] Private puzzle storage, structural loading, initial reveals and Restart.
+- [x] Immutable public snapshots containing revealed clues and proved statuses.
+- [x] Criminal/Innocent popup on unresolved cards and distinct rejection notifications.
+- [x] Accepted verdicts reveal cards and their clues progressively.
+- [x] Stage picker using JSON `name`, plus legacy `title` compatibility.
+- [x] Hint, Auto Solve, Stop, help panel, music toggle and track selector.
+- [x] Background, local fonts, portrait fitting, origin labels and random casts.
+- [x] Hover/selection feedback, automatic-move highlighting and reveal animations.
+- [x] Bordered clue panel with smooth scrolling and referenced-cell highlighting.
+- [x] Engine and offscreen UI tests, including unchanged state after rejected choices.
+- [x] Integration guide, UI guide and AI-assistance appendix.
 
-- [x] Implement validated JSON loading, initial reveals, restart, and engine-owned
-  hidden solution/clues; keep the agent's input limited to public knowledge.
-- [x] Render 3x3 and 4x4 grids (allow 5x5), coordinates, names, professions,
-  face-down cards, known statuses, and readable revealed clues.
-- [x] Add selection and CRIMINAL/INNOCENT actions; accepted verdicts mark status,
-  flip the card, and reveal its clue. All revealed clues are true regardless of owner status.
-- [x] Distinguish NOT_PROVABLE from CONTRADICTED; rejection must not change the
-  board or expose hidden clue text.
-- [x] Selecting a revealed clue highlights all referenced/counted cells.
-- [x] Add Load, Restart, Hint, and Auto Solve controls; show solved, stalled,
-  inconsistent, and error states. Keep the event loop responsive during solving.
-- [x] Test reveal transitions, unchanged state on rejection, restart, and no hidden
-  information in public snapshots; verify rendering and controls through offscreen Pygame event tests.
+### Remaining
 
-Acceptance: a user can load and play a puzzle using only proved verdicts, obtain
-a valid hint, and watch Auto Solve reveal clues progressively.
+- [ ] Review manual verdicts, Hint, Auto Solve, Restart and stage switching with
+  Person 4's final adapter, including error and timeout behavior.
+- [ ] Check rendering and audio on teammates' actual desktops.
+- [ ] Review shortened card clues against complete side-panel text for final stages.
+- [ ] Complete asset attributions and supplied license/permission records.
+- [ ] Prepare the GUI portion of the final demonstration after integration.
 
-- [ ] Review on team desktops and integrate the final CNF/DPLL agent with Person 4.
-- [ ] Record the final demo after the remaining team work is complete.
+## Person 2 - logical representation and CNF
 
-## Person 2 - 4.2 Automatic Logical Representation and CNF Encoding
+### Available foundation
 
-- [ ] Define deterministic primary variables: true = criminal, false = innocent.
-- [ ] Implement rows, columns, explicit distinct cell lists, and neighbors including
-  diagonals but excluding the center. Validate IDs, regions, and integer count bounds.
-- [ ] Encode FACT, SAME, DIFFERENT, EXACTLY, AT_LEAST, and AT_MOST automatically;
-  support NO as EXACTLY(0). Never hand-write puzzle-specific CNF.
-- [ ] Add proved verdicts as units; include only revealed clues in the live KB.
-- [ ] Implement independent direct semantic evaluators for all six clue templates.
-- [ ] Implement two planned extensions: EVEN/ODD parity as one extension family,
-  and intersection of regions as a second distinct extension. Document syntax,
-  semantics, CNF conversion, and GUI highlighting with Persons 1 and 5.
-- [ ] Report primary/auxiliary variable counts and clause counts. Document a binary
-  clue derivation and a counting-clue derivation for the report.
-- [ ] Exhaustively compare semantic evaluation with CNF satisfiability on small
-  assignments (fix primary variables, existentially solve auxiliary variables).
-  Cover empty regions, k=0, k=region size, invalid parameters, and both extensions.
+- [x] Shared Status, Character, Clue, PublicState and Analysis dataclasses.
+- [x] Deterministic row-major cell order and validated region expansion.
+- [x] Semantic support for all stage templates in the development analyzer.
+- [x] Exhaustive small-region tests and independent offline semantic checks.
 
-Acceptance: arbitrary supported structured clues become correct CNF, with no
-hidden facts included and reproducible variable IDs and statistics.
+### Remaining implementation
 
-## Person 3 - 4.3 DPLL SAT Solver
+- [ ] Assign primary variables from cell IDs, with true meaning criminal.
+  Allocate auxiliary variables separately and deterministically.
+- [ ] Encode FACT, SAME, DIFFERENT, EXACTLY, AT_LEAST and AT_MOST.
+- [ ] Add public verdicts as unit clauses and encode only public clues.
+- [ ] Treat QUOTE as an empty contribution to CNF.
+- [ ] Encode ODD and EVEN over the normalized criminal count.
+- [ ] Encode COUNT_COMPARE using its actual target status, both regions, and
+  strict GT/LT or EQ semantics. Test overlapping regions and cancellation.
+- [ ] Encode IMPLIES with ordered premise/conclusion cells and their own statuses.
+- [ ] Encode CONNECTED with four-direction adjacency inside the given region.
+  Preserve current empty/singleton semantics and test diagonal-only contact.
+- [ ] Handle the loader's expanded regions, including intersections, common
+  neighbors, direct directions, boundary, whole-grid and fixed named groups.
+- [ ] Maintain independent semantic evaluators for the encoder's supported clues.
+- [ ] Report primary variables, auxiliary variables and generated clause counts.
+- [ ] Compare CNF satisfiability with direct semantics exhaustively on small cases.
+  Fix primary assignments and allow auxiliary assignments to vary.
+- [ ] Cover empty regions, count extremes, innocent-target normalization,
+  conditionals, shared regions, connectivity and invalid inputs.
+- [ ] Write report derivations for a binary clue, a counting clue, and extensions.
 
-- [ ] Implement unit propagation and conflict detection, including empty clauses.
-- [ ] Implement deterministic variable selection, recursive branching, and backtracking.
-- [ ] Return SAT with a complete assignment over declared variables, or UNSAT;
-  handle an empty formula and unconstrained variables correctly.
-- [ ] Support temporary assumptions or copied unit clauses without changing the KB.
-- [ ] Record decisions, propagations, backtracks, and elapsed runtime; document what
-  each counter measures and reset per call.
-- [ ] Test satisfiable/unsatisfiable formulas, propagation chains, branching,
-  backtracking, contradictory assumptions, and repeated independent calls.
-- [ ] Cross-check small formulas against a simple exhaustive truth-table oracle.
-- [ ] Optional after correctness: add pure-literal elimination or a second branching
-  heuristic for controlled benchmark comparisons.
+Core cardinality/parity `kind` and `count` already describe criminals after loading.
+For example, exactly 1 innocent among 3 cells is stored as EXACTLY 2 criminals.
+Use the stored normalized constraint directly. COUNT_COMPARE and CONNECTED use
+`target_status` directly. See the schema table in README.md.
 
-Acceptance: the main SAT algorithm is implemented by the team, passes the oracle
-comparison, and supplies complete models and reliable counters to the agent.
+Acceptance requires semantic/CNF agreement, reproducible variable allocation,
+clause statistics, and successful integration with Persons 3 and 4.
 
-## Person 4 - 4.4 Deductive Logic Agent
+## Person 3 - DPLL SAT solver
 
-- [ ] Check SAT(KB) first; UNSAT means INCONSISTENT, not a forced verdict.
-- [ ] For each unresolved character Ci, query KB AND NOT Ci and KB AND Ci:
-  the first UNSAT forces CRIMINAL, the second UNSAT forces INNOCENT,
-  and both SAT means UNKNOWN. One satisfying model is not proof.
-- [ ] Choose forced verdicts deterministically; never guess when all are UNKNOWN.
-- [ ] Submit each move to the engine; after acceptance receive the newly revealed
-  clue, rebuild/update the public KB, and continue.
-- [ ] Stop explicitly on solved, stalled/ambiguous public state, or inconsistency.
-  A stalled public state is not by itself proof that the complete puzzle is nonunique.
-- [ ] Provide Hint from public entailment only; identify a forced character and/or
-  a relevant revealed clue without inspecting hidden labels.
-- [ ] Record each step, active clue IDs, SAT queries/results, verdict, and newly
-  revealed clue; expose the trace to UI and experiments.
-- [ ] Implement a separate full-clue uniqueness check: find a model, block only
-  its primary-variable assignment, and solve again. Distinguish zero, one, and
-  multiple solutions; auxiliary assignments must not count as different puzzles.
-- [ ] Test forced/unknown/inconsistent cases, deterministic order, progressive
-  reveals, no-guess behavior, and independence from hidden information.
+- [ ] Implement unit propagation and conflict detection.
+- [ ] Implement deterministic variable selection, branching and backtracking.
+- [ ] Return SAT with a complete assignment over declared variables, or UNSAT.
+- [ ] Handle empty formulas, empty clauses, contradictory units and unconstrained
+  variables explicitly.
+- [ ] Support temporary assumptions without mutating the persistent KB or leaking
+  assumptions between entailment queries.
+- [ ] Record decisions, propagations, backtracks and runtime per call.
+  Document counter definitions and how totals are aggregated.
+- [ ] Represent timeout separately from SAT and UNSAT.
+- [ ] Compare small formulas with a truth-table oracle and test repeated calls.
+- [ ] Work with Person 2 to verify formulas containing auxiliary variables.
+- [ ] Document DPLL and the selected deterministic branching rule for the report.
+- [ ] Optional after correctness, add another heuristic for controlled comparisons.
 
-Acceptance: Auto Solve and Hint use only public information and every accepted
-step has a reproducible entailment query in the trace.
+Acceptance requires complete models, reproducible results, isolated assumptions,
+and correct counters through Person 4's entailment calls.
 
-## Person 5 - 4.5 Experiments
+## Person 4 - deductive logic agent
 
-- [ ] Create several reproducible 3x3 and 4x4 fixtures spanning all core clue types,
-  required regions, and both extensions; optionally include a 5x5 stress case.
-- [ ] Validate complete-clue uniqueness and agreement with the stored solution.
-  Separately check that intended playable fixtures finish through progressive reveals.
-- [ ] Add deliberately ambiguous and inconsistent fixtures, malformed inputs, and
-  a uniquely solvable complete puzzle whose initial public clues cannot advance.
-- [ ] Build a headless benchmark runner and CSV/JSON exports in `results/`.
-- [ ] Record primary variables, auxiliary variables, clauses, SAT calls, decisions,
-  propagations, backtracks, deduction steps/reveal waves, and runtime per case.
-  Define whether growing-KB counts are final/peak; distinguish per-call and total metrics.
-- [ ] Use the same puzzle set and environment for comparisons; start with baseline
-  DPLL across board sizes and compare optional heuristics only if implemented.
-- [ ] Fix seeds/order, document hardware/software and timeout limits, repeat timed
-  runs consistently, and retain failures/timeouts in result tables.
-- [ ] Coordinate end-to-end checks: load -> public KB -> CNF -> DPLL -> entailed
-  verdict -> reveal -> completion; summarize findings and limitations for the report.
+- [ ] Implement `griductive/agent/adapter.py` with a no-argument `Agent` factory
+  exposing `analyze(state: PublicState) -> Analysis`.
+- [ ] Call Person 2's encoder and Person 3's DPLL solver.
+- [ ] Check base KB consistency first. Return `Analysis(False, ())` when UNSAT.
+- [ ] Classify every unresolved cell in row-major order. UNSAT under NOT Ci
+  proves criminal. UNSAT under Ci proves innocent. Both SAT means UNKNOWN.
+- [ ] Return Status enum members and exactly one result per unresolved cell.
+- [ ] Raise an explicit failure for unsupported clues or timeouts.
+- [ ] Keep all live queries within the supplied public snapshot. Hidden labels
+  and unrevealed clue contents belong to the engine.
+- [ ] Handle Restart snapshots correctly if caching knowledge bases or results.
+- [ ] Pass `python -m griductive.check_analyzer --analyzer griductive.agent.adapter:Agent`.
+- [ ] Extend differential checks to new clue types and all levels 03 and above.
+- [ ] Run manual verdicts, Hint and Auto Solve through the GUI using the adapter.
+- [ ] Record step number, active clue IDs, SAT queries/results, accepted verdict,
+  and newly revealed clue. Coordinate the engine/trace boundary with Person 1.
+- [ ] Add separate offline full-clue uniqueness checking. Find one model, block
+  its primary assignment, and check for another. Exclude auxiliary variables
+  from the blocking clause.
+- [ ] Test solved, stalled, inconsistent and timeout states, plus hidden-data
+  independence. Distinguish stalled public knowledge from complete-clue ambiguity.
+- [ ] Document entailment, uniqueness and progressive solving for the report.
 
-Acceptance: one documented command reproduces the experiment tables, including
-failures, with all six required metric categories and consistent comparisons.
+The engine already chooses the first forced row-major verdict and reveals the
+card. Integrate the analyzer through the existing CLI factory hook. Coordinate
+any trace callback or additional agent loop with that existing lifecycle.
 
-## Integration milestones (approximately three weeks)
+Acceptance requires a no-guess solve of all supported stages using the team's
+CNF/DPLL path and a reproducible trace of the public reveal sequence.
 
-1. **Week 1:** agree contracts/schema; create small fixtures; implement engine and
-   GUI shell, core encoder, baseline DPLL, and agent/query test doubles.
-2. **Week 2:** integrate manual verdict validation, progressive deduction, hints,
-   Auto Solve, clue highlighting, extensions, and boundary-case tests.
-3. **Week 3:** freeze benchmark fixtures, run experiments, fix integration issues,
-   finish report/video, and verify a clean installation and submission archive.
+## Person 5 - experiments and stage review
 
-Dependencies: shared contracts first; Person 4 integrates Persons 2 and 3;
-Person 1 connects verdicts/hints to Person 4; Person 5 supplies fixtures early
-and runs final measurements after the complete reveal loop works.
+### Available foundation
 
-## Shared submission work beyond the five main work areas
+- [x] Thirteen original stages with names and seeds, comprising 4 for 3x3,
+  4 for 4x4, and 5 for 5x5.
+- [x] Offline clue-truth, full-clue uniqueness and progressive-solving validator.
+- [x] Saved semantic validation traces in `docs/level_validation.json`.
+- [x] Negative tests for false clues, ambiguity and progressive stalls.
+- [x] Reproducible build scripts and redundant-clue pruning to quote cards.
 
-- [ ] Section 4.6 (30 pts): each owner writes their methods/results and actual
-  contribution percentage; Person 5 assembles the report and all five review it.
-  Include formulation, clue semantics, reveal protocol, CNF derivations, algorithms,
-  experiments, limitations, references, and an appendix documenting AI usage/prompts.
-- [ ] Section 4.7 (10 pts): Person 1 coordinates a 5-10 minute narrated/subtitled
-  English or Vietnamese demo of manual play and solving; others demonstrate their
-  features. Upload to Google Drive, include its link in the report, and verify
-  anyone-with-link viewing in a private browser. Do not use YouTube.
-- [ ] All: add final run/benchmark instructions; run the test suite and verify a
-  clean setup without relying on local caches or an existing virtual environment.
-- [ ] All: package `Source/` and `Report.pdf` in the required student-ID-named
-  archive; omit environments/caches, follow the >20 MB Drive rule if needed, and
-  verify the actual course deadline before submission.
+### Remaining experiments
+
+- [ ] Review stage design and human difficulty. Include representative core and
+  extended cases in a fixed manifest with paths, seeds and version information.
+- [ ] Rerun truth, uniqueness and progressive validation with the team's agent.
+- [ ] Add a headless benchmark runner under `griductive/experiments/` that exports
+  CSV/JSON to `results/` and documents one reproduction command.
+- [ ] Record primary/auxiliary variables, clauses, SAT calls, decisions,
+  propagations, backtracks, reveal steps/waves and runtime.
+- [ ] Specify final or peak variable/clause counts as the KB grows. Distinguish
+  per-SAT-call statistics from per-stage totals.
+- [ ] Define run count, seeds, timeout limit and environment details. Retain
+  failures and timeouts in output tables.
+- [ ] Use the same stage manifest for every comparison. Compare optional solver
+  heuristics only after the baseline is correct.
+- [ ] Review randomized display casts and the fixed-cast origin-group stage.
+  Use saved JSON data for reproducible headless experiments.
+- [ ] Produce tables/charts, observations, failure analysis and limitations.
+- [ ] Coordinate final integration checks and report assembly.
+
+The semantic validator provides a development baseline. Benchmark counters and
+results must come from the team's measured CNF/DPLL implementation.
+
+## Integration checkpoints
+
+1. Persons 2-4 agree CNF/SAT return types, variable numbering and metrics.
+2. Encode and solve a small public KB, then connect the adapter and pass core checks.
+3. Support every template used by levels 03 and above and validate all 13 stages.
+4. Persons 1 and 4 exercise the complete GUI reveal loop, errors and Restart.
+5. Person 5 freezes inputs, runs reproducible experiments and prepares report output.
+6. All members review the report, appendix, credits, demo and submission archive.
+
+## Shared report and submission work
+
+- [ ] Section 4.6, 30 pts. Each member writes their methods and results and records
+  actual completion/contribution percentages. Person 5 assembles the report.
+- [ ] Include variables, clue semantics, public KB, reveal protocol, CNF examples,
+  DPLL, entailment, uniqueness, experiments, limitations and references.
+- [ ] Review [appendix.md](appendix.md) and add subsequent AI usage and prompts.
+- [ ] Complete [assets/ATTRIBUTION.md](assets/ATTRIBUTION.md), add the source terms
+  under `assets/licenses/`, and retain `assets/images/NOTICE.txt`.
+- [ ] Section 4.7, 10 pts. Prepare a 5-10 minute demo showing manual play and
+  solving, with English or Vietnamese narration/subtitles. Add the Google Drive
+  link to the report and verify anyone-with-link viewing in a private browser.
+- [ ] Verify a clean installation and current run/test/experiment instructions.
+- [ ] Package `Source/` and `Report.pdf` in the student-ID-named archive required
+  by the assignment. Omit virtual environments and caches. Follow its Drive
+  submission rule for archives above 20 MB and verify the course deadline.

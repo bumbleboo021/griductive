@@ -7,8 +7,7 @@
   "characters": [
     {
       "cell": "A1",
-      "name": "Ada",
-      "profession": "Artist",
+      "name": "Arlecchino",
       "status": "INNOCENT",
       "clue": {
         "id": "clue-A1",
@@ -17,12 +16,12 @@
           "B1"
         ],
         "status": "CRIMINAL"
-      }
+      },
+      "origin": "Khaenri'ah"
     },
     {
       "cell": "B1",
-      "name": "Ben",
-      "profession": "Baker",
+      "name": "Ayaka",
       "status": "CRIMINAL",
       "clue": {
         "id": "clue-B1",
@@ -31,12 +30,12 @@
           "C1"
         ],
         "status": "INNOCENT"
-      }
+      },
+      "origin": "Inazuma"
     },
     {
       "cell": "C1",
-      "name": "Cara",
-      "profession": "Cook",
+      "name": "Chiori",
       "status": "INNOCENT",
       "clue": {
         "id": "clue-C1",
@@ -45,12 +44,12 @@
           "D1"
         ],
         "status": "CRIMINAL"
-      }
+      },
+      "origin": "Inazuma"
     },
     {
       "cell": "D1",
-      "name": "Dan",
-      "profession": "Doctor",
+      "name": "Columbina",
       "status": "CRIMINAL",
       "clue": {
         "id": "clue-D1",
@@ -59,12 +58,12 @@
           "E1"
         ],
         "status": "INNOCENT"
-      }
+      },
+      "origin": "Snezhnaya"
     },
     {
       "cell": "E1",
-      "name": "Eli",
-      "profession": "Engineer",
+      "name": "Escoffier",
       "status": "INNOCENT",
       "clue": {
         "id": "clue-E1",
@@ -73,12 +72,12 @@
           "A2"
         ],
         "status": "CRIMINAL"
-      }
+      },
+      "origin": "Fontaine"
     },
     {
       "cell": "A2",
-      "name": "Faye",
-      "profession": "Artist",
+      "name": "Eula",
       "status": "CRIMINAL",
       "clue": {
         "id": "clue-A2",
@@ -87,12 +86,12 @@
           "B2"
         ],
         "status": "INNOCENT"
-      }
+      },
+      "origin": "Mondstadt"
     },
     {
       "cell": "B2",
-      "name": "Gus",
-      "profession": "Baker",
+      "name": "Furina",
       "status": "INNOCENT",
       "clue": {
         "id": "clue-B2",
@@ -101,12 +100,12 @@
           "C2"
         ],
         "status": "CRIMINAL"
-      }
+      },
+      "origin": "Fontaine"
     },
     {
       "cell": "C2",
-      "name": "Hana",
-      "profession": "Cook",
+      "name": "Ganyu",
       "status": "CRIMINAL",
       "clue": {
         "id": "clue-C2",
@@ -115,12 +114,12 @@
           "D2"
         ],
         "status": "INNOCENT"
-      }
+      },
+      "origin": "Liyue"
     },
     {
       "cell": "D2",
-      "name": "Ivan",
-      "profession": "Doctor",
+      "name": "Hu Tao",
       "status": "INNOCENT",
       "clue": {
         "id": "clue-D2",
@@ -129,12 +128,12 @@
           "E2"
         ],
         "status": "CRIMINAL"
-      }
+      },
+      "origin": "Liyue"
     },
     {
       "cell": "E2",
-      "name": "Jade",
-      "profession": "Engineer",
+      "name": "Kazuha",
       "status": "CRIMINAL",
       "clue": {
         "id": "clue-E2",
@@ -143,12 +142,12 @@
           "A3"
         ],
         "status": "INNOCENT"
-      }
+      },
+      "origin": "Inazuma"
     },
     {
       "cell": "A3",
-      "name": "Kai",
-      "profession": "Artist",
+      "name": "Keqing",
       "status": "INNOCENT",
       "clue": {
         "id": "clue-A3",
@@ -157,12 +156,12 @@
           "B3"
         ],
         "status": "CRIMINAL"
-      }
+      },
+      "origin": "Liyue"
     },
     {
       "cell": "B3",
-      "name": "Lena",
-      "profession": "Baker",
+      "name": "Lumine",
       "status": "CRIMINAL",
       "clue": {
         "id": "clue-B3",
@@ -171,12 +170,12 @@
           "C3"
         ],
         "status": "INNOCENT"
-      }
+      },
+      "origin": "Traveller"
     },
     {
       "cell": "C3",
-      "name": "Max",
-      "profession": "Cook",
+      "name": "Mitya",
       "status": "INNOCENT",
       "clue": {
         "id": "clue-C3",
@@ -185,12 +184,12 @@
           "D3"
         ],
         "status": "CRIMINAL"
-      }
+      },
+      "origin": "Snezhnaya"
     },
     {
       "cell": "D3",
-      "name": "Nora",
-      "profession": "Doctor",
+      "name": "Nahida",
       "status": "CRIMINAL",
       "clue": {
         "id": "clue-D3",
@@ -199,12 +198,12 @@
           "E3"
         ],
         "status": "INNOCENT"
-      }
+      },
+      "origin": "Sumeru"
     },
     {
       "cell": "E3",
-      "name": "Omar",
-      "profession": "Engineer",
+      "name": "Nicole",
       "status": "INNOCENT",
       "clue": {
         "id": "clue-E3",
@@ -213,12 +212,12 @@
           "A4"
         ],
         "status": "CRIMINAL"
-      }
+      },
+      "origin": "Celestia"
     },
     {
       "cell": "A4",
-      "name": "Pia",
-      "profession": "Artist",
+      "name": "Odette",
       "status": "CRIMINAL",
       "clue": {
         "id": "clue-A4",
@@ -227,12 +226,12 @@
           "B4"
         ],
         "status": "INNOCENT"
-      }
+      },
+      "origin": "Snezhnaya"
     },
     {
       "cell": "B4",
-      "name": "Quinn",
-      "profession": "Baker",
+      "name": "Raiden Ei",
       "status": "INNOCENT",
       "clue": {
         "id": "clue-B4",
@@ -241,12 +240,12 @@
           "C4"
         ],
         "status": "CRIMINAL"
-      }
+      },
+      "origin": "Chef"
     },
     {
       "cell": "C4",
-      "name": "Rae",
-      "profession": "Cook",
+      "name": "Sandrone",
       "status": "CRIMINAL",
       "clue": {
         "id": "clue-C4",
@@ -255,12 +254,12 @@
           "D4"
         ],
         "status": "INNOCENT"
-      }
+      },
+      "origin": "Fontaine"
     },
     {
       "cell": "D4",
-      "name": "Sam",
-      "profession": "Doctor",
+      "name": "Skirk",
       "status": "INNOCENT",
       "clue": {
         "id": "clue-D4",
@@ -269,12 +268,12 @@
           "E4"
         ],
         "status": "CRIMINAL"
-      }
+      },
+      "origin": "Abyss"
     },
     {
       "cell": "E4",
-      "name": "Tara",
-      "profession": "Engineer",
+      "name": "Venti",
       "status": "CRIMINAL",
       "clue": {
         "id": "clue-E4",
@@ -283,12 +282,12 @@
           "A5"
         ],
         "status": "INNOCENT"
-      }
+      },
+      "origin": "Alcohol"
     },
     {
       "cell": "A5",
-      "name": "Uma",
-      "profession": "Artist",
+      "name": "Vesna",
       "status": "INNOCENT",
       "clue": {
         "id": "clue-A5",
@@ -297,12 +296,12 @@
           "B5"
         ],
         "status": "CRIMINAL"
-      }
+      },
+      "origin": "Snezhnaya"
     },
     {
       "cell": "B5",
-      "name": "Vera",
-      "profession": "Baker",
+      "name": "Xiangling",
       "status": "CRIMINAL",
       "clue": {
         "id": "clue-B5",
@@ -311,12 +310,12 @@
           "C5"
         ],
         "status": "INNOCENT"
-      }
+      },
+      "origin": "Liyue"
     },
     {
       "cell": "C5",
-      "name": "Will",
-      "profession": "Cook",
+      "name": "Xianyun",
       "status": "INNOCENT",
       "clue": {
         "id": "clue-C5",
@@ -325,12 +324,12 @@
           "D5"
         ],
         "status": "CRIMINAL"
-      }
+      },
+      "origin": "Liyue"
     },
     {
       "cell": "D5",
-      "name": "Xena",
-      "profession": "Doctor",
+      "name": "Yae Miko",
       "status": "CRIMINAL",
       "clue": {
         "id": "clue-D5",
@@ -339,12 +338,12 @@
           "E5"
         ],
         "status": "INNOCENT"
-      }
+      },
+      "origin": "Inazuma"
     },
     {
       "cell": "E5",
-      "name": "Yara",
-      "profession": "Engineer",
+      "name": "Yelan",
       "status": "INNOCENT",
       "clue": {
         "id": "clue-E5",
@@ -353,7 +352,9 @@
           "A1"
         ],
         "status": "INNOCENT"
-      }
+      },
+      "origin": "Liyue"
     }
-  ]
+  ],
+  "name": "5x5 - First deductions"
 }

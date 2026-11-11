@@ -23,7 +23,7 @@ def analyzer_factory(spec):
 
 def main() -> int:
     parser = argparse.ArgumentParser(description='Griductive game and teammate integration harness')
-    parser.add_argument('--puzzle', type=Path, default=ROOT / 'data/puzzles/3x3/tutorial.json')
+    parser.add_argument('--puzzle', type=Path, default=ROOT / 'data/puzzles/3x3/level_01.json')
     parser.add_argument('--analyzer', help='Teammate analyzer, e.g. griductive.agent.adapter:Agent')
     parser.add_argument('--headless', action='store_true', help='Progressive solving without Pygame')
     args = parser.parse_args()

@@ -1,0 +1,167 @@
+{
+  "name": "3x3 - Shared Alibis",
+  "title": "3x3 - Shared Alibis",
+  "size": 3,
+  "initially_revealed": [
+    "A1",
+    "C1"
+  ],
+  "metadata": {
+    "seed": 30400,
+    "author": "Project team with AI assistance",
+    "design": "Connectivity opening, direct spatial identity, comparisons, implication, shared-neighbor parity and regional budgets",
+    "quote_cells": [
+      "A2",
+      "B3"
+    ]
+  },
+  "characters": [
+    {
+      "cell": "A1",
+      "name": "Arlecchino",
+      "origin": "Khaenri'ah",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-A1",
+        "type": "CONNECTED",
+        "target_status": "INNOCENT",
+        "region": {
+          "type": "row",
+          "index": 1
+        }
+      }
+    },
+    {
+      "cell": "B1",
+      "name": "Ayaka",
+      "origin": "Inazuma",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-B1",
+        "type": "COUNT_COMPARE",
+        "region": {
+          "type": "direction",
+          "cell": "C1",
+          "direction": "below"
+        },
+        "other_region": {
+          "type": "row",
+          "index": 1
+        },
+        "operator": "EQ"
+      }
+    },
+    {
+      "cell": "C1",
+      "name": "Chiori",
+      "origin": "Inazuma",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-C1",
+        "type": "FACT",
+        "status": "CRIMINAL",
+        "region": {
+          "type": "cells",
+          "cells": [
+            "C3"
+          ]
+        }
+      }
+    },
+    {
+      "cell": "A2",
+      "name": "Columbina",
+      "origin": "Snezhnaya",
+      "status": "CRIMINAL",
+      "clue": {
+        "id": "clue-A2",
+        "type": "QUOTE"
+      }
+    },
+    {
+      "cell": "B2",
+      "name": "Escoffier",
+      "origin": "Fontaine",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-B2",
+        "type": "EXACTLY",
+        "region": {
+          "type": "boundary"
+        },
+        "count": 5,
+        "target_status": "INNOCENT"
+      }
+    },
+    {
+      "cell": "C2",
+      "name": "Eula",
+      "origin": "Mondstadt",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-C2",
+        "type": "EVEN",
+        "region": {
+          "type": "common_neighbors",
+          "cells": [
+            "B1",
+            "A2"
+          ]
+        }
+      }
+    },
+    {
+      "cell": "A3",
+      "name": "Furina",
+      "origin": "Fontaine",
+      "status": "CRIMINAL",
+      "clue": {
+        "id": "clue-A3",
+        "type": "EXACTLY",
+        "region": {
+          "type": "intersection",
+          "regions": [
+            {
+              "type": "neighbors",
+              "cell": "B3"
+            },
+            {
+              "type": "row",
+              "index": 2
+            }
+          ]
+        },
+        "count": 2,
+        "target_status": "INNOCENT"
+      }
+    },
+    {
+      "cell": "B3",
+      "name": "Ganyu",
+      "origin": "Liyue",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-B3",
+        "type": "QUOTE"
+      }
+    },
+    {
+      "cell": "C3",
+      "name": "Hu Tao",
+      "origin": "Liyue",
+      "status": "CRIMINAL",
+      "clue": {
+        "id": "clue-C3",
+        "type": "IMPLIES",
+        "if": {
+          "cell": "C2",
+          "status": "INNOCENT"
+        },
+        "then": {
+          "cell": "A3",
+          "status": "CRIMINAL"
+        }
+      }
+    }
+  ]
+}

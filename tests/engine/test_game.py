@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 @pytest.fixture
 def puzzle():
-    return load_puzzle(ROOT / 'data/puzzles/3x3/tutorial.json')
+    return load_puzzle(ROOT / 'tests/fixtures/chain_3.json')
 
 
 def test_public_snapshot_and_reveal(puzzle):
@@ -59,7 +59,7 @@ def test_hint_does_not_reveal_or_use_hidden_data(puzzle):
 
 @pytest.mark.parametrize('size', [3, 4, 5])
 def test_tutorial_solves_in_order(size):
-    puzzle = load_puzzle(ROOT / f'data/puzzles/{size}x{size}/tutorial.json')
+    puzzle = load_puzzle(ROOT / f'tests/fixtures/chain_{size}.json')
     engine = GameEngine(puzzle, ReferenceAnalyzer())
     for char in puzzle.characters[1:]:
         result = engine.step()
@@ -104,7 +104,7 @@ def test_solver_exception_does_not_mutate(puzzle):
 
 @pytest.mark.parametrize('mutation', ['duplicate', 'bad_count', 'unknown', 'bad_initial', 'duplicate_clue', 'unsorted'])
 def test_bad_files_rejected(tmp_path, mutation):
-    raw = json.loads((ROOT / 'data/puzzles/3x3/tutorial.json').read_text())
+    raw = json.loads((ROOT / 'tests/fixtures/chain_3.json').read_text())
     if mutation == 'duplicate':
         raw['characters'][1]['cell'] = 'A1'
     elif mutation == 'bad_count':
@@ -129,3 +129,12 @@ def test_regions():
     assert region_cells(dict(type='intersection', regions=[dict(type='row',index=2),dict(type='column',label='B')]),3) == ('B2',)
     with pytest.raises(ValueError):
         region_cells(dict(type='cells', cells=['A1','A1']), 3)
+
+
+def test_stage_name_field_overrides_legacy_title(tmp_path):
+    raw=json.loads((ROOT/'tests/fixtures/chain_3.json').read_text())
+    raw['name']='A named stage'
+    raw.pop('title',None)
+    path=tmp_path/'stage.json'
+    path.write_text(json.dumps(raw),encoding='utf-8')
+    assert load_puzzle(path).title=='A named stage'

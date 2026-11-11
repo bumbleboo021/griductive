@@ -1,0 +1,458 @@
+{
+  "title": "5x5 - Quiet Rows",
+  "size": 5,
+  "initially_revealed": [
+    "A1"
+  ],
+  "metadata": {
+    "author": "Project team with AI assistance",
+    "seed": 501,
+    "source": "Original project level; not an imported official puzzle",
+    "design": "Regional counts, overlap deductions and odd parity",
+    "pre_pruning_construction_plan": [
+      {
+        "owner": "A1",
+        "forces": [
+          "B1",
+          "C1",
+          "D1",
+          "E1"
+        ]
+      },
+      {
+        "owner": "B1",
+        "forces": [
+          "A2",
+          "B2"
+        ]
+      },
+      {
+        "owner": "C1",
+        "forces": [
+          "D4",
+          "E4"
+        ]
+      },
+      {
+        "owner": "D1",
+        "forces": [
+          "B4",
+          "C4"
+        ]
+      },
+      {
+        "owner": "E1",
+        "forces": [
+          "A4",
+          "A5",
+          "C5"
+        ]
+      },
+      {
+        "owner": "A2",
+        "forces": [
+          "C2",
+          "D2"
+        ]
+      },
+      {
+        "owner": "B2",
+        "forces": [
+          "E2"
+        ]
+      },
+      {
+        "owner": "D4",
+        "forces": [
+          "A3",
+          "B3",
+          "B5"
+        ]
+      },
+      {
+        "owner": "E4",
+        "forces": [
+          "C3"
+        ]
+      },
+      {
+        "owner": "B4",
+        "forces": [
+          "D3",
+          "E3"
+        ]
+      },
+      {
+        "owner": "C4",
+        "forces": [
+          "D5"
+        ]
+      },
+      {
+        "owner": "A4",
+        "forces": [
+          "E5"
+        ]
+      }
+    ],
+    "quote_cells": [
+      "B1",
+      "E1",
+      "A2",
+      "B2",
+      "C2",
+      "E2",
+      "A3",
+      "B3",
+      "C3",
+      "D3",
+      "A4",
+      "C4",
+      "E4",
+      "B5"
+    ]
+  },
+  "characters": [
+    {
+      "cell": "A1",
+      "name": "Arlecchino",
+      "origin": "Khaenri'ah",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-A1",
+        "type": "EXACTLY",
+        "region": {
+          "type": "row",
+          "index": 1
+        },
+        "count": 5,
+        "target_status": "INNOCENT"
+      }
+    },
+    {
+      "cell": "B1",
+      "name": "Ayaka",
+      "origin": "Inazuma",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-B1",
+        "type": "QUOTE"
+      }
+    },
+    {
+      "cell": "C1",
+      "name": "Chiori",
+      "origin": "Inazuma",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-C1",
+        "type": "EXACTLY",
+        "region": {
+          "type": "intersection",
+          "regions": [
+            {
+              "type": "neighbors",
+              "cell": "E3"
+            },
+            {
+              "type": "row",
+              "index": 4
+            }
+          ]
+        },
+        "count": 2,
+        "target_status": "INNOCENT"
+      }
+    },
+    {
+      "cell": "D1",
+      "name": "Columbina",
+      "origin": "Snezhnaya",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-D1",
+        "type": "EXACTLY",
+        "region": {
+          "type": "intersection",
+          "regions": [
+            {
+              "type": "neighbors",
+              "cell": "C5"
+            },
+            {
+              "type": "row",
+              "index": 4
+            }
+          ]
+        },
+        "count": 2
+      }
+    },
+    {
+      "cell": "E1",
+      "name": "Escoffier",
+      "origin": "Fontaine",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-E1",
+        "type": "QUOTE"
+      }
+    },
+    {
+      "cell": "A2",
+      "name": "Eula",
+      "origin": "Mondstadt",
+      "status": "CRIMINAL",
+      "clue": {
+        "id": "clue-A2",
+        "type": "QUOTE"
+      }
+    },
+    {
+      "cell": "B2",
+      "name": "Furina",
+      "origin": "Fontaine",
+      "status": "CRIMINAL",
+      "clue": {
+        "id": "clue-B2",
+        "type": "QUOTE"
+      }
+    },
+    {
+      "cell": "C2",
+      "name": "Ganyu",
+      "origin": "Liyue",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-C2",
+        "type": "QUOTE"
+      }
+    },
+    {
+      "cell": "D2",
+      "name": "Hu Tao",
+      "origin": "Liyue",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-D2",
+        "type": "EXACTLY",
+        "region": {
+          "type": "column",
+          "label": "B"
+        },
+        "count": 3,
+        "target_status": "INNOCENT"
+      }
+    },
+    {
+      "cell": "E2",
+      "name": "Kazuha",
+      "origin": "Inazuma",
+      "status": "CRIMINAL",
+      "clue": {
+        "id": "clue-E2",
+        "type": "QUOTE"
+      }
+    },
+    {
+      "cell": "A3",
+      "name": "Keqing",
+      "origin": "Liyue",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-A3",
+        "type": "QUOTE"
+      }
+    },
+    {
+      "cell": "B3",
+      "name": "Lumine",
+      "origin": "Traveller",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-B3",
+        "type": "QUOTE"
+      }
+    },
+    {
+      "cell": "C3",
+      "name": "Mitya",
+      "origin": "Snezhnaya",
+      "status": "CRIMINAL",
+      "clue": {
+        "id": "clue-C3",
+        "type": "QUOTE"
+      }
+    },
+    {
+      "cell": "D3",
+      "name": "Nahida",
+      "origin": "Sumeru",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-D3",
+        "type": "QUOTE"
+      }
+    },
+    {
+      "cell": "E3",
+      "name": "Nicole",
+      "origin": "Celestia",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-E3",
+        "type": "EXACTLY",
+        "region": {
+          "type": "column",
+          "label": "E"
+        },
+        "count": 3,
+        "target_status": "INNOCENT"
+      }
+    },
+    {
+      "cell": "A4",
+      "name": "Odette",
+      "origin": "Snezhnaya",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-A4",
+        "type": "QUOTE"
+      }
+    },
+    {
+      "cell": "B4",
+      "name": "Raiden Ei",
+      "origin": "Chef",
+      "status": "CRIMINAL",
+      "clue": {
+        "id": "clue-B4",
+        "type": "EXACTLY",
+        "region": {
+          "type": "neighbors",
+          "cell": "E2"
+        },
+        "count": 5,
+        "target_status": "INNOCENT"
+      }
+    },
+    {
+      "cell": "C4",
+      "name": "Sandrone",
+      "origin": "Fontaine",
+      "status": "CRIMINAL",
+      "clue": {
+        "id": "clue-C4",
+        "type": "QUOTE"
+      }
+    },
+    {
+      "cell": "D4",
+      "name": "Skirk",
+      "origin": "Abyss",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-D4",
+        "type": "EXACTLY",
+        "region": {
+          "type": "neighbors",
+          "cell": "A4"
+        },
+        "count": 4,
+        "target_status": "INNOCENT"
+      }
+    },
+    {
+      "cell": "E4",
+      "name": "Venti",
+      "origin": "Alcohol",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-E4",
+        "type": "QUOTE"
+      }
+    },
+    {
+      "cell": "A5",
+      "name": "Vesna",
+      "origin": "Snezhnaya",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-A5",
+        "type": "EXACTLY",
+        "region": {
+          "type": "neighbors",
+          "cell": "B5"
+        },
+        "count": 3,
+        "target_status": "INNOCENT"
+      }
+    },
+    {
+      "cell": "B5",
+      "name": "Xiangling",
+      "origin": "Liyue",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-B5",
+        "type": "QUOTE"
+      }
+    },
+    {
+      "cell": "C5",
+      "name": "Xianyun",
+      "origin": "Liyue",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-C5",
+        "type": "EXACTLY",
+        "region": {
+          "type": "neighbors",
+          "cell": "D4"
+        },
+        "count": 4,
+        "target_status": "INNOCENT"
+      }
+    },
+    {
+      "cell": "D5",
+      "name": "Yae Miko",
+      "origin": "Inazuma",
+      "status": "CRIMINAL",
+      "clue": {
+        "id": "clue-D5",
+        "type": "ODD",
+        "region": {
+          "type": "intersection",
+          "regions": [
+            {
+              "type": "neighbors",
+              "cell": "C3"
+            },
+            {
+              "type": "row",
+              "index": 2
+            }
+          ]
+        }
+      }
+    },
+    {
+      "cell": "E5",
+      "name": "Yelan",
+      "origin": "Liyue",
+      "status": "CRIMINAL",
+      "clue": {
+        "id": "clue-E5",
+        "type": "EXACTLY",
+        "region": {
+          "type": "neighbors",
+          "cell": "B2"
+        },
+        "count": 6,
+        "target_status": "INNOCENT"
+      }
+    }
+  ],
+  "name": "5x5 - Quiet Rows"
+}
