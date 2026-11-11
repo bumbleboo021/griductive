@@ -1,0 +1,359 @@
+{
+  "title": "5x5 - First deductions",
+  "size": 5,
+  "initially_revealed": [
+    "A1"
+  ],
+  "characters": [
+    {
+      "cell": "A1",
+      "name": "Ada",
+      "profession": "Artist",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-A1",
+        "type": "FACT",
+        "cells": [
+          "B1"
+        ],
+        "status": "CRIMINAL"
+      }
+    },
+    {
+      "cell": "B1",
+      "name": "Ben",
+      "profession": "Baker",
+      "status": "CRIMINAL",
+      "clue": {
+        "id": "clue-B1",
+        "type": "FACT",
+        "cells": [
+          "C1"
+        ],
+        "status": "INNOCENT"
+      }
+    },
+    {
+      "cell": "C1",
+      "name": "Cara",
+      "profession": "Cook",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-C1",
+        "type": "FACT",
+        "cells": [
+          "D1"
+        ],
+        "status": "CRIMINAL"
+      }
+    },
+    {
+      "cell": "D1",
+      "name": "Dan",
+      "profession": "Doctor",
+      "status": "CRIMINAL",
+      "clue": {
+        "id": "clue-D1",
+        "type": "FACT",
+        "cells": [
+          "E1"
+        ],
+        "status": "INNOCENT"
+      }
+    },
+    {
+      "cell": "E1",
+      "name": "Eli",
+      "profession": "Engineer",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-E1",
+        "type": "FACT",
+        "cells": [
+          "A2"
+        ],
+        "status": "CRIMINAL"
+      }
+    },
+    {
+      "cell": "A2",
+      "name": "Faye",
+      "profession": "Artist",
+      "status": "CRIMINAL",
+      "clue": {
+        "id": "clue-A2",
+        "type": "FACT",
+        "cells": [
+          "B2"
+        ],
+        "status": "INNOCENT"
+      }
+    },
+    {
+      "cell": "B2",
+      "name": "Gus",
+      "profession": "Baker",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-B2",
+        "type": "FACT",
+        "cells": [
+          "C2"
+        ],
+        "status": "CRIMINAL"
+      }
+    },
+    {
+      "cell": "C2",
+      "name": "Hana",
+      "profession": "Cook",
+      "status": "CRIMINAL",
+      "clue": {
+        "id": "clue-C2",
+        "type": "FACT",
+        "cells": [
+          "D2"
+        ],
+        "status": "INNOCENT"
+      }
+    },
+    {
+      "cell": "D2",
+      "name": "Ivan",
+      "profession": "Doctor",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-D2",
+        "type": "FACT",
+        "cells": [
+          "E2"
+        ],
+        "status": "CRIMINAL"
+      }
+    },
+    {
+      "cell": "E2",
+      "name": "Jade",
+      "profession": "Engineer",
+      "status": "CRIMINAL",
+      "clue": {
+        "id": "clue-E2",
+        "type": "FACT",
+        "cells": [
+          "A3"
+        ],
+        "status": "INNOCENT"
+      }
+    },
+    {
+      "cell": "A3",
+      "name": "Kai",
+      "profession": "Artist",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-A3",
+        "type": "FACT",
+        "cells": [
+          "B3"
+        ],
+        "status": "CRIMINAL"
+      }
+    },
+    {
+      "cell": "B3",
+      "name": "Lena",
+      "profession": "Baker",
+      "status": "CRIMINAL",
+      "clue": {
+        "id": "clue-B3",
+        "type": "FACT",
+        "cells": [
+          "C3"
+        ],
+        "status": "INNOCENT"
+      }
+    },
+    {
+      "cell": "C3",
+      "name": "Max",
+      "profession": "Cook",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-C3",
+        "type": "FACT",
+        "cells": [
+          "D3"
+        ],
+        "status": "CRIMINAL"
+      }
+    },
+    {
+      "cell": "D3",
+      "name": "Nora",
+      "profession": "Doctor",
+      "status": "CRIMINAL",
+      "clue": {
+        "id": "clue-D3",
+        "type": "FACT",
+        "cells": [
+          "E3"
+        ],
+        "status": "INNOCENT"
+      }
+    },
+    {
+      "cell": "E3",
+      "name": "Omar",
+      "profession": "Engineer",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-E3",
+        "type": "FACT",
+        "cells": [
+          "A4"
+        ],
+        "status": "CRIMINAL"
+      }
+    },
+    {
+      "cell": "A4",
+      "name": "Pia",
+      "profession": "Artist",
+      "status": "CRIMINAL",
+      "clue": {
+        "id": "clue-A4",
+        "type": "FACT",
+        "cells": [
+          "B4"
+        ],
+        "status": "INNOCENT"
+      }
+    },
+    {
+      "cell": "B4",
+      "name": "Quinn",
+      "profession": "Baker",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-B4",
+        "type": "FACT",
+        "cells": [
+          "C4"
+        ],
+        "status": "CRIMINAL"
+      }
+    },
+    {
+      "cell": "C4",
+      "name": "Rae",
+      "profession": "Cook",
+      "status": "CRIMINAL",
+      "clue": {
+        "id": "clue-C4",
+        "type": "FACT",
+        "cells": [
+          "D4"
+        ],
+        "status": "INNOCENT"
+      }
+    },
+    {
+      "cell": "D4",
+      "name": "Sam",
+      "profession": "Doctor",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-D4",
+        "type": "FACT",
+        "cells": [
+          "E4"
+        ],
+        "status": "CRIMINAL"
+      }
+    },
+    {
+      "cell": "E4",
+      "name": "Tara",
+      "profession": "Engineer",
+      "status": "CRIMINAL",
+      "clue": {
+        "id": "clue-E4",
+        "type": "FACT",
+        "cells": [
+          "A5"
+        ],
+        "status": "INNOCENT"
+      }
+    },
+    {
+      "cell": "A5",
+      "name": "Uma",
+      "profession": "Artist",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-A5",
+        "type": "FACT",
+        "cells": [
+          "B5"
+        ],
+        "status": "CRIMINAL"
+      }
+    },
+    {
+      "cell": "B5",
+      "name": "Vera",
+      "profession": "Baker",
+      "status": "CRIMINAL",
+      "clue": {
+        "id": "clue-B5",
+        "type": "FACT",
+        "cells": [
+          "C5"
+        ],
+        "status": "INNOCENT"
+      }
+    },
+    {
+      "cell": "C5",
+      "name": "Will",
+      "profession": "Cook",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-C5",
+        "type": "FACT",
+        "cells": [
+          "D5"
+        ],
+        "status": "CRIMINAL"
+      }
+    },
+    {
+      "cell": "D5",
+      "name": "Xena",
+      "profession": "Doctor",
+      "status": "CRIMINAL",
+      "clue": {
+        "id": "clue-D5",
+        "type": "FACT",
+        "cells": [
+          "E5"
+        ],
+        "status": "INNOCENT"
+      }
+    },
+    {
+      "cell": "E5",
+      "name": "Yara",
+      "profession": "Engineer",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-E5",
+        "type": "FACT",
+        "cells": [
+          "A1"
+        ],
+        "status": "INNOCENT"
+      }
+    }
+  ]
+}
