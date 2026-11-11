@@ -49,6 +49,10 @@ class GameEngine:
             raise ValueError("Analyzer must classify every unresolved cell in row-major order with Status enums")
         return result
 
+    async def prepare_analysis(self):
+        """Prepare a cooperative browser analyzer before a synchronous action."""
+        await self._analyzer.prepare(self.public_state())
+
     def hint(self) -> Outcome:
         analysis = self._analysis()
         if not analysis.consistent:

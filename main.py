@@ -1,5 +1,13 @@
 """Launch the Griductive application."""
-from griductive.app import main
+import sys
 
 if __name__ == '__main__':
-    raise SystemExit(main())
+    if sys.platform == 'emscripten':
+        # Pygbag scans this entry point to preload its pygame WebAssembly wheel.
+        import pygame
+        import asyncio
+        from griductive.web_app import main
+        asyncio.run(main())
+    else:
+        from griductive.app import main
+        raise SystemExit(main())

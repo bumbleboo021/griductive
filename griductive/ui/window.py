@@ -2,6 +2,8 @@
 from pathlib import Path
 from queue import Queue, Empty
 from threading import Thread
+import asyncio
+import sys
 import pygame
 import re
 import hashlib
@@ -19,7 +21,8 @@ from griductive.ui.config import BG, PANEL, TEXT, MUTED, ACCENT
 
 class GameWindow:
     def __init__(self, path, factory, puzzle_dir, analyzer_name):
-        self.screen = pygame.display.set_mode(cfg.WINDOW_SIZE, pygame.SCALED)
+        flags = 0 if sys.platform == 'emscripten' else pygame.SCALED
+        self.screen = pygame.display.set_mode(cfg.WINDOW_SIZE, flags)
         pygame.display.set_caption("Griductive | Deduction desk")
         self.font = ui_font(cfg.FONT_SIZE)
         self.small = ui_font(cfg.SMALL_FONT_SIZE)
@@ -34,6 +37,7 @@ class GameWindow:
         self.factory, self.puzzle_dir, self.analyzer_name = factory, Path(puzzle_dir), analyzer_name
         self.engine = GameEngine(self.artwork.cast_puzzle(load_puzzle(path)), factory())
         self.queue = Queue()
+        self.analysis_task = None
         self.busy = self.auto = self.picker = False
         self.selected, self.clue_id = 'A1', None
         self.verdict_cell = None
@@ -133,6 +137,9 @@ class GameWindow:
             return
         self.busy = True
         self.message = "Checking the revealed information..."
+        if sys.platform == 'emscripten':
+            self.analysis_task = asyncio.create_task(self.run_browser_action(action))
+            return
         def run():
             try:
                 result = action()
@@ -140,6 +147,15 @@ class GameWindow:
                 result = Outcome("ERROR", f"{type(exc).__name__}: {exc}")
             self.queue.put(result)
         Thread(target=run, daemon=True).start()
+
+    async def run_browser_action(self, action):
+        try:
+            await asyncio.sleep(0)
+            await self.engine.prepare_analysis()
+            result = action()
+        except Exception as exc:
+            result = Outcome('ERROR', f'{type(exc).__name__}: {exc}')
+        self.queue.put(result)
 
     def update(self):
         try:
@@ -656,4 +672,23 @@ class GameWindow:
                 self.draw()
                 clock.tick(60)
         finally:
+            self.music.stop()
+
+    async def run_web(self):
+        running = True
+        try:
+            while running:
+                for event in pygame.event.get():
+                    if not self.event(event):
+                        running = False
+                self.update()
+                self.draw()
+                await asyncio.sleep(0)
+        finally:
+            if self.analysis_task is not None:
+                self.analysis_task.cancel()
+                try:
+                    await self.analysis_task
+                except asyncio.CancelledError:
+                    pass
             self.music.stop()

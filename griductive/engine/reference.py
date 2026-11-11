@@ -38,7 +38,17 @@ class ReferenceAnalyzer:
         self.timeout = timeout
 
     def analyze(self, state: PublicState) -> Analysis:
+        steps = self.analyze_steps(state)
+        while True:
+            try:
+                next(steps)
+            except StopIteration as finished:
+                return finished.value
+
+    def analyze_steps(self, state: PublicState):
+        """Yield regularly so a browser can render during semantic search."""
         deadline = monotonic() + self.timeout
+        visits = 0
         fixed = {c: s == Status.CRIMINAL for c, s in state.verdicts}
         cells = [c.cell for c in state.characters if c.cell not in fixed]
 
@@ -47,6 +57,10 @@ class ReferenceAnalyzer:
             values.update(extra)
 
             def visit():
+                nonlocal visits
+                visits += 1
+                if visits % 128 == 0:
+                    yield
                 if monotonic() > deadline:
                     raise TimeoutError("Reference analyzer timed out; connect the team's DPLL agent.")
                 if not all(possible(clue, values) for clue in state.clues):
@@ -56,19 +70,19 @@ class ReferenceAnalyzer:
                     return True
                 for value in (False, True):
                     values[cell] = value
-                    if visit():
+                    if (yield from visit()):
                         del values[cell]
                         return True
                 del values[cell]
                 return False
-            return visit()
+            return (yield from visit())
 
-        if not satisfiable({}):
+        if not (yield from satisfiable({})):
             return Analysis(False, ())
         verdicts = []
         for cell in cells:
-            innocent = satisfiable({cell: False})
-            criminal = satisfiable({cell: True})
+            innocent = yield from satisfiable({cell: False})
+            criminal = yield from satisfiable({cell: True})
             status = Status.UNKNOWN if innocent and criminal else (
                 Status.CRIMINAL if criminal else Status.INNOCENT)
             verdicts.append((cell, status))

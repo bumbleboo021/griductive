@@ -1,5 +1,7 @@
 /.venv
 /.venv-win/
+/.venv-web/
+/build/
 /.idea
 /.cache/
 __pycache__/

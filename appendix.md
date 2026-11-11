@@ -5,13 +5,26 @@
 The project used OpenAI Codex through an IDE-connected assistant for planning,
 Python/Pygame implementation, debugging, testing, interface customization, and
 documentation. This appendix records assistance requested in the conversation up
-to 11 November 2026. It does not represent a record of other team members' work.
+to 12 November 2026. It does not represent a record of other team members' work.
 
 AI assistance included generating and modifying source code, rather than only
 explaining concepts. Most implementation assistance concerned Person 1's game
 engine and graphical interface, corresponding to assignment section 4.1.
 
 ## 2. Requests and resulting assistance
+
+Browser-deployment request on 12 November 2026: the assistant added a Pygbag
+entry point, asynchronous Pygame loop, cooperative semantic search, generated
+web asset staging with OGG music conversion, and a GitHub Actions Pages workflow.
+The browser build uses the development reference semantics. The team's assessed
+CNF/DPLL agent still needs browser integration. Browser regression tests compare
+public deductions and complete progressive solves across all 13 bundled stages.
+Validation passed 113 automated tests. A real headless Edge browser loaded the
+WebAssembly build, displayed the character-verdict keyboard popup, completed
+Auto Solve on a 3x3 stage, enabled OGG music playback, and loaded the final 5x5
+stage through the stage picker. Browser canvas proportions were checked after
+correcting initial sizing and mouse-coordinate behavior. Public deployment
+remains for the team to enable in its GitHub repository.
 
 Keyboard-control refinement: the assistant separated keyboard card selection
 from opening verdict choices. Stages and restarts select the top-left card;
