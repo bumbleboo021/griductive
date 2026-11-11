@@ -2,6 +2,7 @@
 from pathlib import Path
 from queue import Queue, Empty
 from threading import Thread
+from collections import OrderedDict
 import asyncio
 import sys
 import pygame
@@ -9,6 +10,7 @@ import re
 import hashlib
 import math
 from griductive.ui.music import Music
+from griductive.ui.cache import SurfaceCache
 from griductive.domain.models import Status
 from griductive.engine.game import GameEngine, Outcome
 from griductive.engine.puzzle import load_puzzle
@@ -28,6 +30,11 @@ class GameWindow:
         self.small = ui_font(cfg.SMALL_FONT_SIZE)
         self.tiny = ui_font(cfg.TINY_FONT_SIZE)
         self.heading = ui_font(cfg.HEADING_FONT_SIZE, heading=True)
+        self.text_cache = SurfaceCache(cfg.TEXT_CACHE_BYTES)
+        self.line_cache = OrderedDict()
+        self.clue_text_cache = {}
+        self.name_fonts = {}
+        self.target_fps = cfg.WEB_FPS if sys.platform == 'emscripten' else 60
         self.artwork = Artwork()
         self.background = self.artwork.background(self.screen.get_size())
         self.reveal_started = {}
@@ -69,23 +76,39 @@ class GameWindow:
         self.message = "Select a card, read the revealed clues, then call a verdict."
 
     def label(self, text, pos, color=TEXT, font=None):
-        self.screen.blit((font or self.font).render(str(text), True, color), pos)
+        font = font or self.font
+        key = (font, str(text), tuple(color))
+        surface = self.text_cache.get(key)
+        if surface is None:
+            surface = font.render(str(text), True, color)
+            self.text_cache.put(key, surface)
+        self.screen.blit(surface, pos)
 
     def clue_text(self, clue):
+        if clue in self.clue_text_cache:
+            return self.clue_text_cache[clue]
         if clue.kind == 'QUOTE':
             pool = cfg.CHARACTER_QUOTES or ['...']
             seed = clue.id+'|'+self.engine.title+'|'+','.join(c.name for c in self.engine.public_state().characters)
             index = int.from_bytes(hashlib.sha256(seed.encode()).digest()[:4],'big') % len(pool)
-            return pool[index]
+            text = pool[index]
+            self.clue_text_cache[clue] = text
+            return text
         names = {char.cell: char.name for char in self.engine.public_state().characters}
         def display(match):
             cell = match.group(0)
             name = names.get(cell, cell)
             return f'{name} ({cell})' if cfg.SHOW_CELL_IN_CLUES else name
-        return re.sub(r'\b[A-E][1-5]\b', display, clue.text)
+        text = re.sub(r'\b[A-E][1-5]\b', display, clue.text)
+        self.clue_text_cache[clue] = text
+        return text
 
     def lines(self, text, width, font=None):
         font = font or self.small
+        key = (str(text), width, font)
+        if key in self.line_cache:
+            self.line_cache.move_to_end(key)
+            return self.line_cache[key]
         result, line = [], ""
         for word in str(text).split():
             if line and font.size(line+" "+word)[0] > width:
@@ -93,7 +116,11 @@ class GameWindow:
                 line = word
             else:
                 line = (line+" "+word).strip()
-        return result + [line]
+        result.append(line)
+        self.line_cache[key] = result
+        if len(self.line_cache) > 512:
+            self.line_cache.popitem(last=False)
+        return result
 
     def clue_height(self, clue):
         return 40+len(self.lines(self.clue_text(clue), self.clue_viewport.width-24))*self.small.get_linesize()
@@ -158,6 +185,9 @@ class GameWindow:
         self.queue.put(result)
 
     def update(self):
+        music_message = self.music.poll()
+        if music_message:
+            self.message = music_message
         try:
             result = self.queue.get_nowait()
         except Empty:
@@ -186,6 +216,10 @@ class GameWindow:
             self.message = f"LOAD ERROR: {exc}"
             return
         self.engine = engine
+        self.clue_text_cache.clear()
+        self.line_cache.clear()
+        self.text_cache.clear()
+        self.artwork.images.clear()
         self.notification = None
         self.last_revealed = None
         self.auto_focus_cell = None
@@ -199,6 +233,9 @@ class GameWindow:
         self.message = "Puzzle loaded. Select a card or ask for a hint."
 
     def action(self, key):
+        if key == 'frame_rate':
+            self.target_fps = 60 if self.target_fps == 30 else 30
+            return
         if key == 'choose_music':
             self.auto = False
             self.music_tracks = self.music.tracks()
@@ -443,6 +480,7 @@ class GameWindow:
         self.label("GRIDUCTIVE", (30, 22), ACCENT, self.heading)
         self.label(self.engine.title, (30, 63))
         self.label(f"{len(known)}/{len(state.characters)} proved", (626, 65), MUTED)
+        self.button('frame_rate', f'{self.target_fps} FPS', pygame.Rect(626,22,138,38))
         self.button('music', 'Music On' if self.music.enabled else 'Music Off', pygame.Rect(790,22,140,38))
         self.button('choose_music', 'Tracks', pygame.Rect(942,22,130,38))
         self.button('help', '?', pygame.Rect(1107,22,38,38))
@@ -647,7 +685,7 @@ class GameWindow:
             ('Reveal the next lead', 'An accepted verdict reveals a new clue. Click a solved card or a clue in the side panel to highlight the cells it refers to.'),
             ('Understand the wording', 'Neighbors include diagonals. Connected means linked horizontally or vertically within the region. Shared neighbors touch both people. Exactly means that number, at least means that many or more, and odd means 1, 3, 5 and so on.'),
             ('Keep investigating', 'Incorrect verdict means the opposite is proved. Not enough evidence means neither verdict is proved yet. Continue with another card or use Hint.'),
-            ('Use the controls', 'Stage chooses a level. Restart resets its reveals. Hint points to a provable character. Auto Solve plays proved moves, and Stop pauses it. Music switches the ambient loop on or off.'),
+            ('Use the controls', 'Stage chooses a level. Restart resets its reveals. Hint points to a provable character. Auto Solve plays proved moves. Music toggles playback. The FPS button switches between 30 and 60 frames per second.'),
         ]
         y = rect.y+82
         for title, text in sections:
@@ -670,19 +708,23 @@ class GameWindow:
                         running = False
                 self.update()
                 self.draw()
-                clock.tick(60)
+                clock.tick(self.target_fps)
         finally:
             self.music.stop()
 
     async def run_web(self):
         running = True
+        frame_due = 0.0
         try:
             while running:
                 for event in pygame.event.get():
                     if not self.event(event):
                         running = False
                 self.update()
-                self.draw()
+                now = pygame.time.get_ticks()
+                if now >= frame_due:
+                    self.draw()
+                    frame_due = max(frame_due+1000/self.target_fps, now)
                 await asyncio.sleep(0)
         finally:
             if self.analysis_task is not None:

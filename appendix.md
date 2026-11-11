@@ -13,6 +13,19 @@ engine and graphical interface, corresponding to assignment section 4.1.
 
 ## 2. Requests and resulting assistance
 
+Performance optimization follow-up: the assistant bounded portrait and rendered
+text caches, cached text layout and clue formatting, added a 30/60 FPS control,
+and selected 30 FPS as the browser default. The web builder generates a smaller
+background and a subset of the existing body font. Music is served separately
+and loaded through browser audio after selection. The initial game archive
+measured approximately 2.83 MiB, compared with approximately 30.1 MiB before
+these changes. This measures package size, rather than total browser RAM usage.
+All 115 automated tests passed. Browser checks verified that music requests begin
+after selection, a failed track preserves current playback, and stopping a pending
+track prevents it from starting later. The final 5x5 stage completed Auto Solve
+in Edge with four-times CPU throttling. Device-specific RAM savings still require
+measurement on the team's target hardware.
+
 Browser presentation follow-up: the assistant added a loading card using the
 project's heading font, an animated loading indicator, and a Play button tied
 to the runtime's readiness. The supplied background now fills the browser page,

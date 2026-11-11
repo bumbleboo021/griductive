@@ -37,7 +37,8 @@ The build command prepares assets, packages the game, and adds the browser page.
 
 The deployable output is `build/web-src/build/web/`. Serve that directory over
 HTTP to test the completed build. Runtime source, fonts, portraits, stage JSON,
-credits, and five converted tracks are included. Generated builds and the local
+and credits are included in the game archive. Five converted tracks are served
+separately from `music/` and load after a player requests playback. Generated builds and the local
 web environment are excluded from Git.
 
 ## GitHub Pages
@@ -64,6 +65,26 @@ the canvas while the game keeps its original proportions.
 The build copies `config.BACKGROUND_FILE` and `config.HEADING_FONT` into the page's
 static assets so they can appear before Python finishes loading. Change the
 background dimming in `web/page.css` through the `body::before` overlay opacity.
+
+## Performance settings
+
+The browser starts at 30 FPS. The FPS button at the top switches between 30 and
+60. `WEB_FPS` in `griductive/ui/config.py` sets the browser default.
+`PORTRAIT_CACHE_BYTES` and `TEXT_CACHE_BYTES` cap resized portraits and rendered
+text at 8 MiB and 4 MiB respectively. Least-recently-used surfaces are evicted
+when a cache reaches its budget. Text wrapping and formatted clues are cached
+and reset when loading another stage.
+
+The build reduces the web background to at most 1600 by 1000 pixels with a
+256-color palette. It subsets the body font to characters used by the current
+source, configuration, stage files and asset filenames, plus basic Latin and
+punctuation. Rebuild after adding text or characters. These generated copies
+are created in the staging directory.
+
+The music manifest is packaged in `assets/sounds/tracks.json`. The browser streams
+selected OGG files through HTML audio and releases the previous audio source
+when switching tracks or stopping. Desktop playback uses the local Pygame music
+implementation.
 
 ## Browser checks
 

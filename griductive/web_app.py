@@ -5,6 +5,7 @@ import pygame
 from griductive.engine.browser import BrowserAnalyzer
 from griductive.ui import config
 from griductive.ui.window import GameWindow
+from griductive.ui.web_music import WebMusic
 
 
 async def main():
@@ -14,6 +15,9 @@ async def main():
     try:
         view = GameWindow(root/'data/puzzles/3x3/level_01.json', BrowserAnalyzer,
                           root/'data/puzzles', 'Browser semantic analyzer | development mode')
+        if (root/'assets/sounds/tracks.json').exists():
+            view.music = WebMusic()
+            platform.window.eval(f'window.griductiveMusic.volume = {config.MUSIC_VOLUME}')
         # Recalculate CSS sizing after SDL establishes the actual canvas dimensions.
         platform.window.window_resize()
         view.draw()

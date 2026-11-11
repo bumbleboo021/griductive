@@ -16,6 +16,9 @@ class Music:
                        if path.is_file() and path.suffix.lower() in extensions),
                       key=lambda path: path.stem.casefold())
 
+    def poll(self):
+        return None
+
     def select(self, path):
         previous = self.path
         was_enabled = self.enabled

@@ -4,6 +4,7 @@ import random
 from pathlib import Path
 import pygame
 from griductive.ui import config
+from griductive.ui.cache import SurfaceCache
 
 ASSETS = Path(__file__).resolve().parents[2] / 'assets'
 
@@ -27,7 +28,7 @@ def character_catalog():
 class Artwork:
     def __init__(self):
         self.catalog = character_catalog()
-        self.images = {}
+        self.images = SurfaceCache(config.PORTRAIT_CACHE_BYTES)
         self.originals = {}
 
     def portrait(self, name, size):
@@ -35,7 +36,8 @@ class Artwork:
         if record is None:
             return None
         key = (record.path, size)
-        if key not in self.images:
+        cached = self.images.get(key)
+        if cached is None:
             if record.path not in self.originals:
                 self.originals[record.path] = pygame.image.load(str(record.path)).convert_alpha()
             original = self.originals[record.path]
@@ -45,8 +47,9 @@ class Artwork:
             fitted = pygame.transform.smoothscale(original, fitted_size)
             canvas = pygame.Surface(size, pygame.SRCALPHA)
             canvas.blit(fitted, ((size[0]-fitted_size[0])//2, size[1]-fitted_size[1]))
-            self.images[key] = canvas
-        return self.images[key]
+            self.images.put(key, canvas)
+            return canvas
+        return cached
 
     def cast_puzzle(self, puzzle, rng=None):
         """Randomize public display metadata only; cell-based logic stays intact."""

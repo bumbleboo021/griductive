@@ -41,7 +41,10 @@ def draw_character(view, char, rect, status, clue, progress, size):
     title = f'{char.cell} {char.name}'
     if name_font.size(title)[0] > name_width:
         from griductive.ui.assets import ui_font
-        name_font = ui_font(max(9, round(name_font.get_height()*name_width/name_font.size(title)[0]) - 2))
+        font_size = max(9, round(name_font.get_height()*name_width/name_font.size(title)[0]) - 2)
+        if font_size not in view.name_fonts:
+            view.name_fonts[font_size] = ui_font(font_size)
+        name_font = view.name_fonts[font_size]
     view.wrapped(title, pygame.Rect(name_x, rect.y+5, name_width, 19), font=name_font)
     view.wrapped(origin, pygame.Rect(name_x, rect.y+21, name_width, 16), cfg.MUTED, role_font)
     if status and clue and progress > .65:

@@ -493,3 +493,39 @@ def test_verdict_default_escape_and_solved_card_enter(window):
     assert window.selected == 'A1' and window.verdict_cell is None
     window.load(ROOT/'tests/fixtures/chain_4.json')
     assert window.selected == 'A1' and window.verdict_cell is None
+
+
+def test_surface_caches_stay_within_budget_and_reuse_text(window):
+    from griductive.ui.cache import SurfaceCache
+    cache = SurfaceCache(800)
+    first = pygame.Surface((10,10), pygame.SRCALPHA)
+    second = first.copy()
+    third = first.copy()
+    cache.put('first', first)
+    cache.put('second', second)
+    assert cache.get('first') is first
+    cache.put('third', third)
+    assert cache.get('second') is None
+    assert cache.get('first') is first
+    cache.put('first', third)
+    assert cache.bytes_used == 800
+    cache.put('oversized', pygame.Surface((100,100)))
+    assert cache.bytes_used <= cache.max_bytes and cache.get('oversized') is None
+    cache.clear()
+    assert cache.bytes_used == 0
+    before = dict(window.text_cache.items)
+    window.draw()
+    assert all(window.text_cache.get(key) is surface for key,surface in before.items())
+    assert window.text_cache.bytes_used <= window.text_cache.max_bytes
+    for side in range(30,250):
+        window.artwork.portrait('Lumine',(side,side))
+    assert window.artwork.images.bytes_used <= window.artwork.images.max_bytes
+
+
+def test_frame_rate_control_preserves_board(window):
+    before = window.engine.public_state()
+    click(window, window.buttons['frame_rate'][0].center)
+    assert window.target_fps == 30
+    click(window, window.buttons['frame_rate'][0].center)
+    assert window.target_fps == 60
+    assert window.engine.public_state() == before
