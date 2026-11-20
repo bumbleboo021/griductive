@@ -1,3 +1,5 @@
+🌐 **Ngôn ngữ:** [English](UI_CUSTOMIZATION.md) | [Tiếng Việt](UI_CUSTOMIZATION_vi.md)
+
 # Tùy chỉnh `UI` (giao diện người dùng)
 
 Mỗi màn chơi và mỗi lần chơi lại đều bắt đầu với nhân vật ở góc trên bên trái được chọn sẵn. Các phím `WASD` và phím mũi tên di chuyển vùng chọn từng ô một mà không mở cửa sổ bật lên (popup). Các cạnh của bàn cờ sẽ chặn di chuyển. Phím `Enter` mở các lựa chọn của một thẻ chưa xác định với lựa chọn `Innocent` (vô tội) được chọn sẵn. Phím `A`/Mũi tên trái chọn `Innocent`, `D`/Mũi tên phải chọn `Criminal` (tội phạm), `S`/Mũi tên xuống chọn `Cancel` (hủy), và `W`/Mũi tên lên quay lại từ `Cancel` về `Innocent`. Phím `Enter` để xác nhận; phím `Escape` để đóng cửa sổ bật lên. Thao tác nhấp chuột vẫn mở thẻ và kích hoạt các lựa chọn như bình thường. Việc điều hướng trên thẻ đã giải sẽ chọn manh mối tương ứng của thẻ đó trong bảng bên cạnh. Quá trình điều hướng sẽ chờ trong khi tính năng phân tích hoặc `Auto Solve` (tự động giải) đang hoạt động, và bị chặn bởi các hộp thoại `Stage` (màn chơi), `Tracks` (danh sách nhạc), trợ giúp (`Help`) và hộp thoại thông báo bác bỏ.

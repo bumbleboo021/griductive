@@ -1,3 +1,5 @@
+🌐 **Ngôn ngữ:** [English](LEVELS.md) | [Tiếng Việt](LEVELS_vi.md)
+
 # Danh mục màn chơi
 
 Trò chơi bao gồm 13 màn chơi gốc. Bảy màn chơi đã được thêm vào trong bản cập nhật này và ba màn chơi hướng dẫn đã bị loại bỏ khỏi bộ sưu tập có thể chơi được. Các dữ liệu kiểm thử mẫu (fixture) phục vụ chuỗi phát triển nằm trong thư mục `tests/fixtures/`. Ứng dụng bắt đầu tại màn chơi 01 kích thước 3x3.

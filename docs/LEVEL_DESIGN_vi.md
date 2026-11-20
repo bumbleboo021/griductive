@@ -1,3 +1,5 @@
+🌐 **Ngôn ngữ:** [English](LEVEL_DESIGN.md) | [Tiếng Việt](LEVEL_DESIGN_vi.md)
+
 # Thiết kế các màn chơi Griductive có thể giải được
 
 Cập nhật triển khai sau khi mở rộng màn chơi: Bộ nạp dữ liệu và bộ phân tích phát triển (tạm thời) hiện đã hỗ trợ `COUNT_COMPARE`, `CONNECTED` và `IMPLIES`, cùng với các vùng ô lân cận chung, vùng theo hướng, vùng toàn bộ lưới, vùng biên và vùng góc. Bảy màn chơi sử dụng các tính năng này đã được bổ sung và xác thực. Xem `LEVELS.md` và `INTEGRATION.md` để biết danh mục và lược đồ hiện tại. Việc hỗ trợ `CNF` (dạng chuẩn hội) / `DPLL` vẫn là nhiệm vụ tích hợp của thành viên nhóm.

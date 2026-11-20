@@ -1,3 +1,5 @@
+🌐 **Language:** [English](LEVELS.md) | [Tiếng Việt](LEVELS_vi.md)
+
 # Stage catalog
 
 The game contains 13 original stages. Seven were added in this update and the

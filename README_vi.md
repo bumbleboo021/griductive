@@ -1,3 +1,5 @@
+🌐 **Ngôn ngữ:** [English](README.md) | [Tiếng Việt](README_vi.md)
+
 # Griductive
 
 Trò chơi suy luận bằng Python/Pygame cho môn CSC14003, Nhập môn Trí tuệ Nhân tạo.

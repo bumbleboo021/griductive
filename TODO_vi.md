@@ -1,3 +1,5 @@
+🌐 **Ngôn ngữ:** [English](TODO.md) | [Tiếng Việt](TODO_vi.md)
+
 # Bàn giao nhóm Griductive và các công việc còn lại
 
 Danh sách kiểm tra này phản ánh hiện trạng kho mã nguồn. Hãy thay Thành viên 1–5 bằng họ tên và MSSV. Các mục đã đánh dấu mô tả phần công việc đã triển khai. Các mục chưa đánh dấu mô tả phần triển khai còn lại hoặc cần cả nhóm rà soát. Ghi nhận riêng mức độ đóng góp thực tế khi chuẩn bị báo cáo.
