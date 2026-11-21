@@ -131,9 +131,9 @@ and correct counters through Person 4's entailment calls.
 
 ## Person 4 - deductive logic agent
 
-- [ ] Implement `griductive/agent/adapter.py` with a no-argument `Agent` factory
+- [x] Implement `griductive/agent/adapter.py` with a no-argument `Agent` factory
   exposing `analyze(state: PublicState) -> Analysis`.
-- [ ] Call Person 2's encoder and Person 3's DPLL solver.
+- [x] Call Person 2's encoder and Person 3's DPLL solver.
 - [ ] Check base KB consistency first. Return `Analysis(False, ())` when UNSAT.
 - [ ] Classify every unresolved cell in row-major order. UNSAT under NOT Ci
   proves criminal. UNSAT under Ci proves innocent. Both SAT means UNKNOWN.
