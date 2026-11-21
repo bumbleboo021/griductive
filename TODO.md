@@ -1,4 +1,6 @@
-﻿# Griductive team handoff and remaining work
+﻿🌐 **Language:** [English](TODO.md) | [Tiếng Việt](TODO_vi.md)
+
+# Griductive team handoff and remaining work
 
 This checklist reflects the current repository. Replace Person 1-5 with names and
 student IDs. Checked items describe implemented work. Unchecked items describe

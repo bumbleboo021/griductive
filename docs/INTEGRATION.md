@@ -1,3 +1,5 @@
+🌐 **Language:** [English](INTEGRATION.md) | [Tiếng Việt](INTEGRATION_vi.md)
+
 # Start integrating your module
 
 Person 1's engine and Pygame UI are implemented. Local Genshin portraits and fonts

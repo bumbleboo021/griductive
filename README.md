@@ -1,4 +1,6 @@
-﻿# Griductive
+﻿🌐 **Language:** [English](README.md) | [Tiếng Việt](README_vi.md)
+
+# Griductive
 
 Python/Pygame deduction game for CSC14003, Introduction to Artificial Intelligence.
 The assignment requirements are in [AI - Project 2.pdf](AI%20-%20Project%202.pdf).

@@ -1,3 +1,5 @@
+🌐 **Language:** [English](UI_CUSTOMIZATION.md) | [Tiếng Việt](UI_CUSTOMIZATION_vi.md)
+
 # Customize the UI
 
 Each stage and restart begins with the top-left character selected. WASD and
