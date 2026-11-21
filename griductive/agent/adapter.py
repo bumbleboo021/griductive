@@ -2,6 +2,7 @@ from __future__ import annotations
 import logging
 from typing import Tuple
 from griductive.domain.models import Analysis, PublicState, Status
+from griductive.agent.trace import DeductionTrace, TraceStep
 
 logger = logging.getLogger(__name__)
 
@@ -12,6 +13,7 @@ class Agent:
           self.timeout_seconds = timeout_seconds
           self.strict_dpll = strict_dpll
           self.last_query_count = 0
+          self.trace = None
 
      def analyze(self, state: PublicState) -> Analysis:
           """Phân tích trạng thái công khai hiện tại và phân loại các ô chưa giải
@@ -30,8 +32,111 @@ class Agent:
                logger.debug("Các module CNF/DPLL chưa sẵn sàng (%s). Chuyển sang bộ giải tham chiếu", err)
                return self._fallback_reference(state)
 
-     def _analyze_via_dpll(self, state: PublicState) -> Analysis:
-          """Quy trình suy luận logic ằng CNF/DPLL"""
+     def run_trace(
+               self,
+               puzzle_path: str,
+               puzzle_name: str = "Unknown",
+     ) -> DeductionTrace:
+          """Chạy giải toàn bộ 1 màn chơi và ghu lại vết suy luận
+          
+          Args:
+               puzzle_path: Đường dẫn đến file JSON của màn chơi
+               puzzle_name: Tên hiển thị của màn chơi
+          
+          Returns:
+               DeductionTrace chứa toàn bộ nhật kí suy luận từng bước
+          """
+          from griductive.engine.game import GameEngine
+          from griductive.engine.puzzle import load_puzzle
+          from pathlib import Path
+
+          puzzle = load_puzzle(Path(puzzle_path))
+          engine = GameEngine(puzzle, self)
+
+          trace = DeductionTrace(
+               puzzle_name = puzzle_name,
+               board_size = puzzle.size,
+          )
+          self.trace = trace
+          self._active_trace = trace
+
+          try:
+               step_number = 0
+               while not engine.solved:
+                    step_number += 1
+                    state = engine.public_state()
+
+                    trace_step = trace.begin_step(
+                         active_clue_ids = [c.id for c in state.clues]
+                    )
+
+                    analysis = self._analyze_with_trace(state, trace_step)
+
+                    if not analysis.consistent:
+                         trace.is_inconsistent = True
+                         break
+
+                    # Tìm ô ép buộc đầu tiên theo row-major
+                    forced = next(
+                         ((cell, status) for cell, status in analysis.verdicts
+                          if status != Status.UNKNOWN),
+                          None, 
+                    )
+
+                    if forced is None:
+                         # Không tìm đƯợc ô nào bị ép buộc
+                         trace.is_stalled = True
+                         break
+
+                    forced_cell, forced_status = forced
+                    trace.set_forced_verdict(trace_step, forced_cell, forced_status.value)
+
+                    # Gửi cho GameEngine
+                    outcome = engine.submit_verdict(forced_cell, forced_status)
+
+                    # Ghi nhận manh mối mới 
+                    if outcome.code in ("ACCEPTED", "SOLVED"):
+                         new_state = engine.public_state()
+                         new_clue_ids = {c.id for c in new_state.clues}
+                         old_clue_ids = {c.id for c in state.clues}
+                         newly_revealed = new_clue_ids - old_clue_ids
+                         new_clue_id = next(iter(newly_revealed), None)
+                         trace.set_new_clue(trace_step, new_clue_id)
+
+                    if outcome.code == "SOLVED":
+                         trace.is_solved = True
+                         break
+
+          finally:
+               self._active_trace = None
+
+          return trace 
+
+     def _analyze_with_trace(
+               self, state: PublicState, trace_step: TraceStep
+     ) -> Analysis:
+          """Phân tích KB và ghi nhận chi tiết từng truy vấn SAT vào trace_step"""
+          try:
+               return self._analyze_via_dpll(state, trace_step = trace_step)
+
+          except(ImportError, ModuleNotFoundError, NotImplementedError) as err:
+               logger.debug("Các module CNF/DPLL chưa sẵn sàng (%s). Chuyển sang bộ giải tham chiếu", err)
+
+               from griductive.agent.trace import SatQueryRecord
+               trace_step.sat_queries.append(SatQueryRecord(
+                    cell = "KB",
+                    assumption_type = "BASE_CHECK",
+                    outcome = "SAT"
+               ))
+               return self._fallback_reference(state)
+
+     def _analyze_via_dpll(self, state: PublicState, trace_step: TraceStep | None = None) -> Analysis:
+          """Quy trình suy luận logic bằng CNF/DPLL
+          
+          Args:
+               state: Trạng thái công khai hiện tại
+               trace_step: Nếu không phải None, ghi nhận chi tiết các truy vấn SAT
+          """
           from griductive.logic.encoder import encode
           from griductive.sat.dpll import solve
 
@@ -45,6 +150,21 @@ class Agent:
                assumptions = (),
                timeout_seconds = self.timeout_seconds,
           )
+
+          # Ghi nhận kết quả kiểm tra KB vào trace
+          if trace_step is not None:
+               outcome_str = (
+                    "TIMEOUT" if getattr(base_res, "is_timeout", False)
+                    else "SAT" if base_res.is_sat else "UNSAT"
+               )
+
+               # Ghi trực tiếp vào danh sách truy vấn của trace_step
+               from griductive.agent.trace import SatQueryRecord
+               trace_step.sat_queries.append(SatQueryRecord(
+                    cell = "KB",
+                    assumption_type = "BASE_CHECK",
+                    outcome = outcome_str,
+               ))
 
           if getattr(base_res, "is_timeout", False):
                raise TimeoutError("Bộ giải SAT bị quá thời gian khi kiểm tra tính nhất quán của KB")
@@ -80,9 +200,28 @@ class Agent:
 
                if not res_innocent.is_sat:
                     verdicts.append((cell, Status.CRIMINAL))
+
+                    if trace_step is not None:
+                         from griductive.agent.trace import SatQueryRecord
+                         trace_step.sat_queries.append(SatQueryRecord(
+                              cell = cell,
+                              assumption_type = "ASSUME_INNOCENT",
+                              outcome = "UNSAT",
+                              entailed = "CRIMINAL",
+                         ))
                     continue
 
-               # Truy vấn 2: Giả sử ô này là Criminal (Ci = True => assumption là +var_id)
+               # Ghi nhận query 1 vào trace
+               if trace_step is not None:
+                    from griductive.agent.trace import SatQueryRecord
+                    trace_step.sat_queries.append(SatQueryRecord(
+                         cell = cell,
+                         assumption_type = "ASSUME_INNOCENT",
+                         outcome = "SAT",
+                         entailed = None,
+                    ))
+
+               # Query 2: Giả sử ô này là Criminal (Ci = True => assumption là +var_id)
                # Nếu KBt ^ Ci là UNSAT => KBt |= ¬Ci (ô này bắt buộc là INNOCENT)
                res_criminal = solve(
                     clauses = cnf_result.clauses,
@@ -96,7 +235,25 @@ class Agent:
 
                if not res_criminal.is_sat:
                     verdicts.append((cell, Status.INNOCENT))
-                    continue 
+                    if trace_step is not None:
+                         from griductive.agent.trace import SatQueryRecord
+                         trace_step.sat_queries.append(SatQueryRecord(
+                              cell = cell,
+                              assumption_type = "ASSUME_CRIMINAL",
+                              outcome = "UNSAT",
+                              entailed = "INNOCENT",
+                         ))
+                    continue
+
+               # Ghi nhận query 1 vào trace
+               if trace_step is not None:
+                    from griductive.agent.trace import SatQueryRecord
+                    trace_step.sat_queries.append(SatQueryRecord(
+                         cell = cell,
+                         assumption_type = "ASSUME_CRIMINAL",
+                         outcome = "SAT",
+                         entailed = None,
+                    ))
 
                # Cả 2 đều SAT => UNKNOWN
                verdicts.append((cell, Status.UNKNOWN))
