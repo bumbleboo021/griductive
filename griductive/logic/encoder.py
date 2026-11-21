@@ -100,6 +100,97 @@ def _encode_implies(clue, cell_to_var):
     return [(-lit_1, lit_2)]
 
 
+def _encode_odd_even(clue, cell_to_var, next_aux):
+    if len(clue.cells) == 0:
+        if clue.kind == 'ODD':
+            return next_aux, [()]
+        elif clue.kind == 'EVEN':
+            return next_aux, []
+        else:
+            raise ValueError(f"Unknown kind for ODD/EVEN encoding: {clue.kind}")
+    if len(clue.cells) == 1:
+        if clue.kind == 'ODD':
+            return next_aux, [(_get_cell_var(clue.cells[0], cell_to_var),)]
+        elif clue.kind == 'EVEN':
+            return next_aux, [(-_get_cell_var(clue.cells[0], cell_to_var),)]
+        else:
+            raise ValueError(f"Unknown kind for ODD/EVEN encoding: {clue.kind}")
+    
+    clauses = []
+
+    primary_vars = [_get_cell_var(cell, cell_to_var) for cell in clue.cells]
+    m = len(primary_vars)
+
+    acc = primary_vars[0]
+
+    for i in range(1, m - 1):
+        x = acc
+        y = primary_vars[i]
+        z = next_aux
+        next_aux += 1
+        clauses.extend([(-x, -y, -z), (x, y, -z), (x, -y, z), (-x, y, z)])
+        acc = z
+
+    if clue.kind == 'ODD':
+        clauses.extend(_different(acc, primary_vars[-1]))
+    elif clue.kind == 'EVEN':
+        clauses.extend(_same(acc, primary_vars[-1]))
+    else:
+        raise ValueError(f"Unknown kind for ODD/EVEN encoding: {clue.kind}")
+
+    return next_aux, clauses
+
+
+def _at_most(literals, k, next_aux):
+    m = len(literals)
+    if k < 0:
+        return next_aux, [()]
+    if k >= m:
+        return next_aux, []
+    if k == 0:
+        return next_aux, [(-lit,) for lit in literals]
+
+    clauses = []
+
+    aux_vars = [[next_aux + i * k + j for j in range(k)] for i in range(m - 1)]
+    next_aux += (m - 1) * k
+
+    clauses.append((-literals[0], aux_vars[0][0]))
+    for j in range(1, k):
+        clauses.append((-aux_vars[0][j],))
+
+    for i in range(1, m - 1):
+        for j in range(k):
+            clauses.append((-aux_vars[i - 1][j], aux_vars[i][j]))
+        clauses.append((-literals[i], aux_vars[i][0]))
+        for j in range(1, k):
+            clauses.append((-aux_vars[i - 1][j - 1], -literals[i], aux_vars[i][j]))
+        clauses.append((-aux_vars[i - 1][k - 1], -literals[i]))
+
+    clauses.append((-aux_vars[m - 2][k - 1], -literals[m - 1]))
+
+    return next_aux, clauses
+
+def _encode_at_most(clue, cell_to_var, next_aux):
+    if clue.count is None:
+        raise ValueError("k must be specified for AT_MOST encoding.")
+    primary_vars = [_get_cell_var(cell, cell_to_var) for cell in clue.cells]
+    return _at_most(primary_vars, clue.count, next_aux)
+
+def _encode_at_least(clue, cell_to_var, next_aux):
+    if clue.count is None:
+        raise ValueError("k must be specified for AT_MOST encoding.")
+    primary_vars = [-_get_cell_var(cell, cell_to_var) for cell in clue.cells]
+    return _at_most(primary_vars, len(clue.cells) - clue.count, next_aux)
+
+def _encode_exactly(clue, cell_to_var, next_aux):
+    if clue.count is None:
+        raise ValueError("k must be specified for AT_MOST encoding.")
+    next_aux, at_most_clauses = _encode_at_most(clue, cell_to_var, next_aux)
+    next_aux, at_least_clauses = _encode_at_least(clue, cell_to_var, next_aux)
+    return next_aux, at_most_clauses + at_least_clauses
+
+
 def encode(state: PublicState) -> CNFResult:
     """Encodes the given public state into CNF format.
     
@@ -136,6 +227,18 @@ def encode(state: PublicState) -> CNFResult:
                 raw_clauses.extend(_encode_different(clue, cell_to_var))
             case 'IMPLIES':
                 raw_clauses.extend(_encode_implies(clue, cell_to_var))
+            case 'ODD' | 'EVEN':
+                next_aux, clauses = _encode_odd_even(clue, cell_to_var, next_aux)
+                raw_clauses.extend(clauses)
+            case 'AT_MOST':
+                next_aux, clauses = _encode_at_most(clue, cell_to_var, next_aux)
+                raw_clauses.extend(clauses)
+            case 'AT_LEAST':
+                next_aux, clauses = _encode_at_least(clue, cell_to_var, next_aux)
+                raw_clauses.extend(clauses)
+            case 'EXACTLY':
+                next_aux, clauses = _encode_exactly(clue, cell_to_var, next_aux)
+                raw_clauses.extend(clauses)
             case _:
                 raise NotImplementedError(f"Clue kind '{clue.kind}' is not implemented yet.")
 
