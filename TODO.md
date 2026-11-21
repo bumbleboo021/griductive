@@ -134,15 +134,15 @@ and correct counters through Person 4's entailment calls.
 - [x] Implement `griductive/agent/adapter.py` with a no-argument `Agent` factory
   exposing `analyze(state: PublicState) -> Analysis`.
 - [x] Call Person 2's encoder and Person 3's DPLL solver.
-- [ ] Check base KB consistency first. Return `Analysis(False, ())` when UNSAT.
-- [ ] Classify every unresolved cell in row-major order. UNSAT under NOT Ci
+- [x] Check base KB consistency first. Return `Analysis(False, ())` when UNSAT.
+- [x] Classify every unresolved cell in row-major order. UNSAT under NOT Ci
   proves criminal. UNSAT under Ci proves innocent. Both SAT means UNKNOWN.
-- [ ] Return Status enum members and exactly one result per unresolved cell.
+- [x] Return Status enum members and exactly one result per unresolved cell.
 - [ ] Raise an explicit failure for unsupported clues or timeouts.
 - [ ] Keep all live queries within the supplied public snapshot. Hidden labels
   and unrevealed clue contents belong to the engine.
 - [ ] Handle Restart snapshots correctly if caching knowledge bases or results.
-- [ ] Pass `python -m griductive.check_analyzer --analyzer griductive.agent.adapter:Agent`.
+- [x] Pass `python -m griductive.check_analyzer --analyzer griductive.agent.adapter:Agent`.
 - [ ] Extend differential checks to new clue types and all levels 03 and above.
 - [ ] Run manual verdicts, Hint and Auto Solve through the GUI using the adapter.
 - [ ] Record step number, active clue IDs, SAT queries/results, accepted verdict,
