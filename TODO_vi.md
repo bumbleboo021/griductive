@@ -63,22 +63,22 @@ Các `API` nội bộ được đề xuất là `encode(public_state) -> CNF` v�
 - [x] Thứ tự ô tất định theo thứ tự ưu tiên hàng (row-major order) và cơ chế mở rộng vùng đã được kiểm định.
 - [x] Hỗ trợ ngữ nghĩa cho tất cả các mẫu màn chơi trong bộ phân tích phát triển (tạm thời) (development analyzer).
 - [x] Các bài kiểm thử vét cạn trên vùng nhỏ và các bước kiểm tra ngữ nghĩa ngoại tuyến độc lập.
+- [x] Gán các biến chính (primary variable) từ mã ô, với giá trị chân lý `True` mang nghĩa là tội phạm. Cấp phát riêng biệt và tất định các biến phụ trợ (auxiliary variable).
+- [x] Mã hóa `FACT`, `SAME`, `DIFFERENT`, `EXACTLY`, `AT_LEAST` và `AT_MOST`.
+- [x] Thêm các kết luận công khai dưới dạng mệnh đề đơn vị (unit clause) và chỉ mã hóa các manh mối công khai.
+- [x] Xem `QUOTE` như một thành phần đóng góp rỗng vào `CNF`.
+- [x] Mã hóa `ODD` và `EVEN` trên số lượng tội phạm đã được chuẩn hóa (normalize).
+- [x] Mã hóa `COUNT_COMPARE` sử dụng đúng trạng thái đích thực tế của nó, cả hai vùng, và ngữ nghĩa so sánh nghiêm ngặt `GT`/`LT` hoặc bằng `EQ`. Kiểm thử các vùng giao nhau và trường hợp triệt tiêu.
+- [x] Mã hóa `IMPLIES` với các ô tiền đề/kết luận có thứ tự và trạng thái riêng của từng ô.
+- [x] Mã hóa `CONNECTED` với quan hệ kề theo tính liên thông trực giao (4 hướng) bên trong vùng đã cho. Bảo toàn ngữ nghĩa hiện tại đối với vùng rỗng/vùng một phần tử và kiểm thử trường hợp chỉ tiếp xúc theo đường chéo.
+- [x] Xử lý các vùng đã mở rộng từ bộ nạp dữ liệu, bao gồm phần giao, các ô lân cận chung (common neighbors), các hướng trực tiếp, biên (boundary), toàn lưới và các nhóm cố định (có tên) (fixed named group).
+- [x] Duy trì các bộ đánh giá ngữ nghĩa (semantic evaluator) độc lập cho các manh mối mà bộ mã hóa hỗ trợ.
+- [x] Thống kê số lượng biến chính, biến phụ trợ và số lượng mệnh đề (clause) được sinh ra.
+- [x] Đối chiếu tính thỏa mãn được (satisfiability) của `CNF` với ngữ nghĩa trực tiếp một cách vét cạn trên các trường hợp nhỏ. Cố định phép gán của các biến chính và cho phép phép gán của các biến phụ trợ thay đổi.
+- [x] Bao phủ các trường hợp vùng rỗng, các giá trị cực biên của phép đếm, chuẩn hóa mục tiêu vô tội, mệnh đề điều kiện (conditional), vùng dùng chung, tính liên thông và dữ liệu đầu vào không hợp lệ.
 
 ### Phần triển khai còn lại
 
-- [ ] Gán các biến chính (primary variable) từ mã ô, với giá trị chân lý `True` mang nghĩa là tội phạm. Cấp phát riêng biệt và tất định các biến phụ trợ (auxiliary variable).
-- [ ] Mã hóa `FACT`, `SAME`, `DIFFERENT`, `EXACTLY`, `AT_LEAST` và `AT_MOST`.
-- [ ] Thêm các kết luận công khai dưới dạng mệnh đề đơn vị (unit clause) và chỉ mã hóa các manh mối công khai.
-- [ ] Xem `QUOTE` như một thành phần đóng góp rỗng vào `CNF`.
-- [ ] Mã hóa `ODD` và `EVEN` trên số lượng tội phạm đã được chuẩn hóa (normalize).
-- [ ] Mã hóa `COUNT_COMPARE` sử dụng đúng trạng thái đích thực tế của nó, cả hai vùng, và ngữ nghĩa so sánh nghiêm ngặt `GT`/`LT` hoặc bằng `EQ`. Kiểm thử các vùng giao nhau và trường hợp triệt tiêu.
-- [ ] Mã hóa `IMPLIES` với các ô tiền đề/kết luận có thứ tự và trạng thái riêng của từng ô.
-- [ ] Mã hóa `CONNECTED` với quan hệ kề theo tính liên thông trực giao (4 hướng) bên trong vùng đã cho. Bảo toàn ngữ nghĩa hiện tại đối với vùng rỗng/vùng một phần tử và kiểm thử trường hợp chỉ tiếp xúc theo đường chéo.
-- [ ] Xử lý các vùng đã mở rộng từ bộ nạp dữ liệu, bao gồm phần giao, các ô lân cận chung (common neighbors), các hướng trực tiếp, biên (boundary), toàn lưới và các nhóm cố định (có tên) (fixed named group).
-- [ ] Duy trì các bộ đánh giá ngữ nghĩa (semantic evaluator) độc lập cho các manh mối mà bộ mã hóa hỗ trợ.
-- [ ] Thống kê số lượng biến chính, biến phụ trợ và số lượng mệnh đề (clause) được sinh ra.
-- [ ] Đối chiếu tính thỏa mãn được (satisfiability) của `CNF` với ngữ nghĩa trực tiếp một cách vét cạn trên các trường hợp nhỏ. Cố định phép gán của các biến chính và cho phép phép gán của các biến phụ trợ thay đổi.
-- [ ] Bao phủ các trường hợp vùng rỗng, các giá trị cực biên của phép đếm, chuẩn hóa mục tiêu vô tội, mệnh đề điều kiện (conditional), vùng dùng chung, tính liên thông và dữ liệu đầu vào không hợp lệ.
 - [ ] Viết phần biến đổi công thức cho báo cáo đối với một manh mối hai ngôi, một manh mối đếm số lượng và các phần mở rộng.
 
 Sau khi nạp dữ liệu, các trường `kind` và `count` của các ràng buộc đếm số lượng (cardinality) / tính chẵn lẻ cốt lõi đã mô tả trực tiếp số lượng tội phạm. Ví dụ, chính xác 1 người vô tội trong 3 ô được lưu trữ dưới dạng `EXACTLY` 2 tội phạm. Hãy sử dụng trực tiếp ràng buộc đã được chuẩn hóa này. `COUNT_COMPARE` và `CONNECTED` sử dụng trực tiếp `target_status`. Xem bảng lược đồ trong `README.md`.
