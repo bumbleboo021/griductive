@@ -1,0 +1,63 @@
+\chapter{Kế hoạch và phân công công việc}
+\label{chap:planning}
+
+\section{Mục tiêu và phạm vi}
+Đồ án hướng đến một hệ thống gồm trò chơi có giao diện và tác tử suy diễn không đoán mò. Năm nhóm nhiệm vụ kỹ thuật được tổ chức theo các mục 4.1--4.5 của đề bài: tái hiện trò chơi, biểu diễn tri thức và mã hóa CNF, xây dựng bộ giải DPLL, tích hợp tác tử logic và chạy thực nghiệm trên một số màn chơi.
+
+% TO BE CONTINUE 
+
+\section{Kế hoạch công việc}
+
+Khi tiếp cận đề bài, nhóm đã lên kế hoạch và tiếp cận đề bài theo từng mốc hoàn thành mỗi nhóm công việc theo như bảng dưới đây. 
+
+\begingroup
+\small\linespread{1.15}\selectfont
+\begin{longtable}{@{}p{0.08\textwidth}p{0.28\textwidth}p{0.55\textwidth}@{}}
+\caption{Kế hoạch thực hiện và tiêu chí bàn giao}\label{tab:plan}\\
+\toprule
+\textbf{Mốc} & \textbf{Nhóm công việc} & \textbf{Sản phẩm và điều kiện chuyển bước} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Mốc} & \textbf{Nhóm công việc} & \textbf{Sản phẩm và điều kiện chuyển bước} \\
+\midrule
+\endhead
+1 & Phân tích yêu cầu & Thống nhất luật chơi, kiểu manh mối, tọa độ ô và hợp đồng dữ liệu công khai, thông tin tác tử được nhận. \\
+\addlinespace
+2 & Tạo nền tảng trò chơi & Người~1 tái hiện lại trò chơi, xây dựng giao diện và một số tính năng cơ bản. \\
+\addlinespace
+3 & Phát triển mô-đun logic & Người~2 mã hóa CNF; Người~3 xây dựng DPLL; Người~4 xây dựng tác tử suy diễn để giải màn chơi. \\
+\addlinespace
+4 & Tích hợp và kiểm định & Kiểm tra một kết luận được chứng minh, mở đúng manh mối và cập nhật trạng thái công khai. Mở rộng sang các kích thước lưới và các manh mối nâng cao. \\
+\addlinespace
+5 & Thực nghiệm và hoàn thiện & Người~5 thu thập số liệu từ hệ thống hoàn chỉnh; cả nhóm rà soát báo cáo và quay video minh họa. \\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\section{Bảng phân chia công việc}
+
+\begingroup
+\small\linespread{1.15}\selectfont
+\begin{longtable}{@{}p{0.24\textwidth}p{0.57\textwidth}p{0.12\textwidth}@{}}
+\caption{Trách nhiệm của từng thành viên}\label{tab:tasks}\\
+\toprule
+\textbf{Thành viên} & \textbf{Nhiệm vụ chính} & \textbf{Hoàn thành} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Thành viên} & \textbf{Nhiệm vụ chính} & \textbf{Hoàn thành} \\
+\midrule
+\endhead
+Nguyễn Xuân Hoàng & Tái hiện trò chơi, xây dựng giao diện Pygame và tích hợp bộ phân tích. & 100 \% \\
+\addlinespace
+Lê Thanh Phi & Biểu diễn tri thức và mã hóa manh mối sang CNF. & 100 \% \\
+\addlinespace
+Vương Thành Phát & Xây dựng bộ giải SAT bằng thuật toán DPLL. & 100 \% \\
+\addlinespace
+Trần Đình Hưng & Xây dựng tác tử suy diễn, ghi vết và kiểm tra tính duy nhất của giải pháp. & 100 \% \\
+\addlinespace
+Nguyễn Quốc Thái & Chọn một số màn chơi tiêu biểu để thực hiện thực nghiệm, tổng hợp số liệu và phân tích kết quả. & 100 \% \\
+\bottomrule
+\end{longtable}
+\endgroup

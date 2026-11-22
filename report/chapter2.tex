@@ -1,0 +1,31 @@
+\chapter{Tái hiện trò chơi Griductive}
+\label{chap:game}
+
+\section{Giới thiệu}
+Nhóm xây dựng phiên bản Griductive bằng Python và Pygame, tham khảo luật chơi gốc~\cite{griductive,pygameDocs}. Trò chơi hỗ trợ bàn cờ $3\times3$, $4\times4$ và $5\times5$. Mỗi nhân vật có trạng thái ẩn là tội phạm hoặc vô tội; người chơi chỉ được mở thẻ khi kết luận được chứng minh từ thông tin công khai.
+
+\section{Giao diện và các tính năng chính}
+Giao diện gồm bàn cờ ở bên trái và bảng manh mối ở bên phải. Mỗi thẻ hiển thị tọa độ, tên, xuất xứ và ảnh nhân vật. Thẻ đã mở hiển thị thêm trạng thái cùng manh mối; người chơi có thể chọn manh mối để làm nổi bật các ô liên quan.
+
+\begin{figure}[!htbp]
+    \centering
+    \includegraphics[width=0.75\textwidth]{figures/gameplay.png}
+    \caption{Giao diện trò chơi Griductive với bàn cờ và bảng manh mối.}
+    \label{fig:gameplay}
+\end{figure}
+
+Các tính năng chính gồm:
+\begin{itemize}
+    \item \textbf{Chọn trạng thái nhân vật:} nhấp vào thẻ để chọn \texttt{Innocent} hoặc \texttt{Criminal}. Có thể dùng WASD/phím mũi tên để di chuyển và Enter để mở, xác nhận lựa chọn.
+    \item \textbf{Mở thẻ và phản hồi:} kết luận hợp lệ sẽ mở thẻ, thu nhỏ ảnh và hiện manh mối. Chương trình phân biệt lựa chọn chưa đủ căn cứ (\texttt{NOT\_PROVABLE}) và lựa chọn bị manh mối bác bỏ (\texttt{CONTRADICTED}); cả hai đều giữ nguyên bàn cờ.
+    \item \textbf{Chọn màn và chơi lại:} \texttt{Stage} hiển thị danh sách màn theo tên; \texttt{Restart} khôi phục trạng thái ban đầu của màn đang chơi.
+    \item \textbf{Gợi ý và giải tự động:} \texttt{Hint} chọn một nhân vật có thể chứng minh tiếp theo; \texttt{Auto Solve} mở lần lượt các thẻ theo kết quả suy diễn. Người chơi có thể dừng bằng \texttt{Stop}.
+    \item \textbf{Hỗ trợ trải nghiệm:} bảng manh mối có thanh cuộn, các nút và thẻ có hiệu ứng tương tác, nút dấu hỏi mở hướng dẫn, kèm tùy chọn bật/tắt và chọn nhạc nền.
+\end{itemize}
+
+Ảnh nền, chân dung, phông chữ và âm nhạc được nạp từ \texttt{assets/}, tất cả đã được dẫn nguồn ở tệp \texttt{ATTRIBUTION.md} ~\cite{assetRecord}. Màu sắc, kích thước thẻ và thời gian hoạt ảnh có thể điều chỉnh trong \texttt{griductive/ui/config.py}.
+
+\section{Tổ chức và tích hợp bộ phân tích}
+\texttt{GameEngine} quản lý đáp án và các manh mối chưa mở. Bộ phân tích chỉ nhận \texttt{PublicState}, gồm thông tin nhân vật, trạng thái đã biết và manh mối công khai. Kết quả phân tích được engine sử dụng để chấp nhận hoặc từ chối lựa chọn; chỉ sau khi chấp nhận, trạng thái và manh mối mới được công khai.
+
+Trong quá trình phát triển, trò chơi dùng bộ phân tích tham chiếu bằng quay lui ngữ nghĩa. Tác tử CNF/DPLL của nhóm được kết nối qua giao diện \texttt{analyze(PublicState) -> Analysis}, giúp các thành viên triển khai phần logic độc lập với giao diện. Tác vụ phân tích chạy trong luồng nền để giao diện tiếp tục xử lý sự kiện và hiển thị.
