@@ -77,28 +77,28 @@ return fields together. The implemented external boundary is
 - [x] Deterministic row-major cell order and validated region expansion.
 - [x] Semantic support for all stage templates in the development analyzer.
 - [x] Exhaustive small-region tests and independent offline semantic checks.
+- [x] Assign primary variables from cell IDs, with true meaning criminal.
+  Allocate auxiliary variables separately and deterministically.
+- [x] Encode FACT, SAME, DIFFERENT, EXACTLY, AT_LEAST and AT_MOST.
+- [x] Add public verdicts as unit clauses and encode only public clues.
+- [x] Treat QUOTE as an empty contribution to CNF.
+- [x] Encode ODD and EVEN over the normalized criminal count.
+- [x] Encode COUNT_COMPARE using its actual target status, both regions, and
+  strict GT/LT or EQ semantics. Test overlapping regions and cancellation.
+- [x] Encode IMPLIES with ordered premise/conclusion cells and their own statuses.
+- [x] Encode CONNECTED with four-direction adjacency inside the given region.
+  Preserve current empty/singleton semantics and test diagonal-only contact.
+- [x] Handle the loader's expanded regions, including intersections, common
+  neighbors, direct directions, boundary, whole-grid and fixed named groups.
+- [x] Maintain independent semantic evaluators for the encoder's supported clues.
+- [x] Report primary variables, auxiliary variables and generated clause counts.
+- [x] Compare CNF satisfiability with direct semantics exhaustively on small cases.
+  Fix primary assignments and allow auxiliary assignments to vary.
+- [x] Cover empty regions, count extremes, innocent-target normalization,
+  conditionals, shared regions, connectivity and invalid inputs.
 
 ### Remaining implementation
 
-- [ ] Assign primary variables from cell IDs, with true meaning criminal.
-  Allocate auxiliary variables separately and deterministically.
-- [ ] Encode FACT, SAME, DIFFERENT, EXACTLY, AT_LEAST and AT_MOST.
-- [ ] Add public verdicts as unit clauses and encode only public clues.
-- [ ] Treat QUOTE as an empty contribution to CNF.
-- [ ] Encode ODD and EVEN over the normalized criminal count.
-- [ ] Encode COUNT_COMPARE using its actual target status, both regions, and
-  strict GT/LT or EQ semantics. Test overlapping regions and cancellation.
-- [ ] Encode IMPLIES with ordered premise/conclusion cells and their own statuses.
-- [ ] Encode CONNECTED with four-direction adjacency inside the given region.
-  Preserve current empty/singleton semantics and test diagonal-only contact.
-- [ ] Handle the loader's expanded regions, including intersections, common
-  neighbors, direct directions, boundary, whole-grid and fixed named groups.
-- [ ] Maintain independent semantic evaluators for the encoder's supported clues.
-- [ ] Report primary variables, auxiliary variables and generated clause counts.
-- [ ] Compare CNF satisfiability with direct semantics exhaustively on small cases.
-  Fix primary assignments and allow auxiliary assignments to vary.
-- [ ] Cover empty regions, count extremes, innocent-target normalization,
-  conditionals, shared regions, connectivity and invalid inputs.
 - [ ] Write report derivations for a binary clue, a counting clue, and extensions.
 
 Core cardinality/parity `kind` and `count` already describe criminals after loading.
@@ -134,15 +134,15 @@ and correct counters through Person 4's entailment calls.
 - [x] Implement `griductive/agent/adapter.py` with a no-argument `Agent` factory
   exposing `analyze(state: PublicState) -> Analysis`.
 - [x] Call Person 2's encoder and Person 3's DPLL solver.
-- [ ] Check base KB consistency first. Return `Analysis(False, ())` when UNSAT.
-- [ ] Classify every unresolved cell in row-major order. UNSAT under NOT Ci
+- [x] Check base KB consistency first. Return `Analysis(False, ())` when UNSAT.
+- [x] Classify every unresolved cell in row-major order. UNSAT under NOT Ci
   proves criminal. UNSAT under Ci proves innocent. Both SAT means UNKNOWN.
-- [ ] Return Status enum members and exactly one result per unresolved cell.
+- [x] Return Status enum members and exactly one result per unresolved cell.
 - [ ] Raise an explicit failure for unsupported clues or timeouts.
 - [ ] Keep all live queries within the supplied public snapshot. Hidden labels
   and unrevealed clue contents belong to the engine.
 - [ ] Handle Restart snapshots correctly if caching knowledge bases or results.
-- [ ] Pass `python -m griductive.check_analyzer --analyzer griductive.agent.adapter:Agent`.
+- [x] Pass `python -m griductive.check_analyzer --analyzer griductive.agent.adapter:Agent`.
 - [ ] Extend differential checks to new clue types and all levels 03 and above.
 - [ ] Run manual verdicts, Hint and Auto Solve through the GUI using the adapter.
 - [ ] Record step number, active clue IDs, SAT queries/results, accepted verdict,
