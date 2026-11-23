@@ -1,9 +1,12 @@
 /.venv
-/.venv-win/
+/.venv-web/
+/.vscode
 /.idea
-/.cache/
+/.cache
 __pycache__/
 *.py[cod]
 /.pytest_cache/
 /results/*
 !/results/.gitkeep
+/report
+/build
