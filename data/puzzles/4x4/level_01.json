@@ -1,5 +1,5 @@
 {
-  "title": "4x4 - Quiet Rows",
+  "title": "Stage 5 - 4x4 - Quiet Rows",
   "size": 4,
   "initially_revealed": [
     "A1"
@@ -319,5 +319,5 @@
       }
     }
   ],
-  "name": "4x4 - Quiet Rows"
+  "name": "Stage 5 - 4x4 - Quiet Rows"
 }

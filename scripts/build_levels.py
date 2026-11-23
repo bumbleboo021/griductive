@@ -81,14 +81,26 @@ def build(n, variant, seed=None):
         name,origin,*_= [x.strip() for x in path.stem.split('\u00b7')]
         cast.append((name,origin))
     cast.sort(key=lambda x:x[0].casefold())
-    titles={1:'Quiet Rows',2:'Crossed Testimonies'}
-    return dict(name=f'{n}x{n} - {titles[variant]}',title=f'{n}x{n} - {titles[variant]}',size=n,initially_revealed=['A1'],
+    title = stage_name(n, variant)
+    return dict(name=title,title=title,size=n,initially_revealed=['A1'],
         metadata=dict(author='Project team with AI assistance',seed=n*100+variant,
                       source='Original project level; not an imported official puzzle',
                       design='Regional counts, overlap deductions and odd parity',construction_plan=plan),
         characters=[dict(cell=c,name=cast[i][0],origin=cast[i][1],
                          status='CRIMINAL' if solution[c] else 'INNOCENT',clue=clues[c])
                     for i,c in enumerate(ids)])
+
+
+def stage_name(size, number):
+    """Keep the stage number, board size, and descriptive title together."""
+    offset = {3: 0, 4: 4, 5: 8}[size]
+    titles = {
+        3: ('Quiet Rows', 'Crossed Testimonies', 'Lantern Bridge', 'Shared Alibis'),
+        4: ('Quiet Rows', 'Crossed Testimonies', 'The Silent Courtyard', 'Crossing Paths'),
+        5: ('Quiet Rows', 'Crossed Testimonies', 'Threads of Evidence',
+            'The Boundary Case', 'Teyvat Conspiracy'),
+    }
+    return f'Stage {offset + number} - {size}x{size} - {titles[size][number-1]}'
 
 
 if __name__=='__main__':

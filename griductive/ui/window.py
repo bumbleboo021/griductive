@@ -7,6 +7,7 @@ import re
 import hashlib
 import math
 from griductive.ui.music import Music
+from griductive.ui.agent_inspector import ObservedAnalyzer, AgentInspector
 from griductive.domain.models import Status
 from griductive.engine.game import GameEngine, Outcome
 from griductive.engine.puzzle import load_puzzle
@@ -20,6 +21,7 @@ from griductive.ui.config import BG, PANEL, TEXT, MUTED, ACCENT
 class GameWindow:
     def __init__(self, path, factory, puzzle_dir, analyzer_name):
         self.screen = pygame.display.set_mode(cfg.WINDOW_SIZE, pygame.SCALED)
+        self.output_surface = None
         pygame.display.set_caption("Griductive | Deduction desk")
         self.font = ui_font(cfg.FONT_SIZE)
         self.small = ui_font(cfg.SMALL_FONT_SIZE)
@@ -32,8 +34,11 @@ class GameWindow:
         self.auto_focus_cell = None
         self.auto_focus_until = 0
         self.factory, self.puzzle_dir, self.analyzer_name = factory, Path(puzzle_dir), analyzer_name
-        self.engine = GameEngine(self.artwork.cast_puzzle(load_puzzle(path)), factory())
+        self.observer = ObservedAnalyzer(factory())
+        self.inspector = AgentInspector()
+        self.engine = GameEngine(self.artwork.cast_puzzle(load_puzzle(path)), self.observer)
         self.queue = Queue()
+        self.analysis_sequence_before = 0
         self.busy = self.auto = self.picker = False
         self.selected, self.clue_id = 'A1', None
         self.verdict_cell = None
@@ -70,10 +75,10 @@ class GameWindow:
     def clue_text(self, clue):
         if clue.kind == 'QUOTE':
             pool = cfg.CHARACTER_QUOTES or ['...']
-            seed = clue.id+'|'+self.engine.title+'|'+','.join(c.name for c in self.engine.public_state().characters)
+            seed = clue.id+'|'+self.engine.title+'|'+','.join(c.name for c in self.public_view_state().characters)
             index = int.from_bytes(hashlib.sha256(seed.encode()).digest()[:4],'big') % len(pool)
             return pool[index]
-        names = {char.cell: char.name for char in self.engine.public_state().characters}
+        names = {char.cell: char.name for char in self.public_view_state().characters}
         def display(match):
             cell = match.group(0)
             name = names.get(cell, cell)
@@ -117,9 +122,11 @@ class GameWindow:
         self.wrapped(text, visible.inflate(-24,-14), TEXT if enabled else MUTED, font)
 
     def hover(self, key, rect, enabled=True, focused=False):
+        pointer = self.mouse_position()
         active_scope = ('notice' if self.notification else 'music' if self.music_picker else 'help' if self.help_open else
-                        'verdict' if self.verdict_cell else 'stage' if self.picker else 'main')
-        hovered = enabled and self.hover_scope == active_scope and rect.collidepoint(pygame.mouse.get_pos())
+                        'verdict' if self.verdict_cell else 'stage' if self.picker else
+                        'agent' if self.inspector.open and pointer[0] >= cfg.WINDOW_SIZE[0] else 'main')
+        hovered = enabled and self.hover_scope == active_scope and rect.collidepoint(pointer)
         self.pointer_hover |= hovered
         previous = self.hover_values.get(key, 0.0)
         step = self.hover_delta/max(1,cfg.HOVER_DURATION_MS)
@@ -131,6 +138,8 @@ class GameWindow:
     def start(self, action):
         if self.busy:
             return
+        records = self.observer.snapshot()
+        self.analysis_sequence_before = records[-1].number if records else 0
         self.busy = True
         self.message = "Checking the revealed information..."
         def run():
@@ -148,6 +157,9 @@ class GameWindow:
             result = None
         if result:
             self.busy = False
+            records = self.observer.snapshot()
+            if records and records[-1].number > self.analysis_sequence_before:
+                self.observer.finish_action(result, self.engine.public_state())
             self.message = f"{result.code}: {result.message}"
             if result.code in ('CONTRADICTED', 'NOT_PROVABLE'):
                 self.notification = result
@@ -165,11 +177,14 @@ class GameWindow:
 
     def load(self, path):
         try:
-            engine = GameEngine(self.artwork.cast_puzzle(load_puzzle(path)), self.factory())
+            observer = ObservedAnalyzer(self.factory())
+            engine = GameEngine(self.artwork.cast_puzzle(load_puzzle(path)), observer)
         except Exception as exc:
             self.message = f"LOAD ERROR: {exc}"
             return
         self.engine = engine
+        self.observer = observer
+        self.inspector.reset()
         self.notification = None
         self.last_revealed = None
         self.auto_focus_cell = None
@@ -182,7 +197,71 @@ class GameWindow:
         self.stage_drag_offset = None
         self.message = "Puzzle loaded. Select a card or ask for a hint."
 
+    def logical_position(self, position):
+        if self.output_surface is None:
+            return position
+        return (round(position[0]*self.screen.get_width()/self.output_surface.get_width()),
+                round(position[1]*self.screen.get_height()/self.output_surface.get_height()))
+
+    def mouse_position(self):
+        return self.logical_position(pygame.mouse.get_pos())
+
+    def public_view_state(self):
+        record = self.inspector.selected_record(self.observer)
+        return (record.after_state or record.state) if record else self.engine.public_state()
+
+    def browse_history(self, amount):
+        if self.busy:
+            return
+        self.auto = False
+        self.auto_focus_cell = None
+        self.inspector.browse(amount, len(self.observer.snapshot()))
+        self.clear_replay_view()
+
+    def clear_replay_view(self):
+        self.verdict_cell = None
+        self.clue_id = None
+        self.clue_scroll = self.clue_scroll_target = 0
+        self.reveal_started.clear()
+        self.last_revealed = None
+
+    def set_inspector_open(self, opened):
+        if self.inspector.open == opened:
+            return
+        self.inspector.open = opened
+        self.inspector.focused = opened
+        if not opened:
+            self.inspector.reset()
+            self.clear_replay_view()
+        width, height = cfg.WINDOW_SIZE
+        if opened:
+            width += cfg.AGENT_PANEL_WIDTH
+        # SDL's SCALED renderer must be recreated when its logical size changes.
+        # Keep fonts, audio, cached artwork, and the running engine intact.
+        pygame.display.quit()
+        pygame.display.init()
+        if opened:
+            desktop_width, desktop_height = pygame.display.get_desktop_sizes()[0]
+            scale = min(1.0, max(1,desktop_width-48)/width,
+                        max(1,desktop_height-80)/height)
+            self.output_surface = pygame.display.set_mode((max(1,round(width*scale)),
+                                                          max(1,round(height*scale))))
+            self.screen = pygame.Surface((width,height)).convert()
+        else:
+            self.screen = pygame.display.set_mode((width,height), pygame.SCALED)
+            self.output_surface = None
+        pygame.display.set_caption('Griductive | Deduction desk')
+        self.last_cursor = None
+
     def action(self, key):
+        if key == 'agent_live':
+            self.inspector.reset()
+            self.clear_replay_view()
+            return
+        if key == 'agent':
+            self.set_inspector_open(not self.inspector.open)
+            self.inspector.reset()
+            return
         if key == 'choose_music':
             self.auto = False
             self.music_tracks = self.music.tracks()
@@ -199,6 +278,41 @@ class GameWindow:
         # Recheck current state: multiple mouse events can arrive before a redraw.
         if (self.busy or self.auto) and not (key == "auto" and self.auto):
             return
+        if (self.inspector.selected_record(self.observer) is not None and
+                key in ('agent_reference','agent_logic','agent_analyze','agent_step',
+                        'hint','auto','criminal','innocent')):
+            return
+        if key in ('agent_reference', 'agent_logic'):
+            try:
+                if key == 'agent_logic':
+                    from griductive.agent.adapter import Agent
+                    factory = Agent
+                else:
+                    from griductive.engine.reference import ReferenceAnalyzer
+                    factory = ReferenceAnalyzer
+                observer = ObservedAnalyzer(factory())
+            except Exception as exc:
+                self.message = f'Analyzer unavailable: {exc}'
+                return
+            self.factory = factory
+            self.analyzer_name = factory.__name__
+            self.observer = observer
+            self.engine.set_analyzer(observer)
+            self.inspector.reset()
+            self.message = f'Switched to {factory.__name__}; proved cards preserved.'
+            return
+        if key == 'agent_analyze':
+            def analyze():
+                result = self.engine.analyze()
+                return Outcome('ANALYZED' if result.consistent else 'INCONSISTENT',
+                               'Public-state analysis recorded. No card revealed.')
+            self.start(analyze)
+            self.inspector.reset()
+            return
+        if key == 'agent_step':
+            self.start(self.engine.step)
+            self.inspector.reset()
+            return
         if key in ('load','stage'):
             self.files = sorted(self.puzzle_dir.rglob("*.json"))
             self.stage_names = {}
@@ -213,6 +327,8 @@ class GameWindow:
         elif key == "restart":
             self.notification = None
             self.engine.restart()
+            self.observer.clear()
+            self.inspector.reset()
             self.last_revealed = None
             self.auto_focus_cell = None
             self.reveal_started.clear()
@@ -235,6 +351,8 @@ class GameWindow:
             self.start(lambda: self.engine.submit_verdict(cell, status))
 
     def open_verdict(self):
+        if self.inspector.selected_record(self.observer) is not None:
+            return
         if (self.selected is not None and not self.busy and not self.auto
                 and self.selected not in dict(self.engine.public_state().verdicts)):
             self.verdict_cell = self.selected
@@ -246,7 +364,7 @@ class GameWindow:
         self.verdict_rect = None
         for key in ('criminal','innocent','cancel_verdict'):
             self.buttons.pop(key,None)
-        public = self.engine.public_state()
+        public = self.public_view_state()
         card_clues = dict(zip((c for c, _ in public.verdicts),public.clues))
         if cell not in card_clues:
             self.clue_id = None
@@ -273,6 +391,10 @@ class GameWindow:
             self.select_character(cell, open_popup=False)
 
     def event(self, event):
+        if self.output_surface is not None and hasattr(event, 'pos'):
+            attributes = dict(event.dict)
+            attributes['pos'] = self.logical_position(event.pos)
+            event = pygame.event.Event(event.type, attributes)
         if event.type == pygame.QUIT:
             return False
         if event.type == pygame.WINDOWFOCUSLOST:
@@ -285,6 +407,37 @@ class GameWindow:
                 if button and button[0].collidepoint(event.pos):
                     self.notification = None
             return True
+        if self.inspector.open and not (self.music_picker or self.help_open or self.picker or self.verdict_cell):
+            pointer = getattr(event, 'pos', self.mouse_position())
+            over_panel = pointer[0] >= cfg.WINDOW_SIZE[0]
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                self.inspector.focused = over_panel
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self.set_inspector_open(False)
+                    return True
+                elif self.inspector.focused and event.key in (pygame.K_LEFT, pygame.K_RIGHT):
+                    self.browse_history(-1 if event.key == pygame.K_LEFT else 1)
+                elif self.inspector.focused and event.key in (pygame.K_UP, pygame.K_DOWN):
+                    self.inspector.scroll += -60 if event.key == pygame.K_UP else 60
+            elif event.type == pygame.MOUSEWHEEL and over_panel:
+                self.inspector.scroll += -event.y*60
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and over_panel:
+                for key in ('agent_close','agent_prev','agent_next','agent_live',
+                            'agent_analyze','agent_step','agent_auto','agent_reference','agent_logic'):
+                    entry = self.buttons.get(key)
+                    if entry and entry[1] and entry[0].collidepoint(event.pos):
+                        if key == 'agent_close':
+                            self.set_inspector_open(False)
+                        elif key in ('agent_prev','agent_next'):
+                            self.browse_history(-1 if key == 'agent_prev' else 1)
+                        else:
+                            self.action('auto' if key == 'agent_auto' else key)
+                        break
+            self.inspector.scroll = max(0, min(self.inspector.scroll, self.inspector.max_scroll))
+            if ((event.type != pygame.KEYDOWN and over_panel) or
+                    (event.type == pygame.KEYDOWN and self.inspector.focused)):
+                return True
         if self.music_picker:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 self.music_picker = False
@@ -292,8 +445,11 @@ class GameWindow:
                 self.music_scroll = max(0,min(max(0,len(self.music_tracks)-7),self.music_scroll-event.y))
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 close = self.buttons.get('close_music')
+                toggle = self.buttons.get('music')
                 if close and close[0].collidepoint(event.pos):
                     self.music_picker = False
+                elif toggle and toggle[1] and toggle[0].collidepoint(event.pos):
+                    self.action('music')
                 else:
                     for rect, path in self.music_hits:
                         if rect.collidepoint(event.pos):
@@ -380,7 +536,7 @@ class GameWindow:
             return True
         if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
             return False
-        if event.type == pygame.MOUSEWHEEL and self.clue_panel.collidepoint(pygame.mouse.get_pos()):
+        if event.type == pygame.MOUSEWHEEL and self.clue_panel.collidepoint(self.mouse_position()):
             movement = getattr(event,'precise_y',event.y)
             self.clue_scroll_target = max(0, min(self.max_scroll, self.clue_scroll_target-movement*cfg.CLUE_SCROLL_STEP))
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -416,21 +572,22 @@ class GameWindow:
         if self.background:
             self.screen.blit(self.background, (0, 0))
         self.buttons = {}
-        state = self.engine.public_state()
+        history_record = self.inspector.selected_record(self.observer)
+        state = self.public_view_state()
         known = dict(state.verdicts)
         now = pygame.time.get_ticks()
-        if self.last_revealed is not None:
+        if self.last_revealed is not None and history_record is None:
             for cell in known.keys() - self.last_revealed:
                 self.reveal_started[cell] = now
-        self.last_revealed = set(known)
+        self.last_revealed = set(known) if history_record is None else None
         public_clues = dict(zip((cell for cell, _ in state.verdicts), state.clues))
         self.label("GRIDUCTIVE", (30, 22), ACCENT, self.heading)
         self.label(self.engine.title, (30, 63))
         self.label(f"{len(known)}/{len(state.characters)} proved", (626, 65), MUTED)
-        self.button('music', 'Music On' if self.music.enabled else 'Music Off', pygame.Rect(790,22,140,38))
-        self.button('choose_music', 'Tracks', pygame.Rect(942,22,130,38))
+        self.button('agent', 'Agent', pygame.Rect(790,22,140,38))
+        self.button('choose_music', 'Music', pygame.Rect(942,22,130,38))
         self.button('help', '?', pygame.Rect(1107,22,38,38))
-        self.label("Only proved verdicts reveal a clue.", (790, 62), MUTED, self.small)
+        self.label("Only proved verdicts reveal clues.", (790, 70), MUTED, self.tiny)
         clue = next((c for c in state.clues if c.id == self.clue_id), None)
         highlighted = set(clue.referenced_cells) if clue else set()
         self.cards = {}
@@ -447,10 +604,10 @@ class GameWindow:
                 self.label(str(row+1), (cfg.BOARD_X-30, rect.centery-10), MUTED)
             status = known.get(char.cell)
             color = PANEL if status is None else (cfg.CRIMINAL_CARD if status == Status.CRIMINAL else cfg.INNOCENT_CARD)
-            focused = (char.cell == self.selected or
+            focused = (char.cell == (history_record.move_cell if history_record else self.selected) or
                        (char.cell == self.auto_focus_cell and now < self.auto_focus_until))
             amount = self.hover('card-'+char.cell, rect,
-                                status is not None or (not self.busy and not self.auto), focused=focused)
+                                status is not None or (not self.busy and not self.auto and history_record is None), focused=focused)
             rect = rect.move(0,-round(cfg.HOVER_LIFT*amount))
             color = tuple(round(a+(b-a)*amount*.15) for a,b in zip(color,ACCENT))
             pygame.draw.rect(self.screen, color, rect, border_radius=cfg.CARD_RADIUS)
@@ -458,7 +615,7 @@ class GameWindow:
                 pygame.draw.rect(self.screen, ACCENT, rect, 2, border_radius=cfg.CARD_RADIUS)
             if char.cell in highlighted:
                 pygame.draw.rect(self.screen, cfg.HIGHLIGHT, rect, 3, border_radius=cfg.CARD_RADIUS)
-            progress = reveal_progress(self.reveal_started.get(char.cell), now)
+            progress = 1.0 if history_record else reveal_progress(self.reveal_started.get(char.cell), now)
             draw_character(self, char, rect, status, public_clues.get(char.cell), progress, state.size)
         pygame.draw.rect(self.screen, PANEL, self.clue_panel, border_radius=12)
         pygame.draw.rect(self.screen, (65,85,102), self.clue_panel, 1, border_radius=12)
@@ -493,14 +650,18 @@ class GameWindow:
             thumb_height = max(28,round(viewport.height*viewport.height/total_height))
             thumb_y = track.y+round((track.height-thumb_height)*self.clue_scroll/self.max_scroll)
             pygame.draw.rect(self.screen,ACCENT,(track.x,thumb_y,track.width,thumb_height),border_radius=2)
-        free = not self.busy and not self.auto
+        free = not self.busy and not self.auto and history_record is None
         self.button("stage", "Stage", pygame.Rect(790, 626, 170, 46), free)
         self.button("restart", "Restart", pygame.Rect(975, 626, 170, 46), free)
         self.button("hint", "Hint", pygame.Rect(790, 682, 170, 46), free and not self.engine.solved)
         self.button("auto", "Stop" if self.auto else "Auto Solve", pygame.Rect(975, 682, 170, 46), self.auto or (free and not self.engine.solved))
         message_y = min(cfg.MESSAGE_Y, self.screen.get_height()-72)
         pygame.draw.rect(self.screen, PANEL, (30, message_y, 1115, 60), border_radius=10)
-        self.wrapped(self.message, pygame.Rect(46, message_y+11, 1080, 44), font=self.font)
+        message = (f'HISTORY - call {history_record.number}: board after action. Return to Live to continue.'
+                   if history_record else self.message)
+        self.wrapped(message, pygame.Rect(46, message_y+11, 1080, 44), font=self.font)
+        if self.inspector.open:
+            self.inspector.draw(self)
         if self.picker:
             self.draw_picker()
         if self.verdict_cell:
@@ -515,6 +676,8 @@ class GameWindow:
         if cursor != self.last_cursor and pygame.display.get_driver() != 'dummy':
             pygame.mouse.set_cursor(cursor)
             self.last_cursor = cursor
+        if self.output_surface is not None:
+            pygame.transform.smoothscale(self.screen, self.output_surface.get_size(), self.output_surface)
         pygame.display.flip()
 
     def select_music(self, path):
@@ -528,7 +691,9 @@ class GameWindow:
         rect = pygame.Rect(0,0,700,540)
         rect.center = self.screen.get_rect().center
         pygame.draw.rect(self.screen,PANEL,rect,border_radius=14)
-        self.label('Choose music',(rect.x+24,rect.y+22),ACCENT,self.heading)
+        self.label('Music',(rect.x+24,rect.y+22),ACCENT,self.heading)
+        self.button('music', 'Music On' if self.music.enabled else 'Music Off',
+                    pygame.Rect(rect.right-174,rect.y+22,150,40))
         self.label('Select a track to play. Scroll for more.',(rect.x+24,rect.y+70),MUTED,self.small)
         self.music_hits = []
         for index,path in enumerate(self.music_tracks[self.music_scroll:self.music_scroll+7]):
@@ -631,7 +796,7 @@ class GameWindow:
             ('Reveal the next lead', 'An accepted verdict reveals a new clue. Click a solved card or a clue in the side panel to highlight the cells it refers to.'),
             ('Understand the wording', 'Neighbors include diagonals. Connected means linked horizontally or vertically within the region. Shared neighbors touch both people. Exactly means that number, at least means that many or more, and odd means 1, 3, 5 and so on.'),
             ('Keep investigating', 'Incorrect verdict means the opposite is proved. Not enough evidence means neither verdict is proved yet. Continue with another card or use Hint.'),
-            ('Use the controls', 'Stage chooses a level. Restart resets its reveals. Hint points to a provable character. Auto Solve plays proved moves, and Stop pauses it. Music switches the ambient loop on or off.'),
+            ('Use the controls', 'Stage chooses a level. Restart resets its reveals. Hint points to a provable character. Auto Solve plays proved moves. Agent opens live reasoning and one-move solving. Music opens track selection and the audio on/off toggle.'),
         ]
         y = rect.y+82
         for title, text in sections:
