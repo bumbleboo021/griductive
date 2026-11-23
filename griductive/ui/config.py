@@ -10,6 +10,7 @@ BOARD_Y = 132
 BOARD_WIDTH = 700
 BOARD_HEIGHT = 600
 WINDOW_SIZE = (1180, 850)
+AGENT_PANEL_WIDTH = 600  # Extra logical width while the inspector is docked.
 MESSAGE_Y = 948
 CARD_GAP = 10
 CARD_RADIUS = 10

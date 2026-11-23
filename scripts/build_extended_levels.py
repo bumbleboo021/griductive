@@ -5,7 +5,7 @@ import random
 import sys
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-from scripts.build_levels import build, ROOT
+from scripts.build_levels import build, ROOT, stage_name
 from griductive.engine.puzzle import cell_ids,region_cells
 from scripts.validate_levels import validate
 
@@ -129,8 +129,7 @@ def make(size,number,seed):
         step+=1
     for card in raw['characters']:
         card['clue']=clues.get(card['cell'],dict(id='clue-'+card['cell'],type='QUOTE'))
-    names={3:{3:'Lantern Bridge',4:'Shared Alibis'},4:{3:'The Silent Courtyard',4:'Crossing Paths'},5:{3:'Threads of Evidence',4:'The Boundary Case',5:'Teyvat Conspiracy'}}
-    raw['name']=raw['title']=f'{size}x{size} - {names[size][number]}'
+    raw['name']=raw['title']=stage_name(size, number)
     raw['initially_revealed']=['A1',last]
     raw['metadata']=dict(seed=seed,author='Project team with AI assistance',
         design='Connectivity opening, direct spatial identity, comparisons, implication, shared-neighbor parity and regional budgets',
