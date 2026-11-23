@@ -133,24 +133,24 @@ and correct counters through Person 4's entailment calls.
 
 - [x] Implement `griductive/agent/adapter.py` with a no-argument `Agent` factory
   exposing `analyze(state: PublicState) -> Analysis`.
-- [x] Call Person 2's encoder and Person 3's DPLL solver.
+- [ ] Call Person 2's encoder and Person 3's DPLL solver.
 - [x] Check base KB consistency first. Return `Analysis(False, ())` when UNSAT.
 - [x] Classify every unresolved cell in row-major order. UNSAT under NOT Ci
   proves criminal. UNSAT under Ci proves innocent. Both SAT means UNKNOWN.
 - [x] Return Status enum members and exactly one result per unresolved cell.
-- [ ] Raise an explicit failure for unsupported clues or timeouts.
-- [ ] Keep all live queries within the supplied public snapshot. Hidden labels
+- [x] Raise an explicit failure for unsupported clues or timeouts.
+- [x] Keep all live queries within the supplied public snapshot. Hidden labels
   and unrevealed clue contents belong to the engine.
-- [ ] Handle Restart snapshots correctly if caching knowledge bases or results.
+- [x] Handle Restart snapshots correctly if caching knowledge bases or results.
 - [x] Pass `python -m griductive.check_analyzer --analyzer griductive.agent.adapter:Agent`.
-- [ ] Extend differential checks to new clue types and all levels 03 and above.
-- [ ] Run manual verdicts, Hint and Auto Solve through the GUI using the adapter.
-- [ ] Record step number, active clue IDs, SAT queries/results, accepted verdict,
+- [x] Extend differential checks to new clue types and all levels 03 and above.
+- [x] Run manual verdicts, Hint and Auto Solve through the GUI using the adapter.
+- [x] Record step number, active clue IDs, SAT queries/results, accepted verdict,
   and newly revealed clue. Coordinate the engine/trace boundary with Person 1.
-- [ ] Add separate offline full-clue uniqueness checking. Find one model, block
+- [x] Add separate offline full-clue uniqueness checking. Find one model, block
   its primary assignment, and check for another. Exclude auxiliary variables
   from the blocking clause.
-- [ ] Test solved, stalled, inconsistent and timeout states, plus hidden-data
+- [x] Test solved, stalled, inconsistent and timeout states, plus hidden-data
   independence. Distinguish stalled public knowledge from complete-clue ambiguity.
 - [ ] Document entailment, uniqueness and progressive solving for the report.
 
