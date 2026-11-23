@@ -170,15 +170,11 @@ class AgentInspector:
                   f'Decisions: {value(record.decisions)} | Propagations: {value(record.propagations)} | Backtracks: {value(record.backtracks)}',
                   f'Runtime (analysis): {record.elapsed_ms:.2f} ms']
         totals = record.totals
-        lines += ['', 'RUN TOTALS (through this call; reset on stage/backend change)',
+        lines += ['', 'RUN TOTALS',
                   f'Analysis calls: {totals.analysis_calls} | SAT calls: {value(totals.sat_calls)}',
                   f'Decisions: {value(totals.decisions if totals.sat_calls else None)} | Propagations: {value(totals.propagations if totals.sat_calls else None)} | Backtracks: {value(totals.backtracks if totals.sat_calls else None)}',
                   f'Deduction steps: {totals.deduction_steps} | Reveal waves: {totals.reveal_waves}',
-                  f'Runtime (analysis total): {totals.runtime_ms:.2f} ms; excludes animations/waiting.',
-                  'CNF counts describe the public input, including diagnostic encoding for Reference.',
-                  'N/A means the solver did not supply that counter.']
-        lines.append(f'Recorded SAT queries: {len(record.queries)}'
-                     if record.queries else 'SAT details: unavailable for this call (no SAT queries recorded).')
+                  f'Runtime: {totals.runtime_ms:.2f} ms']
         if record.note:
             lines.append(record.note)
         if record.consistent is not None:
