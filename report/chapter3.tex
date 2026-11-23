@@ -48,7 +48,7 @@ Trước khi chuyển sang bộ mã hóa, bộ nạp màn chơi (\texttt{loader}
 
 \section{Mã hóa manh mối}
 Mỗi manh mối thuộc $L_t$ được chuyển đổi độc lập thành một tập mệnh đề con và hợp nhất vào $\Phi_t$. Dưới đây trình bày công thức biến đổi cho toàn bộ sáu mẫu cốt lõi cùng các mẫu mở rộng được hỗ trợ, đồng thời phân tích số lượng biến phụ và số lượng mệnh đề sinh ra trong hai trường hợp: không sử dụng biến phụ và có sử dụng biến phụ.
-
+\newpage
 \subsection{Manh mối phi logic và đơn ngôi (\texttt{QUOTE}, \texttt{FACT})}
 \begin{itemize}
     \item \textbf{Manh mối lời thoại (\texttt{QUOTE}):} Là câu bình luận cá nhân của nhân vật, không chứa ràng buộc logic. Biểu diễn CNF của \texttt{QUOTE} là tập rỗng $\emptyset$ ($\top$), tốn $0$ biến phụ và $0$ mệnh đề.
@@ -109,7 +109,7 @@ Với các trường hợp biên nhỏ: nếu $m = 0$, tổng bằng $0$ (chẵn
     \end{equation}
     Với $m = 25$, chuỗi cổng XOR chỉ cần $23$ biến phụ và $94$ mệnh đề.
 \end{itemize}
-
+\newpage
 \subsection{Manh mối đếm số lượng (\texttt{AT\_MOST}, \texttt{AT\_LEAST}, \texttt{EXACTLY})}
 \label{subsec:counting_constraints}
 Xét dãy gồm $m$ nghĩa văn đầu vào $\Lambda = (\lambda_1, \lambda_2, \dots, \lambda_m)$ và ngưỡng nguyên $k \in \mathbb{Z}$. Toàn bộ ba loại manh mối đếm được quy về bài toán chặn trên $\text{AT\_MOST}(\Lambda, k)$ (tổng số nghĩa văn đúng trong $\Lambda$ không vượt quá $k$):
@@ -159,7 +159,7 @@ Xét dãy gồm $m$ nghĩa văn đầu vào $\Lambda = (\lambda_1, \lambda_2, \d
     \end{enumerate}
     Hội của cả $13$ mệnh đề trên với $6$ biến phụ ($10$ đến $15$) ép tổng số tội phạm trong $\{\text{A1}, \text{B1}, \text{C1}\}$ bằng chính xác $2$.
 \end{itemize}
-
+\newpage
 \subsection{Manh mối mở rộng (\texttt{COUNT\_COMPARE}, \texttt{CONNECTED})}
 \begin{itemize}
     \item \textbf{So sánh số lượng hai vùng (\texttt{COUNT\_COMPARE}):} Cho hai vùng $\Omega_1, \Omega_2$, toán tử so sánh $\text{op} \in \{\texttt{GT}, \texttt{LT}, \texttt{EQ}\}$ và trạng thái mục tiêu $\sigma \in \Sigma$. Các ô nằm trong phần giao $\Omega_1 \cap \Omega_2$ đóng góp giá trị bằng nhau ở cả hai vế nên được triệt tiêu trước: $\Omega_A = \Omega_1 \setminus \Omega_2$ ($m_A = |\Omega_A|$) và $\Omega_B = \Omega_2 \setminus \Omega_1$ ($m_B = |\Omega_B|$). Gọi $\Lambda_A = (\alpha_1, \dots, \alpha_{m_A})$ và $\Lambda_B = (\beta_1, \dots, \beta_{m_B})$ là các dãy nghĩa văn theo trạng thái $\sigma$ của hai phần bù. Sử dụng đồng nhất thức nhị phân $\sum_{j=1}^{m_B} \beta_j = m_B - \sum_{j=1}^{m_B} (-\beta_j)$, phép so sánh được đưa về hàm đếm của Mục~\ref{subsec:counting_constraints} trên dãy ghép $\Lambda_{A \cup \neg B} = (\alpha_1, \dots, \alpha_{m_A}, -\beta_1, \dots, -\beta_{m_B})$ gồm $m' = m_A + m_B$ nghĩa văn:
@@ -196,11 +196,11 @@ Bảng~\ref{tab:cnf_complexity} tổng hợp chi phí sinh biến phụ và mệ
 \begin{longtable}{@{}p{0.23\textwidth}p{0.22\textwidth}p{0.22\textwidth}p{0.24\textwidth}@{}}
 \caption{So sánh số lượng biến phụ và mệnh đề CNF theo từng loại manh mối}\label{tab:cnf_complexity}\\
 \toprule
-\textbf{Loại manh mối} & \textbf{Mệnh đề (không biến phụ)} & \textbf{Biến phụ sử dụng} & \textbf{Mệnh đề (có biến phụ)} \\
+\textbf{Loại manh mối} & \makecell{\textbf{Mệnh đề}\\\textbf{không biến phụ}} & \textbf{Biến phụ sử dụng} & \makecell{\textbf{Mệnh đề}\\\textbf{có biến phụ}} \\
 \midrule
 \endfirsthead
 \toprule
-\textbf{Loại manh mối} & \textbf{Mệnh đề (không biến phụ)} & \textbf{Biến phụ sử dụng} & \textbf{Mệnh đề (có biến phụ)} \\
+\textbf{Loại manh mối} & \makecell{\textbf{Mệnh đề}\\\textbf{không biến phụ}} & \textbf{Biến phụ sử dụng} & \makecell{\textbf{Mệnh đề}\\\textbf{có biến phụ}} \\
 \midrule
 \endhead
 \texttt{QUOTE} & $0$ & $0$ & $0$ \\
