@@ -4,6 +4,8 @@
 \section{Phạm vi hỗ trợ}
 OpenAI Codex được sử dụng để lập kế hoạch, chia việc, sinh và chỉnh sửa mã Python/Pygame, xử lý lỗi và soạn tài liệu.
 
+Đối với mô-đun biểu diễn tri thức và mã hóa CNF (\texttt{griductive/logic/encoder.py}), Google Gemini được sử dụng ở vai trò trợ lý trao đổi lý thuyết và sinh mã kiểm thử tự động: giải thích cơ sở biến đổi công thức logic mệnh đề, rà soát hợp đồng giao diện \texttt{encode(state: PublicState) -> CNFResult}, và tạo các bộ kiểm thử \texttt{pytest} (\texttt{test\_easy\_encoder.py}, \texttt{test\_hard\_encoder.py}, \texttt{test\_superhard\_encoder.py}, \texttt{test\_integration.py}).
+
 \section{Một số yêu cầu tiêu biểu}
 Các yêu cầu dưới đây được tóm lược từ lịch sử làm việc (không phải trích dẫn nguyên văn):
 \begin{itemize}
@@ -11,7 +13,12 @@ Các yêu cầu dưới đây được tóm lược từ lịch sử làm việc
     \item Xây dựng engine và giao diện trò chơi, tách trạng thái công khai để đồng đội có thể tích hợp bộ phân tích.
     \item Sử dụng ảnh nhân vật đã cung cấp; bổ sung hoạt ảnh mở thẻ, bảng manh mối, chọn màn, điều khiển bàn phím và nhạc nền.
     \item Viết chương trình sinh màn chơi và kiểm tra màn chơi có hợp lệ với luật chơi và có lời giải không.
+    \item Giải thích bài toán Griductive, cách biểu diễn CNF.
+    \item Sinh các bộ kiểm thử vét cạn bảng chân trị và gán biến phụ cho các loại manh mối.
+    \item Sinh bộ kiểm thử tích hợp trên toàn bộ $13$ màn chơi thực tế để đối chiếu tính tái lập, tính duy nhất nghiệm và độ tương đương suy diễn với \texttt{ReferenceAnalyzer}.
 \end{itemize}
 
 \section{Trách nhiệm và nguồn tài nguyên}
 Luật chơi tham khảo từ Griductive~\cite{griductive} và đề bài. Ảnh, phông chữ và âm nhạc được cung cấp từ bên ngoài, không do AI tạo; nguồn được ghi trong \path{assets/ATTRIBUTION.md}~\cite{assetRecord}.
+
+Đối với mô-đun mã hóa CNF, toàn bộ mã nguồn sản phẩm trong \texttt{griductive/logic/encoder.py} do Người~2 tự thiết kế và lập trình hoàn toàn, không đưa mã nguồn sản phẩm cho AI hay dùng AI sinh mã cài đặt. Các tệp kiểm thử do AI hỗ trợ tạo ra đều được rà soát và chạy nghiệm thu cục bộ, đạt kết quả $189/189$ ca kiểm thử thành công.

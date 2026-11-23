@@ -1,0 +1,234 @@
+\chapter{Biểu diễn tri thức và mã hóa CNF}
+\label{chap:cnf}
+
+\section{Biểu diễn bài toán}
+Để tác tử suy diễn logic có thể kiểm tra hệ quả logic ($\models$) thông qua bộ giải SAT bằng thuật toán DPLL đã giới thiệu ở Chương~\ref{chap:game}, toàn bộ trạng thái bàn cờ và các manh mối của trò chơi Griductive được chuyển đổi sang công thức logic mệnh đề ở dạng chuẩn hội (CNF)~\cite{russell2020aima}. Trước khi xây dựng các quy tắc biến đổi, ta thiết lập hệ thống định nghĩa và ký hiệu đơn nghĩa xuyên suốt chương này như sau:
+
+\begin{itemize}
+    \item \textbf{Tọa độ ô và thứ tự đọc sách:} Với bàn cờ vuông kích thước cạnh $N \in \{3, 4, 5\}$, tổng số ô trên bàn cờ là $N^2$. Các ô được đánh chỉ số nguyên liên tiếp $i \in \{1, 2, \dots, N^2\}$ theo thứ tự đọc sách từ trên xuống dưới, từ trái sang phải (row-major order). Ví dụ trên bàn cờ $N = 3$, ô \texttt{A1} ứng với chỉ số $i = 1$, ô \texttt{B1} ứng với $i = 2$, và ô \texttt{C3} ứng với $i = 9$.
+
+    \item \textbf{Biến mệnh đề chính:} Mỗi ô thứ $i \in \{1, 2, \dots, N^2\}$ được gán một biến Boolean $C_i$, biểu diễn mệnh đề nhân vật tại ô $i$ là tội phạm. Giá trị chân trị của $C_i$ được quy ước tất định:
+    \begin{equation}
+        C_i = \text{True} \iff \text{nhân vật tại ô } i \text{ mang trạng thái } \texttt{CRIMINAL},
+    \end{equation}
+    và $C_i = \text{False}$ khi nhân vật tại ô $i$ mang trạng thái $\texttt{INNOCENT}$. Trong biểu diễn số nguyên của công thức CNF, biến chính $C_i$ mang định danh số nguyên dương $+i \in \{1, 2, \dots, N^2\}$. Việc neo cố định định danh biến theo chỉ số ô giúp biểu diễn logic độc lập hoàn toàn với việc xáo trộn tên hoặc chân dung nhân vật trên GUI.
+
+    \item \textbf{Biến mệnh đề phụ:} Đối với các ràng buộc đếm số lượng, tính chẵn lẻ hoặc tính liên thông trên nhiều ô, việc biểu diễn trực tiếp chỉ bằng các biến chính $C_i$ có thể làm số mệnh đề tăng theo hàm mũ. Để duy trì kích thước công thức ở mức đa thức, bộ mã hóa cấp phát thêm $M \in \mathbb{Z}_{\ge 0}$ biến trung gian, ký hiệu là $A_1, A_2, \dots, A_M$. Mỗi biến phụ $A_j$ ($1 \le j \le M$) được gán định danh số nguyên liên tiếp $N^2 + j \in \{N^2 + 1, \dots, N^2 + M\}$, tách biệt hoàn toàn với tập chỉ số biến chính.
+
+    \item \textbf{Nghĩa văn (literal) và công thức CNF:} Với mỗi chỉ số biến $v \in \{1, 2, \dots, N^2 + M\}$, một nghĩa văn là số nguyên $+v$ (biểu diễn khẳng định của biến thứ $v$) hoặc $-v$ (biểu diễn phủ định của biến thứ $v$). Gọi $\Sigma = \{\texttt{CRIMINAL}, \texttt{INNOCENT}\}$ là tập trạng thái nhân vật; ta định nghĩa hàm ánh xạ $\ell: \{1, \dots, N^2\} \times \Sigma \to \mathbb{Z} \setminus \{0\}$ chuyển cặp chỉ số ô $i$ và trạng thái $\sigma \in \Sigma$ thành nghĩa văn tương ứng:
+    \begin{equation}
+        \ell(i, \sigma) = \begin{cases}
+            +i & \text{nếu } \sigma = \texttt{CRIMINAL}, \\
+            -i & \text{nếu } \sigma = \texttt{INNOCENT}.
+        \end{cases}
+    \end{equation}
+    Một mệnh đề (clause) là tuyển ($\lor$) của một bộ hữu hạn các nghĩa văn. Một công thức CNF $\Phi_t$ là hội ($\land$) của nhiều mệnh đề. Mệnh đề rỗng $()$ biểu diễn hằng sai ($\bot$, tức trạng thái UNSAT), trong khi tập công thức rỗng $\emptyset$ biểu diễn hằng đúng ($\top$).
+\end{itemize}
+
+\section{Xây dựng cơ sở tri thức}
+Tại bước suy diễn thứ $t$, tác tử chỉ được phép tiếp cận bản chụp trạng thái công khai \texttt{PublicState} do \texttt{GameEngine} cung cấp. Cơ sở tri thức công khai $KB_t$ được mã hóa thành công thức CNF $\Phi_t$ từ hai thành phần dữ liệu công khai duy nhất:
+
+\begin{enumerate}
+    \item \textbf{Tập trạng thái đã biết ($V_t$):} Gồm các cặp $(i, \sigma_i)$ của những ô thuộc tập ô đã mở $R_t$ (bao gồm các thẻ mở sẵn ban đầu và các thẻ đã được chứng minh hợp lệ ở các bước trước). Mỗi cặp $(i, \sigma_i) \in V_t$ đóng góp trực tiếp một mệnh đề đơn (unit clause) có dạng $(\ell(i, \sigma_i))$ vào công thức $\Phi_t$.
+
+    \item \textbf{Tập manh mối công khai ($L_t$):} Chỉ bao gồm các manh mối gắn với các ô thuộc $R_t$. Toàn bộ nhãn đáp án ẩn và nội dung manh mối của các ô chưa mở đều không xuất hiện trong $KB_t$.
+\end{enumerate}
+
+Trong Griductive, các manh mối tham chiếu đến nhiều cấu trúc vùng khác nhau trên bàn cờ $N \times N$:
+\begin{itemize}
+    \item \textbf{Các vùng cơ bản:} Một hàng (\texttt{row}), một cột (\texttt{column}), một tập ô chỉ định (\texttt{cells}), hoặc tập tối đa $8$ ô láng giềng xung quanh một ô tâm (\texttt{neighbors}, bao gồm cả láng giềng ngang, dọc và đường chéo, không tính ô tâm).
+    \item \textbf{Các vùng mở rộng:} Hợp nhiều hàng hoặc nhiều cột (\texttt{rows}, \texttt{columns}), giao của nhiều vùng (\texttt{intersection}), láng giềng chung của hai ô phân biệt (\texttt{common\_neighbors}), vùng theo hướng vuông góc từ một ô mốc (\texttt{direction}), đường biên bàn cờ (\texttt{boundary}), bốn ô góc (\texttt{corners}), toàn bộ bàn cờ (\texttt{grid}), và nhóm nhân vật cố định theo xuất xứ (\texttt{group}).
+\end{itemize}
+
+Trước khi chuyển sang bộ mã hóa, bộ nạp màn chơi (\texttt{loader}) thực hiện hai bước chuẩn hóa tất định:
+\begin{itemize}
+    \item \textbf{Khai triển vùng thành bộ chỉ số ô:} Mọi định nghĩa vùng đều được mở rộng sẵn thành bộ có thứ tự các chỉ số ô duy nhất $\Omega = (i_1, i_2, \dots, i_m)$ theo thứ tự đọc sách (với $m = |\Omega|$ là số ô của vùng). Nhờ vậy, bộ mã hóa xử lý đồng nhất mọi loại vùng thông qua bộ chỉ số $\Omega$.
+    \item \textbf{Chuẩn hóa mục tiêu đếm về tội phạm:} Đối với nhóm manh mối đếm số lượng (\texttt{EXACTLY}, \texttt{AT\_LEAST}, \texttt{AT\_MOST}) và tính chẵn lẻ (\texttt{ODD}, \texttt{EVEN}), nếu câu manh mối gốc phát biểu trên số người vô tội (ví dụ: có đúng $1$ người vô tội trong vùng $3$ ô), bộ nạp đã quy đổi sẵn sang ràng buộc tương đương trên số tội phạm (\texttt{EXACTLY} $2$ tội phạm). Bộ mã hóa sử dụng trực tiếp loại ràng buộc và giá trị đếm đã chuẩn hóa trên các biến dương $+i$ mà không thực hiện phép đảo ngược lần thứ hai. Ngược lại, hai mẫu mở rộng là \texttt{COUNT\_COMPARE} và \texttt{CONNECTED} giữ nguyên trạng thái mục tiêu thực tế $\sigma \in \Sigma$ để mã hóa trực tiếp.
+\end{itemize}
+
+\section{Mã hóa manh mối}
+Mỗi manh mối thuộc $L_t$ được chuyển đổi độc lập thành một tập mệnh đề con và hợp nhất vào $\Phi_t$. Dưới đây trình bày công thức biến đổi cho toàn bộ sáu mẫu cốt lõi cùng các mẫu mở rộng được hỗ trợ, đồng thời phân tích số lượng biến phụ và số lượng mệnh đề sinh ra trong hai trường hợp: không sử dụng biến phụ và có sử dụng biến phụ.
+\newpage
+\subsection{Manh mối phi logic và đơn ngôi (\texttt{QUOTE}, \texttt{FACT})}
+\begin{itemize}
+    \item \textbf{Manh mối lời thoại (\texttt{QUOTE}):} Là câu bình luận cá nhân của nhân vật, không chứa ràng buộc logic. Biểu diễn CNF của \texttt{QUOTE} là tập rỗng $\emptyset$ ($\top$), tốn $0$ biến phụ và $0$ mệnh đề.
+
+    \item \textbf{Manh mối khẳng định (\texttt{FACT}):} Khẳng định ô thứ $i_1$ mang trạng thái $\sigma \in \Sigma$. Công thức CNF gồm đúng $1$ mệnh đề đơn và không dùng biến phụ:
+    \begin{equation}
+        \Phi_{\texttt{FACT}}(i_1, \sigma) = \big(\ell(i_1, \sigma)\big).
+    \end{equation}
+\end{itemize}
+
+\subsection{Manh mối nhị phân (\texttt{IMPLIES}, \texttt{SAME}, \texttt{DIFFERENT})}
+Xét hai ô có thứ tự $(i_1, i_2)$ với các biến chính tương ứng $C_{i_1}, C_{i_2}$.
+
+\begin{itemize}
+    \item \textbf{Manh mối kéo theo (\texttt{IMPLIES}):} Khẳng định nếu ô $i_1$ mang trạng thái tiền đề $\sigma_1$ thì ô $i_2$ phải mang trạng thái hệ quả $\sigma_2$. Đặt $\lambda_1 = \ell(i_1, \sigma_1)$ và $\lambda_2 = \ell(i_2, \sigma_2)$. Áp dụng phép tương đương logic $(\lambda_1 \Rightarrow \lambda_2) \equiv (\neg \lambda_1 \lor \lambda_2)$, công thức CNF gồm $1$ mệnh đề và $0$ biến phụ:
+    \begin{equation}
+        \Phi_{\texttt{IMPLIES}}(i_1, \sigma_1, i_2, \sigma_2) = (-\lambda_1 \lor \lambda_2).
+    \end{equation}
+
+    \item \textbf{Manh mối tương đương (\texttt{SAME}):} Khẳng định hai ô $i_1$ và $i_2$ có cùng trạng thái ($C_{i_1} \Leftrightarrow C_{i_2}$). Khai triển thành hội của hai phép kéo theo $(C_{i_1} \Rightarrow C_{i_2}) \land (C_{i_2} \Rightarrow C_{i_1})$, ta thu được $2$ mệnh đề và $0$ biến phụ:
+    \begin{equation}
+        \Phi_{\texttt{SAME}}(i_1, i_2) = (-i_1 \lor +i_2) \land (+i_1 \lor -i_2).
+    \end{equation}
+
+    \item \textbf{Manh mối đối lập (\texttt{DIFFERENT}):} Khẳng định hai ô $i_1$ và $i_2$ có trạng thái trái ngược nhau ($C_{i_1} \oplus C_{i_2}$).
+    
+    \textit{Dẫn xuất ví dụ minh họa:} Xét manh mối \texttt{DIFFERENT} trên hai ô \texttt{A1} ($i_1 = 1$) và \texttt{B1} ($i_2 = 2$). Ràng buộc $C_1 \oplus C_2$ chỉ sai khi hai ô cùng vô tội ($C_1 = \text{False}, C_2 = \text{False}$) hoặc cùng là tội phạm ($C_1 = \text{True}, C_2 = \text{True}$). Loại trừ hai tổ hợp vi phạm này cho ta dạng chuẩn hội:
+    \begin{equation}
+        C_1 \oplus C_2 \equiv (C_1 \lor C_2) \land (\neg C_1 \lor \neg C_2).
+    \end{equation}
+    Chuyển sang biểu diễn số nguyên, công thức CNF thu được gồm $2$ mệnh đề và $0$ biến phụ:
+    \begin{equation}
+        \Phi_{\texttt{DIFFERENT}}(1, 2) = (+1 \lor +2) \land (-1 \lor -2).
+    \end{equation}
+\end{itemize}
+
+\subsection{Manh mối tính chẵn lẻ (\texttt{ODD}, \texttt{EVEN})}
+Cho vùng $\Omega = (i_1, i_2, \dots, i_m)$ gồm $m = |\Omega|$ ô. Manh mối tính chẵn lẻ yêu cầu tổng số tội phạm trong $\Omega$ là số lẻ (\texttt{ODD}) hoặc số chẵn (\texttt{EVEN}):
+\begin{equation}
+    C_{i_1} \oplus C_{i_2} \oplus \dots \oplus C_{i_m} = p, \quad \text{với } p = \begin{cases}
+        1 & \text{nếu là } \texttt{ODD}, \\
+        0 & \text{nếu là } \texttt{EVEN}.
+    \end{cases}
+\end{equation}
+
+Với các trường hợp biên nhỏ: nếu $m = 0$, tổng bằng $0$ (chẵn) nên \texttt{EVEN} trả về $\emptyset$ ($\top$) và \texttt{ODD} trả về mệnh đề rỗng $()$ ($\bot$); nếu $m = 1$, \texttt{ODD} trả về $(+i_1)$ và \texttt{EVEN} trả về $(-i_1)$ ($1$ mệnh đề, $0$ biến phụ). Khi $m \ge 2$, độ phức tạp biểu diễn khác biệt đáng kể giữa hai cách tiếp cận:
+
+\begin{itemize}
+    \item \textbf{Khi không sử dụng biến phụ:} Trong $2^m$ tổ hợp chân trị của $m$ biến chính, có đúng một nửa số tổ hợp có tính chẵn lẻ trái với $p$. Do đó, khai triển CNF trực tiếp bắt buộc phải liệt kê đủ $2^{m-1}$ mệnh đề để loại trừ từng tổ hợp vi phạm. Trên bàn cờ $N = 5$ ($m = 25$), phương pháp này sinh ra $2^{24} = 16.777.216$ mệnh đề.
+
+    \item \textbf{Khi sử dụng biến phụ (chuỗi cổng XOR):} Ta gập tuần tự từng cặp biến thông qua $m - 2$ biến phụ mới $y_1, y_2, \dots, y_{m-2}$. Tại mỗi mắt xích $y \leftrightarrow (u \oplus v)$, quan hệ tương đương ba biến được biểu diễn trọn vẹn bằng $4$ mệnh đề loại trừ bốn tổ hợp sai:
+    \begin{equation}
+        \Phi_{\text{XOR}}(u, v, y) = (-u \lor -v \lor -y) \land (+u \lor +v \lor -y) \land (+u \lor -v \lor +y) \land (-u \lor +v \lor +y).
+    \end{equation}
+    Gọi $t$ là biến đại diện cho tổng dồn của $m - 1$ biến đầu tiên ($t = i_1$ nếu $m = 2$, ngược lại $t = y_{m-2}$). Mắt xích cuối cùng kết nối $t$ với $i_m$ sử dụng $\Phi_{\texttt{DIFFERENT}}(t, i_m)$ cho \texttt{ODD} hoặc $\Phi_{\texttt{SAME}}(t, i_m)$ cho \texttt{EVEN} ($2$ mệnh đề). Tổng chi phí giảm từ hàm mũ xuống tuyến tính:
+    \begin{equation}
+        M_{\text{parity}}(m) = m - 2 \text{ biến phụ}, \qquad K_{\text{parity}}(m) = 4(m - 2) + 2 = 4m - 6 \text{ mệnh đề}.
+    \end{equation}
+    Với $m = 25$, chuỗi cổng XOR chỉ cần $23$ biến phụ và $94$ mệnh đề.
+\end{itemize}
+\newpage
+\subsection{Manh mối đếm số lượng (\texttt{AT\_MOST}, \texttt{AT\_LEAST}, \texttt{EXACTLY})}
+\label{subsec:counting_constraints}
+Xét dãy gồm $m$ nghĩa văn đầu vào $\Lambda = (\lambda_1, \lambda_2, \dots, \lambda_m)$ và ngưỡng nguyên $k \in \mathbb{Z}$. Toàn bộ ba loại manh mối đếm được quy về bài toán chặn trên $\text{AT\_MOST}(\Lambda, k)$ (tổng số nghĩa văn đúng trong $\Lambda$ không vượt quá $k$):
+\begin{enumerate}
+    \item \texttt{AT\_MOST} $k$ tội phạm: Áp dụng trực tiếp $\text{AT\_MOST}(\Lambda, k)$ với $\Lambda = (+i_1, \dots, +i_m)$.
+    \item \texttt{AT\_LEAST} $k$ tội phạm: Có ít nhất $k$ tội phạm trong $m$ ô tương đương với có nhiều nhất $m - k$ người vô tội, do đó quy về $\text{AT\_MOST}(\overline{\Lambda}, m - k)$ với dãy đối ngẫu $\overline{\Lambda} = (-i_1, \dots, -i_m)$.
+    \item \texttt{EXACTLY} $k$ tội phạm: Là phép hội $\text{AT\_MOST}(\Lambda, k) \land \text{AT\_MOST}(\overline{\Lambda}, m - k)$.
+\end{enumerate}
+
+Đối với $\text{AT\_MOST}(\Lambda, k)$, các trường hợp biên được xử lý ngay mà không cần biến phụ: nếu $k < 0$, trả về $()$ ($\bot$); nếu $k \ge m$, trả về $\emptyset$ ($\top$); nếu $k = 0$, trả về $m$ mệnh đề đơn $(-\lambda_1) \land \dots \land (-\lambda_m)$. Khi $1 \le k < m$, ta đối chiếu hai phương pháp mã hóa:
+
+\begin{itemize}
+    \item \textbf{Khi không sử dụng biến phụ (mã hóa tổ hợp trực tiếp):} Để ngăn không cho nhiều hơn $k$ nghĩa văn cùng đúng, mọi tập con gồm $k + 1$ phần tử của $\Lambda$ đều không được đồng thời đúng. Số mệnh đề sinh ra bằng tổ hợp chập $k + 1$ của $m$:
+    \begin{equation}
+        K_{\text{no-aux}}(m, k) = \binom{m}{k + 1} = \frac{m!}{(k + 1)!(m - k - 1)!} \text{ mệnh đề}.
+    \end{equation}
+    Khi $m = 25$ và $k = 12$, công thức này tạo ra $\binom{25}{13} = 5.200.300$ mệnh đề.
+
+    \item \textbf{Khi sử dụng biến phụ (bộ đếm tuần tự --- Sequential Counter~\cite{sinz2005towards}):} Ta cấp phát lưới biến phụ $s_{r, j}$ với $r \in \{1, \dots, m - 1\}$ và $j \in \{1, \dots, k\}$. Biến $s_{r, j} = \text{True}$ mang ngữ nghĩa: trong $r$ phần tử đầu tiên $(\lambda_1, \dots, \lambda_r)$ có ít nhất $j$ phần tử đúng. Bộ đếm được vận hành qua bốn nhóm mệnh đề:
+    \begin{enumerate}
+        \item \textit{Khởi tạo tại $r = 1$:} $(-\lambda_1 \lor +s_{1, 1})$ và $(-s_{1, j})$ với $2 \le j \le k$ (gồm $k$ mệnh đề).
+        \item \textit{Bảo toàn mức đếm ($2 \le r \le m - 1,\; 1 \le j \le k$):} $(-s_{r-1, j} \lor +s_{r, j})$ (gồm $(m - 2)k$ mệnh đề).
+        \item \textit{Cập nhật mức đếm mới ($2 \le r \le m - 1$):} $(-\lambda_r \lor +s_{r, 1})$ và $(-s_{r-1, j-1} \lor -\lambda_r \lor +s_{r, j})$ với $2 \le j \le k$ (gồm $(m - 2)k$ mệnh đề).
+        \item \textit{Chặn trần không vượt quá $k$ ($2 \le r \le m$):} $(-s_{r-1, k} \lor -\lambda_r)$ (gồm $m - 1$ mệnh đề).
+    \end{enumerate}
+    Tổng số biến phụ và mệnh đề của một bộ đếm $\text{AT\_MOST}(\Lambda, k)$ tăng bậc hai theo $m$ và $k$:
+    \begin{equation}
+        M_{\texttt{AT\_MOST}}(m, k) = (m - 1)k \text{ biến phụ},
+    \end{equation}
+    \begin{equation}
+        K_{\texttt{AT\_MOST}}(m, k) = k + 2(m - 2)k + (m - 1) = 2mk + m - 3k - 1 \text{ mệnh đề}.
+    \end{equation}
+    Với $m = 25$ và $k = 12$, bộ đếm tuần tự chỉ tốn $288$ biến phụ và $588$ mệnh đề.
+
+    \item \textbf{Dẫn xuất ví dụ minh họa cho \texttt{EXACTLY}:} Xét manh mối \texttt{EXACTLY} $2$ tội phạm trên hàng đầu tiên $\Omega = (\text{A1}, \text{B1}, \text{C1})$ của bàn cờ $N = 3$ ($N^2 = 9$, các biến phụ bắt đầu từ chỉ số $10$), ứng với $\Lambda = (+1, +2, +3)$, $m = 3$ và $k = 2$:
+    \begin{enumerate}
+        \item \textit{Thành phần $\text{AT\_MOST}((+1, +2, +3), 2)$:} Cấp phát $(3 - 1) \times 2 = 4$ biến phụ ứng với $s_{1,1} \mapsto 10$, $s_{1,2} \mapsto 11$, $s_{2,1} \mapsto 12$, $s_{2,2} \mapsto 13$, sinh ra $2(3)(2) + 3 - 3(2) - 1 = 8$ mệnh đề:
+        \begin{align}
+            \Phi_{\texttt{AT\_MOST}} &= (-1 \lor +10) \land (-11) \land (-10 \lor +12) \land (-11 \lor +13) \nonumber \\
+            &\quad \land (-2 \lor +12) \land (-10 \lor -2 \lor +13) \land (-11 \lor -2) \land (-13 \lor -3).
+        \end{align}
+        \item \textit{Thành phần $\text{AT\_LEAST}((+1, +2, +3), 2) \equiv \text{AT\_MOST}((-1, -2, -3), 1)$:} Cấp phát thêm $(3 - 1) \times 1 = 2$ biến phụ mới ứng với $s'_{1,1} \mapsto 14$, $s'_{2,1} \mapsto 15$, sinh ra $2(3)(1) + 3 - 3(1) - 1 = 5$ mệnh đề:
+        \begin{align}
+            \Phi_{\texttt{AT\_LEAST}} &= (+1 \lor +14) \land (-14 \lor +15) \land (+2 \lor +15) \nonumber \\
+            &\quad \land (-14 \lor +2) \land (-15 \lor +3).
+        \end{align}
+    \end{enumerate}
+    Hội của cả $13$ mệnh đề trên với $6$ biến phụ ($10$ đến $15$) ép tổng số tội phạm trong $\{\text{A1}, \text{B1}, \text{C1}\}$ bằng chính xác $2$.
+\end{itemize}
+\newpage
+\subsection{Manh mối mở rộng (\texttt{COUNT\_COMPARE}, \texttt{CONNECTED})}
+\begin{itemize}
+    \item \textbf{So sánh số lượng hai vùng (\texttt{COUNT\_COMPARE}):} Cho hai vùng $\Omega_1, \Omega_2$, toán tử so sánh $\text{op} \in \{\texttt{GT}, \texttt{LT}, \texttt{EQ}\}$ và trạng thái mục tiêu $\sigma \in \Sigma$. Các ô nằm trong phần giao $\Omega_1 \cap \Omega_2$ đóng góp giá trị bằng nhau ở cả hai vế nên được triệt tiêu trước: $\Omega_A = \Omega_1 \setminus \Omega_2$ ($m_A = |\Omega_A|$) và $\Omega_B = \Omega_2 \setminus \Omega_1$ ($m_B = |\Omega_B|$). Gọi $\Lambda_A = (\alpha_1, \dots, \alpha_{m_A})$ và $\Lambda_B = (\beta_1, \dots, \beta_{m_B})$ là các dãy nghĩa văn theo trạng thái $\sigma$ của hai phần bù. Sử dụng đồng nhất thức nhị phân $\sum_{j=1}^{m_B} \beta_j = m_B - \sum_{j=1}^{m_B} (-\beta_j)$, phép so sánh được đưa về hàm đếm của Mục~\ref{subsec:counting_constraints} trên dãy ghép $\Lambda_{A \cup \neg B} = (\alpha_1, \dots, \alpha_{m_A}, -\beta_1, \dots, -\beta_{m_B})$ gồm $m' = m_A + m_B$ nghĩa văn:
+    \begin{itemize}
+        \item Nếu $\text{op} = \texttt{EQ}$ ($\sum \alpha_r = \sum \beta_j$): Mã hóa $\text{EXACTLY}(\Lambda_{A \cup \neg B}, m_B)$.
+        \item Nếu $\text{op} = \texttt{GT}$ ($\sum \alpha_r > \sum \beta_j$): Mã hóa $\text{AT\_LEAST}(\Lambda_{A \cup \neg B}, m_B + 1)$.
+        \item Nếu $\text{op} = \texttt{LT}$ ($\sum \alpha_r < \sum \beta_j$): Đảo vai trò hai vùng thành $\text{AT\_LEAST}(\Lambda_{B \cup \neg A}, m_A + 1)$.
+    \end{itemize}
+    Chi phí biến phụ và mệnh đề kế thừa trực tiếp từ bộ đếm tuần tự trên $m_A + m_B$ phần tử.
+
+    \item \textbf{Tính liên thông bốn hướng (\texttt{CONNECTED}):} Cho vùng $\Omega = (i_0, i_1, \dots, i_{m-1})$ gồm $m = |\Omega|$ ô và trạng thái mục tiêu $\sigma \in \Sigma$. Ràng buộc yêu cầu tập các ô mang trạng thái $\sigma$ trong $\Omega$ tạo thành một thành phần liên thông duy nhất theo $4$ hướng vuông góc (trên, dưới, trái, phải) thông qua các ô thuộc $\Omega$; trường hợp có $0$ hoặc $1$ ô thỏa mãn mặc định đúng ($\emptyset$).
+    
+    Khi $m \ge 2$, nếu không dùng biến phụ, việc biểu diễn tính liên thông đồ thị bằng CNF đòi hỏi liệt kê mọi lát cắt chia tách tập đỉnh hoạt động, khiến số mệnh đề tăng theo hàm mũ $\Omega(2^m)$. Thay vào đó, ta dùng phương pháp \textit{bầu gốc duy nhất và lan truyền khoảng cách theo chiều rộng} (BFS). Gọi $\tau_r = \ell(i_r, \sigma)$ ($0 \le r \le m - 1$) là nghĩa văn kích hoạt của ô thứ $r$ trong $\Omega$, và $\mathcal{N}_\Omega(r)$ là tập chỉ số các ô trong $\Omega$ kề $4$ hướng với ô $r$. Ta cấp phát hai nhóm biến phụ:
+    \begin{enumerate}
+        \item \textit{Biến chọn gốc $g_r$ ($m$ biến phụ, $0 \le r \le m - 1$):} Quy định $g_r = \text{True}$ khi và chỉ khi ô $r$ là ô đầu tiên trong $\Omega$ mang trạng thái $\sigma$, tức $g_r \Leftrightarrow \big(\tau_r \land \bigwedge_{q < r} \neg \tau_q\big)$. Ràng buộc này sinh ra $m$ mệnh đề $(-g_r \lor +\tau_r)$, $\frac{m(m-1)}{2}$ mệnh đề $(-g_r \lor -\tau_q)$ với $q < r$, và $m$ mệnh đề $(+g_r \lor -\tau_r \lor \bigvee_{q < r} +\tau_q)$.
+        \item \textit{Biến đạt tới theo khoảng cách $p_{r, d}$ ($m^2$ biến phụ, $0 \le r, d \le m - 1$):} $p_{r, d} = \text{True}$ nghĩa là ô $r$ mang trạng thái $\sigma$ và có đường đi $4$ hướng nội vùng từ ô gốc tới $r$ trong tối đa $d$ bước:
+        \begin{itemize}
+            \item Tại bước $d = 0$: $(-p_{r, 0} \lor +g_r) \land (-g_r \lor +p_{r, 0})$ ($2m$ mệnh đề).
+            \item Tại mỗi bước $d \in \{1, \dots, m - 1\}$: $(-p_{r, d} \lor +\tau_r)$ và $\big(-p_{r, d} \lor +p_{r, d-1} \lor \bigvee_{u \in \mathcal{N}_\Omega(r)} +p_{u, d-1}\big)$ ($2m(m - 1)$ mệnh đề).
+            \item Điều kiện bao phủ ở bước cuối $d = m - 1$: $(-\tau_r \lor +p_{r, m-1})$ ($m$ mệnh đề).
+        \end{itemize}
+    \end{enumerate}
+    Nhờ đó, chi phí mã hóa tính liên thông đạt mức đa thức bậc hai xác định:
+    \begin{equation}
+        M_{\texttt{CONNECTED}}(m) = m^2 + m \text{ biến phụ}, \qquad K_{\texttt{CONNECTED}}(m) = \frac{5m(m + 1)}{2} \text{ mệnh đề}.
+    \end{equation}
+    Trên toàn bàn cờ $N = 5$ ($m = 25$), công thức chỉ sử dụng $650$ biến phụ và $1.625$ mệnh đề.
+\end{itemize}
+
+Bảng~\ref{tab:cnf_complexity} tổng hợp chi phí sinh biến phụ và mệnh đề của toàn bộ các mẫu manh mối được hỗ trợ.
+
+\begingroup
+\small\linespread{1.15}\selectfont
+\begin{longtable}{@{}p{0.23\textwidth}p{0.22\textwidth}p{0.22\textwidth}p{0.24\textwidth}@{}}
+\caption{So sánh số lượng biến phụ và mệnh đề CNF theo từng loại manh mối}\label{tab:cnf_complexity}\\
+\toprule
+\textbf{Loại manh mối} & \makecell{\textbf{Mệnh đề}\\\textbf{không biến phụ}} & \textbf{Biến phụ sử dụng} & \makecell{\textbf{Mệnh đề}\\\textbf{có biến phụ}} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Loại manh mối} & \makecell{\textbf{Mệnh đề}\\\textbf{không biến phụ}} & \textbf{Biến phụ sử dụng} & \makecell{\textbf{Mệnh đề}\\\textbf{có biến phụ}} \\
+\midrule
+\endhead
+\texttt{QUOTE} & $0$ & $0$ & $0$ \\
+\addlinespace
+\texttt{FACT}, \texttt{IMPLIES} & $1$ & $0$ & $1$ \\
+\addlinespace
+\texttt{SAME}, \texttt{DIFFERENT} & $2$ & $0$ & $2$ \\
+\addlinespace
+\texttt{ODD}, \texttt{EVEN} ($m \ge 2$) & $2^{m-1}$ & $m - 2$ & $4m - 6$ \\
+\addlinespace
+\texttt{AT\_MOST} ($1 \le k < m$) & $\binom{m}{k+1}$ & $(m - 1)k$ & $2mk + m - 3k - 1$ \\
+\addlinespace
+\texttt{AT\_LEAST} ($1 \le k < m$) & $\binom{m}{m-k+1}$ & $(m - 1)(m - k)$ & $2m(m - k) + m - 3(m - k) - 1$ \\
+\addlinespace
+\texttt{EXACTLY} ($1 \le k < m$) & $\binom{m}{k+1} + \binom{m}{m-k+1}$ & $m(m - 1)$ & $2m^2 - m - 2$ \\
+\addlinespace
+\texttt{CONNECTED} ($m \ge 2$) & $\Omega(2^m)$ & $m^2 + m$ & $\dfrac{5m(m + 1)}{2}$ \\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\section{Tổ chức encoder}
+Mô-đun mã hóa được cài đặt tại \texttt{griductive/logic/encoder.py} dưới dạng hàm thuần túy không lưu trạng thái nội bộ (\texttt{stateless}), đảm bảo kết quả mã hóa hoàn toàn tái lập khi người chơi dùng tính năng \texttt{Restart} hoặc chuyển đổi giữa các màn chơi.
+
+\begin{itemize}
+    \item \textbf{Giao diện hàm và dữ liệu đầu vào:} Hàm \texttt{encode(state: PublicState) -> CNFResult} nhận bản chụp trạng thái công khai \texttt{PublicState} gồm kích thước cạnh bàn cờ \texttt{size} ($N$), danh sách nhân vật \texttt{characters} theo thứ tự đọc sách, tập trạng thái đã biết \texttt{verdicts} ($V_t$) và tập manh mối đã mở \texttt{clues} ($L_t$).
+
+    \item \textbf{Quy trình điều phối và cấp phát biến:} Khi được gọi, hàm khởi tạo hai bảng ánh xạ hai chiều \texttt{cell\_to\_var} và \texttt{var\_to\_cell} cho $N^2$ biến chính $C_1, \dots, C_{N^2}$, đồng thời đặt con trỏ cấp phát biến phụ tại \texttt{next\_aux} $= N^2 + 1$. Tiếp theo, hàm thêm các mệnh đề đơn từ $V_t$ rồi duyệt tuần tự từng manh mối trong $L_t$ để gọi bộ sinh mệnh đề tương ứng theo trường \texttt{clue.kind}. Mỗi khi sinh một biến phụ $A_j$, con trỏ \texttt{next\_aux} tăng đơn điệu lên $1$ nhằm loại bỏ hoàn toàn nguy cơ xung đột định danh biến giữa các manh mối. Đối với các đầu vào vi phạm hợp đồng dữ liệu (thiếu tham số đếm, thiếu trạng thái kéo theo hoặc gặp mẫu manh mối không hợp lệ), hàm chủ động phát sinh ngoại lệ \texttt{ValueError}.
+
+    \item \textbf{Đóng gói đầu ra (\texttt{CNFResult}):} Kết quả trả về là cấu trúc dữ liệu bất biến chứa danh sách các mệnh đề \texttt{clauses}, hai từ điển ánh xạ \texttt{cell\_to\_var} và \texttt{var\_to\_cell}, tập chỉ số biến chính \texttt{primary\_vars}, cùng các chỉ số thống kê \texttt{num\_primary\_vars} ($N^2$), \texttt{num\_aux\_vars} ($M$), \texttt{total\_vars} ($N^2 + M$) và \texttt{num\_clauses} ($|\Phi_t|$) phục vụ trực tiếp cho bộ giải DPLL, tác tử suy diễn và bộ đo thực nghiệm ở các chương sau.
+\end{itemize}
