@@ -1,0 +1,273 @@
+\chapter{Tác tử suy diễn logic}
+\label{chap:agent}
+
+\section{Kiểm tra hệ quả logic}
+\label{sec:entailment}
+
+\subsection{Biểu diễn trạng thái và bài toán hệ quả logic}
+Với mỗi ô trên bàn cờ kích thước $N \times N$, bài toán gán một biến mệnh đề logic $C_i \in \{0, 1\}$ (với $i$ là chỉ số ô theo thứ tự hàng-trước):
+\begin{equation}
+    C_i = 
+    \begin{cases}
+        \text{True}, & \text{nếu nhân vật tại ô } i \text{ là Tội phạm (\texttt{CRIMINAL})}, \\
+        \text{False}, & \text{nếu nhân vật tại ô } i \text{ là Vô tội (\texttt{INNOCENT})}.
+    \end{cases}
+\end{equation}
+
+Tại bước suy diễn thứ $t$, cơ sở tri thức công khai $KB_t$ gồm tập hợp các mệnh đề CNF được chuyển đổi từ các manh mối đã lật và các mệnh đề đơn vị (\textit{unit clauses}) sinh ra từ các phán quyết đã được chứng minh trước đó:
+\begin{equation}
+    KB_t = \text{CNF}(\text{revealed\_clues}) \wedge \bigwedge_{(j, s) \in \text{verdicts}} \ell_j
+\end{equation}
+trong đó literal $\ell_j = C_j$ nếu $s = \texttt{CRIMINAL}$ và $\ell_j = \neg C_j$ nếu $s = \texttt{INNOCENT}$.
+
+Quy tắc của trò chơi: \textbf{Không đoán mò}. Người chơi (tác tử) chỉ được phép khẳng định trạng thái của một nhân vật khi và chỉ khi trạng thái đó là \textbf{hệ quả logic bắt buộc} (\textit{entailment}, ký hiệu $\models$) từ cơ sở tri thức hiện tại $KB_t$. Nói cách khác, kết luận phải đúng trong \textbf{mọi} mô hình thỏa mãn $KB_t$, chứ không chỉ là một cấu hình khả dĩ ngẫu nhiên.
+
+\subsection{Kiểm tra tính nhất quán ban đầu của cơ sở tri thức}
+Trước khi thực hiện phân loại bất kỳ ô chưa giải nào, tác tử tiến hành kiểm tra tính thỏa mãn của chính cơ sở tri thức $KB_t$:
+\begin{itemize}
+    \item Gọi bộ giải DPLL với công thức $KB_t$ và tập giả định rỗng: $\text{SAT}(KB_t, \emptyset)$.
+    \item Nếu kết quả là \textbf{UNSAT}: cơ sở tri thức đã phát sinh mâu thuẫn nội tại (không tồn tại bất kỳ phép gán nào thỏa mãn toàn bộ manh mối đã mở). Tác tử lập tức dừng và trả về trạng thái bất nhất quán: $\texttt{Analysis(consistent=False, verdicts=())}$.
+    \item Nếu kết quả là \textbf{SAT}: cơ sở tri thức hợp lệ, tác tử tiếp tục tiến trình phân loại.
+\end{itemize}
+
+\subsection{Cơ chế suy diễn phản chứng qua bộ giải SAT}
+\begin{equation}
+    KB_t \models \alpha \iff KB_t \wedge \neg \alpha \text{ là \textbf{UNSAT}}.
+\end{equation}
+
+Đối với mỗi ô chưa mở $C_i$, tác tử sử dụng cơ chế truyền giả định vào bộ giải SAT để phân loại trạng thái thông qua hai truy vấn:
+
+\begin{enumerate}
+    \item \textbf{Kiểm tra khả năng là Tội phạm (\texttt{CRIMINAL}):}
+    Ta giả định nhân vật $i$ là vô tội, tức thêm giả thiết $\neg C_i$ vào $KB_t$:
+    \begin{equation}
+        KB_t \models C_i \iff KB_t \wedge \neg C_i \text{ là UNSAT}.
+    \end{equation}
+    Nếu bộ giải kết luận \textbf{UNSAT}, điều này chứng minh giả thiết ô $i$ vô tội dẫn tới mâu thuẫn. Do đó, nhân vật $i$ bắt buộc phải là \texttt{CRIMINAL}.
+
+    \item \textbf{Kiểm tra khả năng là Vô tội (\texttt{INNOCENT}):}
+    Nếu truy vấn đầu tiên trả về SAT (ô $i$ chưa thể khẳng định là tội phạm), ta tiếp tục kiểm tra giả định ngược lại: ô $i$ là tội phạm ($C_i$):
+    \begin{equation}
+        KB_t \models \neg C_i \iff KB_t \wedge C_i \text{ là UNSAT}.
+    \end{equation}
+    Nếu bộ giải kết luận \textbf{UNSAT}, giả định ô $i$ là tội phạm bị bác bỏ hoàn toàn. Do đó, nhân vật $i$ bắt buộc phải là \texttt{INNOCENT}.
+
+    \item \textbf{Trạng thái chưa xác định (\texttt{UNKNOWN}):}
+    Nếu cả hai truy vấn $KB_t \wedge \neg C_i$ và $KB_t \wedge C_i$ đều trả về \textbf{SAT}, điều này đồng nghĩa với việc tồn tại ít nhất một mô hình thỏa mãn gán $C_i = 0$ và ít nhất một mô hình thỏa mãn gán $C_i = 1$. Khi đó, thông tin từ các manh mối hiện tại chưa đủ để ép buộc trạng thái của ô $i$. Tác tử phân loại ô này là \texttt{UNKNOWN} nhằm bảo đảm nguyên tắc không đoán mò.
+\end{enumerate}
+
+%Bảng~\ref{tab:entailment_decision} tóm tắt bảng quyết định phân loại trạng thái của tác tử.
+
+\begin{table}[H]
+    \centering
+    \caption{Bảng quyết định phân loại trạng thái ô $C_i$ dựa trên kết quả giải SAT.}
+    \label{tab:entailment_decision}
+    \begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}p{4.2cm}|>{\centering\arraybackslash}p{4.2cm}|X|}
+        \hline
+        \textbf{Truy vấn 1} \newline $\text{SAT}(KB_t \wedge \neg C_i)$ & \textbf{Truy vấn 2} \newline $\text{SAT}(KB_t \wedge C_i)$ & \textbf{Phán quyết kết luận} \\
+        \hline
+        UNSAT & SAT & \texttt{Status.CRIMINAL} \newline (Bắt buộc là tội phạm) \\
+        \hline
+        SAT & UNSAT & \texttt{Status.INNOCENT} \newline (Bắt buộc là vô tội) \\
+        \hline
+        SAT & SAT & \texttt{Status.UNKNOWN} \newline (Chưa đủ bằng chứng suy luận) \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+\section{Vòng suy diễn logic}
+\label{sec:deduction_loop}
+
+\subsection{Quy trình suy diễn lũy tiến (Progressive Deduction Loop)}
+Vòng lặp suy diễn của tác tử diễn ra theo các bước tuần tự như sau:
+\begin{enumerate}
+    \item \textbf{Khởi tạo và tiếp nhận trạng thái công khai ($t = 0$):}
+    Tác tử nhận \texttt{PublicState} từ \texttt{GameEngine}, gồm các thẻ đã lật ban đầu kèm theo các manh mối tương ứng để thiết lập cơ sở tri thức ban đầu $KB_0$.
+    
+    \item \textbf{Phân loại toàn bộ các ô chưa giải:}
+    Tại bước $t$, tác tử tiến hành kiểm tra tính nhất quán của $KB_t$ và áp dụng phương pháp suy diễn phản chứng (Mục~\ref{sec:entailment}) để phân loại tất cả các ô chưa mở thành \texttt{CRIMINAL}, \texttt{INNOCENT}, hoặc \texttt{UNKNOWN}.
+    
+    \item \textbf{Lựa chọn phán quyết tất định:}
+    Để đảm bảo tính tất định và khả năng tái lập của thuật toán, nếu có nhiều ô đồng thời được chứng minh là \texttt{CRIMINAL} hoặc \texttt{INNOCENT}, tác tử luôn chọn ô đầu tiên theo \textbf{thứ tự hàng-trước} (duyệt từ trái sang phải, từ trên xuống dưới: $A1, B1, \dots$).
+    
+    \item \textbf{Gửi phán quyết và tương tác với Game Engine:}
+    Tác tử gửi phán quyết $(c^*, s^*)$ cho \texttt{GameEngine} thông qua phương thức \texttt{submit\_verdict}:
+    \begin{itemize}
+        \item \texttt{GameEngine} xác minh tính hợp lệ. Do phán quyết được chứng minh chặt chẽ bằng SAT, phán quyết này luôn được chấp nhận (\texttt{ACCEPTED}).
+        \item Thẻ tại ô $c^*$ được lật ngửa, công khai trạng thái $s^*$ và làm lộ ra manh mối mới $\text{clue}_{c^*}$.
+    \end{itemize}
+    
+    \item \textbf{Cập nhật cơ sở tri thức ($KB_{t+1}$):}
+    Manh mối mới và mệnh đề đơn vị tương ứng với trạng thái vừa mở được bổ sung vào cơ sở tri thức:
+    \begin{equation}
+        KB_{t+1} = KB_t \wedge \text{CNF}(\text{clue}_{c^*}) \wedge \ell_{c^*}
+    \end{equation}
+    Tác tử tăng bước đếm $t \leftarrow t + 1$ và quay lại Bước 2.
+\end{enumerate}
+
+\subsection{Điều kiện dừng của vòng lặp}
+Vòng lặp suy diễn kết thúc khi gặp một trong các trạng thái dừng sau:
+\begin{itemize}
+    \item \textbf{Giải xong hoàn toàn (\texttt{SOLVED}):} Tất cả các ô trên bàn cờ $N \times N$ đều đã được chứng minh và lật mở thành công. Đây là trạng thái đích của một màn chơi hợp lệ.
+    \item \textbf{Suy luận bế tắc (\texttt{STALLED}):} Mọi ô chưa mở đều bị phân loại là \texttt{UNKNOWN} (không còn bất kỳ ô nào bị ép buộc logic từ $KB_t$). Khi đó, tác tử dừng lại.
+    \item \textbf{Phát hiện mâu thuẫn (\texttt{INCONSISTENT}):} Cơ sở tri thức $KB_t$ bị bộ giải SAT đánh giá là UNSAT ngay từ đầu, báo hiệu lỗi mâu thuẫn dữ liệu hoặc màn chơi không hợp lệ.
+    \item \textbf{Quá thời gian (\texttt{TIMEOUT}):} Bộ giải SAT vượt quá ngưỡng thời gian quy định (\texttt{timeout\_seconds}), tác tử dừng tiến trình để bảo vệ tài nguyên hệ thống.
+\end{itemize}
+
+\subsection{Tách biệt ranh giới dữ liệu ẩn}
+
+\begin{itemize}
+    \item \texttt{GameEngine} nắm giữ cấu hình bàn cờ gốc, đáp án ẩn và toàn bộ nội dung manh mối chưa lật.
+    \item \texttt{Agent} chỉ nhận đối tượng bất biến \texttt{PublicState} gồm các thẻ đã lật. Tác tử không có quyền truy cập hay đọc lén đáp án ẩn, kể cả khi thực hiện tính năng gợi ý (\texttt{Hint}). Gợi ý thực chất chỉ là việc tác tử chạy phân tích và trả về ô bị ép buộc đầu tiên mà không thực hiện lật thẻ.
+\end{itemize}
+
+
+\section{Vết suy diễn (Deduction Trace)}
+\label{sec:deduction_trace}
+
+\subsection{Ý nghĩa và cấu trúc dữ liệu lưu vết}
+Để phục vụ việc kiểm chứng tính đúng đắn của thuật toán, đánh giá hiệu năng thực nghiệm và phân tích quá trình giải đố, tác tử được tích hợp cơ chế ghi nhận \textbf{vết suy diễn} (\textit{Deduction Trace}) độc lập tại tệp \texttt{griductive/agent/trace.py}. Vết suy diễn lưu lại toàn bộ diễn biến của từng bước lật thẻ theo thời gian.
+
+Cấu trúc vết suy diễn được tổ chức theo hai tầng dữ liệu chính:
+\begin{itemize}
+    \item \texttt{TraceStep}: Đại diện cho một bước lật thẻ thành công, bao gồm:
+    \begin{itemize}
+        \item Số thứ tự bước (\texttt{step\_number}).
+        \item Danh sách định danh các manh mối đang hoạt động (\texttt{active\_clue\_ids}).
+        \item Chi tiết từng lần gọi bộ giải SAT (\texttt{sat\_queries}): bao gồm ô đang xét, loại giả định (\texttt{BASE\_CHECK}, \texttt{ASSUME\_INNOCENT}, \texttt{ASSUME\_CRIMINAL}), kết quả trả về (\texttt{SAT/UNSAT}) và kết luận rút ra.
+        \item Ô bị ép buộc và phán quyết được chọn (\texttt{forced\_cell}, \texttt{forced\_status}).
+        \item Định danh manh mối mới vừa được lộ diện (\texttt{new\_clue\_id}).
+    \end{itemize}
+    \item \texttt{DeductionTrace}: Đại diện cho toàn bộ tiến trình giải một màn chơi, tổng hợp tổng số bước, tổng số lần gọi SAT, trạng thái kết thúc (\texttt{SOLVED}, \texttt{STALLED}, \texttt{INCONSISTENT}) và cung cấp các phương thức xuất dữ liệu dạng bảng tóm tắt hoặc tệp JSON.
+\end{itemize}
+
+\subsection{Minh họa tiến trình suy diễn thực tế}
+Dưới đây là trích đoạn vết suy diễn thực tế do tác tử ghi nhận khi giải màn chơi kích thước $3 \times 3$ (\texttt{data/puzzles/3x3/level\_01.json}), bắt đầu với duy nhất một ô $A1$ mở ban đầu (\texttt{clue-A1}):
+
+\begin{itemize}
+    \item \textbf{Bước 1:}
+    \begin{itemize}
+        \item \textit{Manh mối đang hoạt động (1):} \texttt{clue-A1}.
+        \item \textit{Truy vấn SAT:}
+        \begin{itemize}
+            \item Kiểm tra $KB_1$: kết quả \textbf{SAT} (cơ sở tri thức nhất quán).
+            \item Ô $B1$: Giả thiết $\neg C_{B1}$ dẫn tới \textbf{SAT}; Giả thiết $C_{B1}$ dẫn tới \textbf{UNSAT} $\implies$ Chứng minh phản chứng xác định $B1$ là vô tội (\texttt{INNOCENT}).
+        \end{itemize}
+        \item \textit{Phán quyết được chọn:} $B1 \to \texttt{INNOCENT}$.
+        \item \textit{Manh mối mới lật:} \texttt{clue-B1}.
+    \end{itemize}
+
+    \item \textbf{Bước 2:}
+    \begin{itemize}
+        \item \textit{Manh mối đang hoạt động (2):} \texttt{clue-A1}, \texttt{clue-B1}.
+        \item \textit{Truy vấn SAT:} Bổ sung tri thức từ $B1$, suy luận phản chứng xác định ô $C1$ có giả thiết $C_{C1}$ là \textbf{UNSAT}.
+        \item \textit{Phán quyết được chọn:} $C1 \to \texttt{INNOCENT}$.
+        \item \textit{Manh mối mới lật:} \texttt{clue-C1}.
+    \end{itemize}
+
+    \item \dots
+    \item \textbf{Bước 5:}
+    \begin{itemize}
+        \item \textit{Manh mối đang hoạt động (5):} \texttt{clue-A1}, \texttt{clue-B1}, \texttt{clue-C1}, \texttt{clue-B2}, \texttt{clue-A3}.
+        \item \textit{Truy vấn SAT:} Xét ô $B3$, giả định $\neg C_{B3}$ (cho rằng $B3$ vô tội) dẫn tới mâu thuẫn \textbf{UNSAT} với các manh mối đếm lân cận $\implies$ Chứng minh bắt buộc $B3$ là tội phạm (\texttt{CRIMINAL}).
+        \item \textit{Phán quyết được chọn:} $B3 \to \texttt{CRIMINAL}$.
+        \item \textit{Manh mối mới lật:} \texttt{clue-B3}.
+    \end{itemize}
+\end{itemize}
+
+Tiến trình lặp lại liên tục cho đến Bước 8, khi ô cuối cùng $C2$ được chứng minh là \texttt{CRIMINAL}, toàn bộ 9 ô trên bàn cờ được giải hoàn tất (\texttt{SOLVED}) mà không cần bất kỳ phỏng đoán nào.
+
+Bảng~\ref{tab:trace_summary_sample} tóm tắt diễn biến lật thẻ và số lượng truy vấn SAT qua từng bước của màn chơi $3 \times 3$.
+
+\begin{table}[H]
+    \centering
+    \caption{Tóm tắt diễn biến vết suy diễn trên màn chơi $3 \times 3$ (\texttt{level\_01}).}
+    \label{tab:trace_summary_sample}
+    \begin{tabular}{|c|c|c|c|c|}
+        \hline
+        \textbf{Bước} & \textbf{Số manh mối mở} & \textbf{Phán quyết ép buộc} & \textbf{Manh mối mới lộ} & \textbf{Trạng thái bước} \\
+        \hline
+        1 & 1 & $B1 \to \texttt{INNOCENT}$ & \texttt{clue-B1} & \texttt{ACCEPTED} \\
+        2 & 2 & $C1 \to \texttt{INNOCENT}$ & \texttt{clue-C1} & \texttt{ACCEPTED} \\
+        3 & 3 & $A3 \to \texttt{INNOCENT}$ & \texttt{clue-A3} & \texttt{ACCEPTED} \\
+        4 & 4 & $B2 \to \texttt{INNOCENT}$ & \texttt{clue-B2} & \texttt{ACCEPTED} \\
+        5 & 5 & $B3 \to \texttt{CRIMINAL}$ & \texttt{clue-B3} & \texttt{ACCEPTED} \\
+        6 & 6 & $C3 \to \texttt{INNOCENT}$ & \texttt{clue-C3} & \texttt{ACCEPTED} \\
+        7 & 7 & $A2 \to \texttt{CRIMINAL}$ & \texttt{clue-A2} & \texttt{ACCEPTED} \\
+        8 & 8 & $C2 \to \texttt{CRIMINAL}$ & \texttt{clue-C2} & \texttt{SOLVED} \\
+        \hline
+    \end{tabular}
+\end{table}
+
+
+\section{Kiểm tra tính duy nhất}
+\label{sec:uniqueness}
+
+\subsection{Bài toán nghiệm duy nhất trên tập manh mối đầy đủ}
+Một câu đố logic hợp lệ trong trò chơi Griductive bắt buộc phải thỏa mãn tính đơn nghiệm: khi xem xét đồng thời toàn bộ tập manh mối của màn chơi cùng các ô lật ban đầu, phải tồn tại \textbf{duy nhất một} cấu hình gán nhãn Tội phạm/Vô tội thỏa mãn. Nếu bài toán có từ hai nghiệm trở lên, màn chơi bị coi là mơ hồ (\textit{ambiguous}); ngược lại nếu không có nghiệm nào, bài toán bị mâu thuẫn (\textit{inconsistent / no solution}).
+
+\subsection{Kỹ thuật Mệnh đề chặn (Blocking Clause)}
+Thay vì phải duyệt toàn bộ không gian trạng thái $2^{N \times N}$ bằng thuật toán quay lui truyền thống, tác tử tận dụng bộ giải SAT và kỹ thuật \textbf{Mệnh đề chặn} (\textit{Blocking Clause}) qua hai lượt gọi:
+
+\begin{enumerate}
+    \item \textbf{Tìm nghiệm thứ nhất ($M_1$):}
+    Toàn bộ manh mối của màn chơi được mã hóa sang dạng CNF (ký hiệu là $\mathcal{F}_{\text{all}}$). Tác tử gọi bộ giải SAT tìm kiếm mô hình đầu tiên:
+    \begin{equation}
+        M_1 = \text{SAT}(\mathcal{F}_{\text{all}})
+    \end{equation}
+    Nếu kết quả trả về là \textbf{UNSAT}, bài toán không có nghiệm khả dĩ $\implies$ Kết luận màn chơi vô nghiệm (\texttt{UniquenessStatus.NO\_SOLUTION}).
+    
+    \item \textbf{Xây dựng Mệnh đề chặn trên tập biến chính:}
+    Giả sử tìm được nghiệm $M_1$. Nghiệm này tương ứng với một phép gán giá trị chân lý cụ thể cho tập các biến chính đại diện cho các ô trên bàn cờ $\mathcal{V}_{\text{primary}} = \{C_1, C_2, \dots, C_{N^2}\}$:
+    \begin{equation}
+        \bigwedge_{v \in \mathcal{V}_{\text{primary}}} \ell_v \quad \text{với } \ell_v = 
+        \begin{cases}
+            v, & \text{nếu } M_1[v] = \text{True}, \\
+            \neg v, & \text{nếu } M_1[v] = \text{False}.
+        \end{cases}
+    \end{equation}
+    Để ngăn bộ giải tìm lại chính xác cấu hình bàn cờ này ở lượt giải tiếp theo, ta phủ định hội trên theo quy tắc De Morgan để tạo ra một mệnh đề tuyển mới:
+    \begin{equation}
+        \text{BlockingClause}(M_1) = \neg \left( \bigwedge_{v \in \mathcal{V}_{\text{primary}}} \ell_v \right) \equiv \bigvee_{v \in \mathcal{V}_{\text{primary}}} \neg \ell_v
+    \end{equation}
+    trong đó literal $\neg \ell_v = -v$ nếu $M_1[v] = \text{True}$ và $\neg \ell_v = +v$ nếu $M_1[v] = \text{False}$.
+    
+    \item \textbf{Tìm kiếm nghiệm thứ hai ($M_2$):}
+    Mệnh đề chặn được bổ sung trực tiếp vào công thức ban đầu để tạo ra công thức tăng cường:
+    \begin{equation}
+        \mathcal{F}_{\text{augmented}} = \mathcal{F}_{\text{all}} \wedge \text{BlockingClause}(M_1)
+    \end{equation}
+    Tác tử gọi bộ giải SAT lần thứ hai với $\mathcal{F}_{\text{augmented}}$:
+    \begin{itemize}
+        \item Nếu kết quả là \textbf{UNSAT}: Không còn bất kỳ cách gán biến chính nào khác thỏa mãn toàn bộ manh mối $\implies$ Màn chơi có \textbf{Nghiệm duy nhất} (\texttt{UniquenessStatus.UNIQUE} – Hợp lệ).
+        \item Nếu kết quả là \textbf{SAT}: Bộ giải tìm được một nghiệm $M_2 \neq M_1$ trên các biến chính $\implies$ Màn chơi bị \textbf{Đa nghiệm} (\texttt{UniquenessStatus.AMBIGUOUS} – Không hợp lệ). Nghiệm $M_2$ được lưu lại làm phản ví dụ chứng minh tính mơ hồ.
+    \end{itemize}
+\end{enumerate}
+
+\section{Tích hợp trò chơi}
+\label{sec:game_integration}
+
+\subsection{Giao diện Adapter}
+Để kết nối các mô-đun thuật toán logic (Mã hóa CNF, Bộ giải DPLL) với giao diện người dùng và (\texttt{GameEngine}), tác tử được đóng gói trong lớp \texttt{Agent} tại tệp \texttt{griductive/agent/adapter.py}. Lớp này tuân thủ giao thức \texttt{Analyzer}:
+\begin{equation}
+    \texttt{analyze(state: PublicState) -> Analysis}
+\end{equation}
+
+\noindent
+Quy ước dữ liệu đầu vào và đầu ra:
+\begin{itemize}
+    \item \textbf{Đầu vào (\texttt{PublicState}):} Nhận trạng thái bất biến gồm kích thước bàn cờ (\texttt{size}), danh sách nhân vật (\texttt{characters}), các phán quyết đã mở (\texttt{verdicts}) và các manh mối công khai (\texttt{clues}).
+    \item \textbf{Đầu ra (\texttt{Analysis}):} Trả về đối tượng gồm:
+    \begin{itemize}
+        \item \texttt{consistent} (kiểu \texttt{bool}): Báo hiệu tính nhất quán của cơ sở tri thức. Nếu \texttt{False}, danh sách phán quyết bắt buộc phải rỗng: \texttt{Analysis(consistent=False, verdicts=())}.
+        \item \texttt{verdicts} (danh sách \texttt{tuple[str, Status]}): Nếu nhất quán, chứa đúng một phán quyết (\texttt{CRIMINAL}, \texttt{INNOCENT}, hoặc \texttt{UNKNOWN}) cho \textbf{từng ô chưa giải}, xếp theo đúng thứ tự hàng-trước.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Cơ chế dự phòng an toàn}
+Nhằm đảm bảo hệ thống có thể phát triển song song giữa các thành viên mà không bị nghẽn, \texttt{Agent} được thiết kế với cơ chế dự phòng an toàn:
+\begin{itemize}
+    \item Mặc định, tác tử cố gắng gọi quy trình suy diễn chính thức thông qua chuỗi kết hợp giữa bộ mã hóa CNF (\texttt{griductive.logic.encoder}) và bộ giải DPLL (\texttt{griductive.sat.dpll}).
+    \item Nếu các mô-đun này chưa được nạp hoặc đang trong quá trình phát triển (bắt các ngoại lệ \texttt{ImportError}, \texttt{NotImplementedError}), tác tử sẽ tự động chuyển hướng sang bộ phân tích tham chiếu ngữ nghĩa (\texttt{ReferenceAnalyzer}) làm cơ chế dự phòng (\textit{fallback}).
+\end{itemize}
+
