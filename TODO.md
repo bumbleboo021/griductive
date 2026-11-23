@@ -111,19 +111,19 @@ clause statistics, and successful integration with Persons 3 and 4.
 
 ## Person 3 - DPLL SAT solver
 
-- [ ] Implement unit propagation and conflict detection.
-- [ ] Implement deterministic variable selection, branching and backtracking.
-- [ ] Return SAT with a complete assignment over declared variables, or UNSAT.
-- [ ] Handle empty formulas, empty clauses, contradictory units and unconstrained
+- [x] Implement unit propagation and conflict detection.
+- [x] Implement deterministic variable selection, branching and backtracking.
+- [x] Return SAT with a complete assignment over declared variables, or UNSAT.
+- [x] Handle empty formulas, empty clauses, contradictory units and unconstrained
   variables explicitly.
-- [ ] Support temporary assumptions without mutating the persistent KB or leaking
+- [x] Support temporary assumptions without mutating the persistent KB or leaking
   assumptions between entailment queries.
-- [ ] Record decisions, propagations, backtracks and runtime per call.
+- [x] Record decisions, propagations, backtracks and runtime per call.
   Document counter definitions and how totals are aggregated.
-- [ ] Represent timeout separately from SAT and UNSAT.
-- [ ] Compare small formulas with a truth-table oracle and test repeated calls.
-- [ ] Work with Person 2 to verify formulas containing auxiliary variables.
-- [ ] Document DPLL and the selected deterministic branching rule for the report.
+- [x] Represent timeout separately from SAT and UNSAT.
+- [x] Compare small formulas with a truth-table oracle and test repeated calls.
+- [x] Work with Person 2 to verify formulas containing auxiliary variables.
+- [x] Document DPLL and the selected deterministic branching rule for the report.
 - [ ] Optional after correctness, add another heuristic for controlled comparisons.
 
 Acceptance requires complete models, reproducible results, isolated assumptions,
