@@ -35,12 +35,15 @@
 \RequirePackage{silence}
 \RequirePackage{xcolor}
 \RequirePackage{geometry}
-\RequirePackage{microtype}
+\RequirePackage[protrusion=false, expansion=true]{microtype}
 \RequirePackage[fontsize=12pt]{scrextend}
 
 % Bibliography and citations
+\RequirePackage{fvextra}
 \RequirePackage{biblatex}
 \RequirePackage{csquotes}
+\DeclareQuoteGlyph{T5}{34}
+\DeclareQuoteGlyph{T5}{96}
 
 % Text formatting
 \RequirePackage{ragged2e}
