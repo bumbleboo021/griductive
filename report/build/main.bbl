@@ -19,6 +19,85 @@
 
 \refsection{0}
   \datalist[entry]{nty/global//global/global/global}
+    \entry{dpll1962}{article}{}{}
+      \name{author}{3}{}{%
+        {{hash=3030b497304f96b07639c080bd40073a}{%
+           family={Davis},
+           familyi={D\bibinitperiod},
+           given={Martin},
+           giveni={M\bibinitperiod}}}%
+        {{hash=24e4630f17ad70c904b474689fa7c2f7}{%
+           family={Logemann},
+           familyi={L\bibinitperiod},
+           given={George},
+           giveni={G\bibinitperiod}}}%
+        {{hash=e12dfefe9f68decf10be77e2a9ee8760}{%
+           family={Loveland},
+           familyi={L\bibinitperiod},
+           given={Donald},
+           giveni={D\bibinitperiod}}}%
+      }
+      \strng{namehash}{cd811c39e320a06b71599b34923063af}
+      \strng{fullhash}{cd811c39e320a06b71599b34923063af}
+      \strng{fullhashraw}{cd811c39e320a06b71599b34923063af}
+      \strng{bibnamehash}{cd811c39e320a06b71599b34923063af}
+      \strng{authorbibnamehash}{cd811c39e320a06b71599b34923063af}
+      \strng{authornamehash}{cd811c39e320a06b71599b34923063af}
+      \strng{authorfullhash}{cd811c39e320a06b71599b34923063af}
+      \strng{authorfullhashraw}{cd811c39e320a06b71599b34923063af}
+      \field{sortinit}{D}
+      \field{sortinithash}{6f385f66841fb5e82009dc833c761848}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Communications of the ACM}
+      \field{note}{Bài báo gốc về thuật toán DPLL với lan truyền đơn vị và quay lui}
+      \field{number}{7}
+      \field{title}{A Machine Program for Theorem-Proving}
+      \field{volume}{5}
+      \field{year}{1962}
+      \field{pages}{394\bibrangedash 397}
+      \range{pages}{4}
+      \verb{doi}
+      \verb 10.1145/368273.368557
+      \endverb
+    \endentry
+    \entry{jeroslow1990}{article}{}{}
+      \name{author}{2}{}{%
+        {{hash=5e64964e6530288ad1af8055092bba17}{%
+           family={Jeroslow},
+           familyi={J\bibinitperiod},
+           given={Robert\bibnamedelima G.},
+           giveni={R\bibinitperiod\bibinitdelim G\bibinitperiod}}}%
+        {{hash=a819d5307822a787d571f69a1743838f}{%
+           family={Wang},
+           familyi={W\bibinitperiod},
+           given={Jinchang},
+           giveni={J\bibinitperiod}}}%
+      }
+      \strng{namehash}{4056bb9202c507291d8fcd8f08d4e4be}
+      \strng{fullhash}{4056bb9202c507291d8fcd8f08d4e4be}
+      \strng{fullhashraw}{4056bb9202c507291d8fcd8f08d4e4be}
+      \strng{bibnamehash}{4056bb9202c507291d8fcd8f08d4e4be}
+      \strng{authorbibnamehash}{4056bb9202c507291d8fcd8f08d4e4be}
+      \strng{authornamehash}{4056bb9202c507291d8fcd8f08d4e4be}
+      \strng{authorfullhash}{4056bb9202c507291d8fcd8f08d4e4be}
+      \strng{authorfullhashraw}{4056bb9202c507291d8fcd8f08d4e4be}
+      \field{sortinit}{J}
+      \field{sortinithash}{b2f54a9081ace9966a7cb9413811edb4}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Annals of Mathematics and Artificial Intelligence}
+      \field{note}{Tham khảo chiến lược chọn biến rẽ nhánh Jeroslow--Wang cho bộ giải DPLL}
+      \field{number}{1--4}
+      \field{title}{Solving Propositional Satisfiability Problems}
+      \field{volume}{1}
+      \field{year}{1990}
+      \field{pages}{167\bibrangedash 187}
+      \range{pages}{21}
+      \verb{doi}
+      \verb 10.1007/BF01531077
+      \endverb
+    \endentry
     \entry{griductive}{online}{}{}
       \name{author}{1}{}{%
         {{hash=e66b58ba5762c1fbbe56e96c74a134ea}{%
@@ -100,6 +179,120 @@
       \endverb
       \verb{url}
       \verb https://www.pygame.org/docs/
+      \endverb
+    \endentry
+    \entry{pythonDataclasses}{online}{}{}
+      \name{author}{1}{}{%
+        {{hash=c7b5508dc5e59a2846d22617276cc27c}{%
+           family={{Python Software Foundation}},
+           familyi={P\bibinitperiod}}}%
+      }
+      \strng{namehash}{c7b5508dc5e59a2846d22617276cc27c}
+      \strng{fullhash}{c7b5508dc5e59a2846d22617276cc27c}
+      \strng{fullhashraw}{c7b5508dc5e59a2846d22617276cc27c}
+      \strng{bibnamehash}{c7b5508dc5e59a2846d22617276cc27c}
+      \strng{authorbibnamehash}{c7b5508dc5e59a2846d22617276cc27c}
+      \strng{authornamehash}{c7b5508dc5e59a2846d22617276cc27c}
+      \strng{authorfullhash}{c7b5508dc5e59a2846d22617276cc27c}
+      \strng{authorfullhashraw}{c7b5508dc5e59a2846d22617276cc27c}
+      \field{sortinit}{P}
+      \field{sortinithash}{ff3bcf24f47321b42cb156c2cc8a8422}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{Tham khảo mô hình dữ liệu và tùy chọn frozen}
+      \field{title}{dataclasses -- Data Classes}
+      \field{urlday}{23}
+      \field{urlmonth}{11}
+      \field{urlyear}{2026}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://docs.python.org/3/library/dataclasses.html
+      \endverb
+      \verb{url}
+      \verb https://docs.python.org/3/library/dataclasses.html
+      \endverb
+    \endentry
+    \entry{russell2020aima}{book}{}{}
+      \name{author}{2}{}{%
+        {{hash=143fa183327d9fcd9de18eec99d6ca97}{%
+           family={Russell},
+           familyi={R\bibinitperiod},
+           given={Stuart},
+           giveni={S\bibinitperiod}}}%
+        {{hash=5de798d5fa3c0236c0478134cd23f52a}{%
+           family={Norvig},
+           familyi={N\bibinitperiod},
+           given={Peter},
+           giveni={P\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Pearson}%
+      }
+      \strng{namehash}{b280605b721b4ebcba5395298499f924}
+      \strng{fullhash}{b280605b721b4ebcba5395298499f924}
+      \strng{fullhashraw}{b280605b721b4ebcba5395298499f924}
+      \strng{bibnamehash}{b280605b721b4ebcba5395298499f924}
+      \strng{authorbibnamehash}{b280605b721b4ebcba5395298499f924}
+      \strng{authornamehash}{b280605b721b4ebcba5395298499f924}
+      \strng{authorfullhash}{b280605b721b4ebcba5395298499f924}
+      \strng{authorfullhashraw}{b280605b721b4ebcba5395298499f924}
+      \field{sortinit}{R}
+      \field{sortinithash}{5e1c39a9d46ffb6bebd8f801023a9486}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{4}
+      \field{isbn}{978-0134610993}
+      \field{note}{Tham khảo biểu diễn tri thức logic mệnh đề, dạng chuẩn hội CNF và kiểm tra hệ quả logic}
+      \field{title}{Artificial Intelligence: A Modern Approach}
+      \field{year}{2020}
+    \endentry
+    \entry{sinz2005towards}{inproceedings}{}{}
+      \name{author}{1}{}{%
+        {{hash=b4417367042e77e23bdbc8008317154e}{%
+           family={Sinz},
+           familyi={S\bibinitperiod},
+           given={Carsten},
+           giveni={C\bibinitperiod}}}%
+      }
+      \name{editor}{1}{}{%
+        {{hash=916275d1d39fcac58fc43c89f29645d6}{%
+           family={Beek},
+           familyi={B\bibinitperiod},
+           given={Peter},
+           giveni={P\bibinitperiod},
+           prefix={van},
+           prefixi={v\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Berlin, Heidelberg}%
+      }
+      \list{publisher}{1}{%
+        {Springer}%
+      }
+      \strng{namehash}{b4417367042e77e23bdbc8008317154e}
+      \strng{fullhash}{b4417367042e77e23bdbc8008317154e}
+      \strng{fullhashraw}{b4417367042e77e23bdbc8008317154e}
+      \strng{bibnamehash}{b4417367042e77e23bdbc8008317154e}
+      \strng{authorbibnamehash}{b4417367042e77e23bdbc8008317154e}
+      \strng{authornamehash}{b4417367042e77e23bdbc8008317154e}
+      \strng{authorfullhash}{b4417367042e77e23bdbc8008317154e}
+      \strng{authorfullhashraw}{b4417367042e77e23bdbc8008317154e}
+      \strng{editorbibnamehash}{916275d1d39fcac58fc43c89f29645d6}
+      \strng{editornamehash}{916275d1d39fcac58fc43c89f29645d6}
+      \strng{editorfullhash}{916275d1d39fcac58fc43c89f29645d6}
+      \strng{editorfullhashraw}{916275d1d39fcac58fc43c89f29645d6}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Principles and Practice of Constraint Programming -- CP 2005}
+      \field{note}{Tham khảo phương pháp mã hóa bộ đếm tuần tự (Sequential Counter) cho ràng buộc đếm số lượng}
+      \field{title}{Towards an Optimal CNF Encoding of Boolean Cardinality Constraints}
+      \field{year}{2005}
+      \field{pages}{827\bibrangedash 831}
+      \range{pages}{5}
+      \verb{doi}
+      \verb 10.1007/11564751_73
       \endverb
     \endentry
   \enddatalist
