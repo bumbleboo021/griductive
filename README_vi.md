@@ -60,7 +60,7 @@ python main.py --puzzle data/puzzles/5x5/level_05.json
 - Một phán đoán được chấp nhận sẽ lật mở một manh mối. Các lựa chọn bị bác bỏ sẽ hiển thị thông báo `Incorrect verdict` (Phán đoán sai) hoặc `Not enough evidence` (Chưa đủ bằng chứng). Việc sử dụng `Hint` là không bắt buộc.
 - Nhấp vào một thẻ đã giải hoặc manh mối đã lật để làm nổi bật các ô được tham chiếu bởi manh mối đó. Bảng manh mối cuộn mượt mà và hiển thị toàn bộ nội dung của các manh mối bị rút gọn trên thẻ.
 - `Stage` mở danh sách các màn chơi theo tên. `Restart` khôi phục lại trạng thái được lật sẵn từ đầu. `Hint` chỉ ra một nhân vật có trạng thái suy ra được chắc chắn. `Auto Solve` tự động thực hiện các nước đi đã chứng minh được và `Stop` (dừng) sẽ tạm dừng quá trình này sau khi hoàn tất lượt phân tích đang chạy dở.
-- Nút `?` ở góc trên bên phải giải thích luật chơi. `Music` (bật/tắt nhạc) bật hoặc tắt phát nhạc và `Tracks` (chọn bản nhạc) cho phép chọn một tệp WAV, OGG, MP3 hoặc FLAC từ thư mục `assets/sounds/`.
+- Nút `?` ở góc trên bên phải giải thích luật chơi. `Music` mở bảng chọn bản nhạc, gồm nút bật/tắt và các tệp WAV, OGG, MP3 hoặc FLAC từ thư mục `assets/sounds/`.
 - Phím Escape đóng cửa sổ bật lên đang mở. Ở màn hình chính, phím này dùng để thoát trò chơi.
 
 Màn chơi mặc định là `data/puzzles/3x3/level_01.json`. Mỗi màn chơi có một trường gốc `name` để hiển thị. Các trường `title` kiểu cũ vẫn được chấp nhận. Các màn chơi hướng dẫn đã bị loại bỏ khỏi danh sách chọn. Dữ liệu kiểm thử mẫu (fixture) dạng chuỗi `FACT` dùng cho các bài kiểm thử nằm trong thư mục `tests/fixtures/`.
@@ -69,6 +69,37 @@ Màn chơi mặc định là `data/puzzles/3x3/level_01.json`. Mỗi màn chơi 
 Tệp `5x5/level_05.json` sử dụng `fixed_cast: true` vì manh mối về xuất xứ Liyue của màn chơi này phụ thuộc vào dàn nhân vật. Tên nhân vật trong tệp JSON nguồn hiện bắt buộc phải là duy nhất và sắp xếp theo thứ tự bảng chữ cái theo thứ tự ưu tiên hàng (row-major order). Việc xáo trộn ngẫu nhiên trên `GUI` (giao diện đồ họa) diễn ra sau khi nạp dữ liệu.
 
 Tên các màn chơi, độ bao phủ và hướng dẫn kiểm định nằm trong [docs/LEVELS.md](docs/LEVELS.md).
+
+## Quan sát tác tử trong trò chơi
+
+Nhấn **Agent** ở phía trên bên phải bàn cờ để mở bảng bên cạnh trò chơi.
+Cửa sổ mở rộng khi bật bảng và trở lại kích thước ban đầu khi đóng. Nhấp vào
+bàn cờ để chơi, hoặc nhấp vào bảng tác tử để dùng phím mũi tên cuộn và xem lịch sử.
+**Analyze** phân loại trạng thái công
+khai mà không mở thẻ; **Next move** chứng minh và mở một nhân vật. **Auto Solve /
+Stop** chạy hoặc dừng giải tự động, đồng thời ghi lại các lượt phân tích. Dùng
+Previous/Next để xem lịch sử; cuộn bằng bánh xe hoặc phím mũi tên.
+Khi xem lịch sử, bàn cờ hiển thị trạng thái công khai sau hành động tương ứng,
+không thay đổi engine thật. Nhấn **Live**, chuyển đến lượt mới nhất hoặc đóng
+bảng để trở về bàn cờ hiện tại. Chế độ lịch sử chỉ đọc và tạm dừng Auto Solve.
+
+Bảng có số biến chính/phụ, số mệnh đề CNF, lượt gọi SAT, quyết định/lan truyền/
+quay lui, số bước suy diễn/lượt mở và thời gian phân tích. Số liệu từng lượt và
+tổng tích lũy được tách riêng. Không tính thẻ mở sẵn hoặc Hint là bước suy diễn;
+thời gian không gồm hoạt ảnh, chờ và mã hóa bổ sung phục vụ hiển thị. Bộ đếm
+solver chưa cung cấp hiển thị **N/A**, không suy đoán bằng 0. Chạy Reference
+không gọi SAT; kích thước CNF là mã hóa chẩn đoán của đầu vào công khai.
+Các thao tác Hint và chọn trạng thái thủ công cũng được ghi nhận.
+
+Mỗi lượt hiển thị bộ phân tích thực tế, manh mối công khai, kết quả phân loại,
+thời gian, số biến/mệnh đề CNF nếu có, các giả định và kết quả SAT đã ghi nhận,
+cùng manh mối vừa mở. Lưu tối đa 128 lượt; Restart và chuyển màn xóa lịch sử.
+Một lượt phân tích không đồng nghĩa với một bước mở thẻ.
+
+**Use Reference** và **Use Logic Agent** đổi bộ phân tích, giữ nguyên các thẻ đã
+chứng minh và xóa lịch sử. Nếu chưa có CNF/DPLL, tác tử ghi rõ **Reference fallback**;
+không tạo kết quả SAT giả cho bộ phân tích tham chiếu. Nhánh hiện tại vẫn cần
+`griductive/sat/dpll.py` để chạy DPLL thật.
 
 ## Các bước kiểm tra đầu tiên sau khi kéo dự án về
 

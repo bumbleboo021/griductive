@@ -87,16 +87,16 @@ Tiêu chí nghiệm thu (acceptance) yêu cầu sự thống nhất giữa ngữ
 
 ## Thành viên 3 - Bộ giải `DPLL` `SAT`
 
-- [ ] Triển khai lan truyền đơn vị (unit propagation) và phát hiện xung đột (conflict).
-- [ ] Triển khai chọn biến tất định, rẽ nhánh (branching) và quay lui (backtracking).
-- [ ] Trả về `SAT` kèm một phép gán đầy đủ trên các biến đã khai báo, hoặc `UNSAT`.
-- [ ] Xử lý tường minh các công thức rỗng (empty formula), mệnh đề rỗng (empty clause), các mệnh đề đơn vị mâu thuẫn nhau và các biến không bị ràng buộc.
-- [ ] Hỗ trợ các giả định tạm thời (temporary assumption) mà không làm biến đổi cơ sở tri thức (`KB`) bền vững hay làm rò rỉ giả định giữa các truy vấn hệ quả logic (entailment query).
-- [ ] Ghi nhận số quyết định (rẽ nhánh) (decision), số lần lan truyền (propagation), số lần quay lui (backtrack) và thời gian chạy cho mỗi lần gọi. Viết tài liệu định nghĩa các bộ đếm và cách tổng hợp số liệu.
-- [ ] Biểu diễn trạng thái quá thời gian (`timeout`) tách biệt khỏi `SAT` và `UNSAT`.
-- [ ] Đối chiếu các công thức nhỏ với bộ kiểm chứng bằng bảng chân trị (truth-table oracle) và kiểm thử các lần gọi lặp lại.
-- [ ] Phối hợp với Thành viên 2 để kiểm chứng các công thức có chứa biến phụ trợ.
-- [ ] Viết tài liệu mô tả `DPLL` và quy tắc chọn biến rẽ nhánh (branching rule) xác định đã chọn cho báo cáo.
+- [x] Triển khai lan truyền đơn vị (unit propagation) và phát hiện xung đột (conflict).
+- [x] Triển khai chọn biến tất định, rẽ nhánh (branching) và quay lui (backtracking).
+- [x] Trả về `SAT` kèm một phép gán đầy đủ trên các biến đã khai báo, hoặc `UNSAT`.
+- [x] Xử lý tường minh các công thức rỗng (empty formula), mệnh đề rỗng (empty clause), các mệnh đề đơn vị mâu thuẫn nhau và các biến không bị ràng buộc.
+- [x] Hỗ trợ các giả định tạm thời (temporary assumption) mà không làm biến đổi cơ sở tri thức (`KB`) bền vững hay làm rò rỉ giả định giữa các truy vấn hệ quả logic (entailment query).
+- [x] Ghi nhận số quyết định (rẽ nhánh) (decision), số lần lan truyền (propagation), số lần quay lui (backtrack) và thời gian chạy cho mỗi lần gọi. Viết tài liệu định nghĩa các bộ đếm và cách tổng hợp số liệu.
+- [x] Biểu diễn trạng thái quá thời gian (`timeout`) tách biệt khỏi `SAT` và `UNSAT`.
+- [x] Đối chiếu các công thức nhỏ với bộ kiểm chứng bằng bảng chân trị (truth-table oracle) và kiểm thử các lần gọi lặp lại.
+- [x] Phối hợp với Thành viên 2 để kiểm chứng các công thức có chứa biến phụ trợ.
+- [x] Viết tài liệu mô tả `DPLL` và quy tắc chọn biến rẽ nhánh (branching rule) xác định đã chọn cho báo cáo.
 - [ ] Tùy chọn sau khi đã đảm bảo tính đúng đắn: bổ sung một chiến lược heuristic khác để thực hiện các so sánh có đối chứng.
 
 Tiêu chí nghiệm thu yêu cầu trả về mô hình đầy đủ, kết quả có thể tái lập, các giả định được cô lập và các bộ đếm chính xác thông qua các lời gọi kiểm tra hệ quả logic (entailment) của Thành viên 4.

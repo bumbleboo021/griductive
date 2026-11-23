@@ -24,6 +24,14 @@ class GameEngine:
     def restart(self):
         self._revealed = frozenset(self._puzzle.initially_revealed)
 
+    def set_analyzer(self, analyzer: Analyzer):
+        """Replace the analyzer between actions, preserving the revealed board."""
+        self._analyzer = analyzer
+
+    def analyze(self) -> Analysis:
+        """Classify the current public state without revealing any cards."""
+        return self._analysis()
+
     @property
     def solved(self):
         return len(self._revealed) == len(self._puzzle.characters)

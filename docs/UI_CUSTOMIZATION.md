@@ -9,7 +9,7 @@ A/Left selects Innocent, D/Right selects Criminal, S/Down selects Cancel, and
 W/Up returns from Cancel to Innocent. Enter confirms; Escape closes the popup.
 Mouse clicks still open cards and activate choices. Solved-card navigation selects
 its clue in the side panel. Navigation waits while analysis or Auto Solve is active
-and is blocked by Stage, Tracks, Help, and rejection dialogs.
+and is blocked by Stage, Music, Help, and rejection dialogs.
 
 The Stage picker supports mouse-wheel scrolling and a draggable scrollbar on its
 right edge. Hold the left mouse button on the thumb and move it up or down.
@@ -21,10 +21,10 @@ indicator. Wheel and trackpad input scroll smoothly while the pointer is inside
 that panel. `CLUE_SCROLL_STEP` sets pixels per wheel notch and
 `CLUE_SCROLL_TIME_MS` controls easing time. Lower easing times settle sooner.
 
-Use **Tracks** beside Music On/Off to choose music. The picker lists WAV, OGG,
+Use **Music** beside Agent to choose music and access the on/off toggle. The picker lists WAV, OGG,
 MP3 (including VBR), and FLAC files directly inside `assets/sounds/`. Selecting
 a track starts it and keeps the choice for the current game session. Closing
-and reopening Tracks refreshes the file list. Escape or Close dismisses it.
+and reopening Music refreshes the file list. Escape or Close dismisses it.
 M4A files are omitted from the list. Add the MP3 version of your track to use it.
 The Music toggle stops or restarts the selected track.
 

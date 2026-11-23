@@ -23,6 +23,9 @@ def window():
 
 
 def click(view, point):
+    if view.output_surface is not None:
+        point = (round(point[0]*view.output_surface.get_width()/view.screen.get_width()),
+                 round(point[1]*view.output_surface.get_height()/view.screen.get_height()))
     view.event(pygame.event.Event(pygame.MOUSEBUTTONDOWN, button=1, pos=point))
     view.draw()
 
@@ -245,12 +248,22 @@ def test_stage_names_and_music_toggle(window):
     click(window,window.buttons['stage'][0].center)
     assert window.stage_names
     assert all(name==load_puzzle(path).title for path,name in window.stage_names.items())
+    for i, (path, name) in enumerate(window.stage_names.items(), 1):
+        size = load_puzzle(path).size
+        prefix = f'Stage {i} - {size}x{size} - '
+        assert name.startswith(prefix) and name[len(prefix):].strip()
     click(window,window.buttons['close_stage'][0].center)
     assert not window.picker
+    assert 'music' not in window.buttons
+    assert window.buttons['agent'][0] == pygame.Rect(790,22,140,38)
+    click(window,window.buttons['choose_music'][0].center)
+    assert window.music_picker
     click(window,window.buttons['music'][0].center)
     assert window.music.enabled
     click(window,window.buttons['music'][0].center)
     assert not window.music.enabled
+    click(window,window.buttons['close_music'][0].center)
+    assert not window.music_picker and 'music' not in window.buttons
 
 
 def test_hover_animates_buttons_and_cards(window,monkeypatch):
@@ -291,6 +304,7 @@ def test_music_picker_switches_tracks_and_preserves_choice(window,tmp_path,monke
     assert window.music.enabled and window.music.path==path
     click(window,window.buttons['close_music'][0].center)
     assert not window.music_picker
+    click(window,window.buttons['choose_music'][0].center)
     click(window,window.buttons['music'][0].center)
     assert not window.music.enabled
     click(window,window.buttons['music'][0].center)
@@ -493,3 +507,134 @@ def test_verdict_default_escape_and_solved_card_enter(window):
     assert window.selected == 'A1' and window.verdict_cell is None
     window.load(ROOT/'tests/fixtures/chain_4.json')
     assert window.selected == 'A1' and window.verdict_cell is None
+
+
+def test_agent_inspector_analyze_step_and_backend_switch(window, monkeypatch):
+    before = window.engine.public_state()
+    click(window, window.buttons['agent'][0].center)
+    assert window.inspector.open
+    assert 'agent_up' not in window.buttons and 'agent_down' not in window.buttons
+    click(window, window.buttons['agent_analyze'][0].center)
+    wait(window)
+    assert window.engine.public_state() == before
+    record, = window.observer.snapshot()
+    assert record.backend == 'ReferenceAnalyzer' and record.queries == ()
+    assert record.outcome.startswith('ANALYZED')
+    click(window, window.buttons['agent_step'][0].center)
+    wait(window)
+    assert len(window.engine.public_state().verdicts) == len(before.verdicts)+1
+    record = window.observer.snapshot()[-1]
+    assert record.new_clues == ('clue-B1',)
+    assert record.outcome.startswith('ACCEPTED: B1')
+    proved = window.engine.public_state()
+    click(window, window.buttons['agent_logic'][0].center)
+    assert window.engine.public_state() == proved
+    assert window.observer.snapshot() == ()
+    click(window, window.buttons['agent_analyze'][0].center)
+    wait(window)
+    assert window.engine.public_state() == proved
+    record, = window.observer.snapshot()
+    assert record.backend in ('Reference fallback', 'CNF / DPLL')
+    lines = window.inspector.lines(window, record)
+    assert any('CLASSIFICATION' in line for line in lines)
+    assert not any('ACTIVE CLUES' in line or 'Active clues:' in line for line in lines)
+    window.load(ROOT/'tests/fixtures/chain_5.json')
+    window.action('agent_analyze')
+    wait(window)
+    monkeypatch.setattr(window, 'mouse_position', lambda: window.inspector.rect.center)
+    window.event(pygame.event.Event(pygame.MOUSEWHEEL, y=-100))
+    window.draw()
+    assert window.inspector.scroll == window.inspector.max_scroll > 0
+    window.event(pygame.event.Event(pygame.KEYDOWN,key=pygame.K_ESCAPE))
+    assert not window.inspector.open
+    from griductive.ui import config
+    assert window.screen.get_size() == config.WINDOW_SIZE
+
+
+def test_agent_history_browsing_and_restart(window):
+    window.action('agent')
+    window.draw()
+    selected = window.selected
+    window.event(pygame.event.Event(pygame.KEYDOWN,key=pygame.K_d))
+    assert window.selected == selected and window.verdict_cell is None
+    for _ in range(2):
+        window.action('agent_analyze')
+        wait(window)
+    window.event(pygame.event.Event(pygame.KEYDOWN,key=pygame.K_LEFT))
+    assert window.inspector.index == 0
+    window.event(pygame.event.Event(pygame.KEYDOWN,key=pygame.K_RIGHT))
+    assert window.inspector.index == -1
+    window.busy = True
+    observer = window.observer
+    window.action('agent_logic')
+    assert window.observer is observer
+    window.busy = False
+    window.set_inspector_open(False)
+    window.action('restart')
+    assert window.observer.snapshot() == ()
+
+
+def test_docked_inspector_keeps_board_visible_and_playable(window):
+    from griductive.ui import config
+    before = dict(window.cards)
+    window.action('agent')
+    window.draw()
+    assert window.screen.get_size() == (config.WINDOW_SIZE[0]+config.AGENT_PANEL_WIDTH,
+                                        config.WINDOW_SIZE[1])
+    assert window.inspector.rect.left >= config.WINDOW_SIZE[0]
+    desktop_width, desktop_height = pygame.display.get_desktop_sizes()[0]
+    assert window.output_surface.get_width() <= desktop_width
+    assert window.output_surface.get_height() <= desktop_height
+    assert window.cards == before
+    assert not any(window.inspector.rect.colliderect(card) for card in window.cards.values())
+    click(window, window.cards['B1'].center)
+    assert window.verdict_cell == 'B1' and not window.inspector.focused
+    click(window, window.buttons['cancel_verdict'][0].center)
+    window.event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_RIGHT))
+    assert window.selected == 'C1'  # Arrows control the board after clicking it.
+    click(window, window.buttons['choose_music'][0].center)
+    assert window.music_picker and window.inspector.open
+    click(window, window.buttons['close_music'][0].center)
+    assert not window.music_picker
+    click(window, window.buttons['agent_close'][0].center)
+    assert not window.inspector.open
+    assert window.screen.get_size() == config.WINDOW_SIZE
+
+
+def test_agent_history_replays_public_board_without_rewinding_engine(window):
+    window.action('agent')
+    snapshots = []
+    for _ in range(3):
+        window.action('agent_step')
+        wait(window)
+        snapshots.append(window.engine.public_state())
+    live = snapshots[-1]
+    click(window, window.buttons['agent_prev'][0].center)
+    assert window.public_view_state() == snapshots[1]
+    assert window.engine.public_state() == live
+    click(window, window.buttons['agent_prev'][0].center)
+    assert window.public_view_state() == snapshots[0]
+    assert {clue.id for _,clue in window.clue_hits} == {clue.id for clue in snapshots[0].clues}
+    assert not window.buttons['agent_step'][1] and not window.buttons['hint'][1]
+    record_count = len(window.observer.snapshot())
+    window.action('agent_step')
+    window.action('auto')
+    assert not window.busy and not window.auto
+    # A2 was revealed only later: historical inspection must not expose its clue.
+    click(window, window.cards['A2'].center)
+    assert window.verdict_cell is None and window.clue_id is None
+    assert window.public_view_state() == snapshots[0]
+    assert len(window.observer.snapshot()) == record_count
+    click(window, window.buttons['agent_next'][0].center)
+    assert window.public_view_state() == snapshots[1]
+    click(window, window.buttons['agent_live'][0].center)
+    assert window.public_view_state() == live and window.inspector.index == -1
+    assert window.buttons['agent_step'][1]
+    assert window.engine.public_state() == live
+    metrics = window.inspector.lines(window, window.observer.snapshot()[-1])
+    assert any('Primary variables:' in line for line in metrics)
+    assert any('CNF clauses:' in line for line in metrics)
+    assert any('SAT calls:' in line for line in metrics)
+    assert any('Decisions:' in line and 'Propagations:' in line and 'Backtracks:' in line for line in metrics)
+    assert any('Deduction steps: 3 | Reveal waves: 3' in line for line in metrics)
+    assert any('Runtime (analysis total)' in line for line in metrics)
