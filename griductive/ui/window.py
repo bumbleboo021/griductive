@@ -74,8 +74,16 @@ class GameWindow:
 
     def clue_text(self, clue):
         if clue.kind == 'QUOTE':
-            pool = cfg.CHARACTER_QUOTES or ['...']
-            seed = clue.id+'|'+self.engine.title+'|'+','.join(c.name for c in self.public_view_state().characters)
+            state = self.public_view_state()
+            pool = cfg.CHARACTER_QUOTES
+            if isinstance(pool, dict):
+                # The engine emits revealed verdicts and clues in the same board order.
+                owner = next((cell for (cell, _), item in zip(state.verdicts, state.clues)
+                              if item.id == clue.id), None)
+                name = next((c.name for c in state.characters if c.cell == owner), None)
+                pool = pool.get(name)
+            pool = pool or ['...']
+            seed = clue.id+'|'+self.engine.title+'|'+','.join(c.name for c in state.characters)
             index = int.from_bytes(hashlib.sha256(seed.encode()).digest()[:4],'big') % len(pool)
             return pool[index]
         names = {char.cell: char.name for char in self.public_view_state().characters}
