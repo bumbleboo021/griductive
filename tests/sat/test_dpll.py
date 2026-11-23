@@ -197,21 +197,60 @@ def test_truth_table_oracle_differential():
             assumptions = tuple(v if rng.choice((True, False)) else -v for v in assump_vars)
 
             expected_sat = _truth_table_is_sat(clauses, num_vars, assumptions)
-            res = solve(clauses=clauses, total_vars=num_vars, assumptions=assumptions)
+            for heuristic in ("smallest", "jw"):
+                res = solve(
+                    clauses=clauses,
+                    total_vars=num_vars,
+                    assumptions=assumptions,
+                    heuristic=heuristic,
+                )
 
-            assert res.is_sat is expected_sat
-            assert res.is_timeout is False
-            if expected_sat:
-                assert res.model is not None
-                assert set(res.model.keys()) == set(range(1, num_vars + 1))
-                assert _is_model_valid(clauses, assumptions, res.model)
-            else:
-                assert res.model is None
+                assert res.is_sat is expected_sat
+                assert res.is_timeout is False
+                if expected_sat:
+                    assert res.model is not None
+                    assert set(res.model.keys()) == set(range(1, num_vars + 1))
+                    assert _is_model_valid(clauses, assumptions, res.model)
+                else:
+                    assert res.model is None
 
-            # Kiểm tra tính xác định khi gọi lặp lại cùng một đầu vào.
-            res2 = solve(clauses=clauses, total_vars=num_vars, assumptions=assumptions)
-            assert res2.is_sat is res.is_sat
-            assert res2.model == res.model
-            assert res2.decisions == res.decisions
-            assert res2.propagations == res.propagations
-            assert res2.backtracks == res.backtracks
+                # Kiểm tra tính xác định khi gọi lặp lại cùng một đầu vào.
+                res2 = solve(
+                    clauses=clauses,
+                    total_vars=num_vars,
+                    assumptions=assumptions,
+                    heuristic=heuristic,
+                )
+                assert res2.is_sat is res.is_sat
+                assert res2.model == res.model
+                assert res2.decisions == res.decisions
+                assert res2.propagations == res.propagations
+                assert res2.backtracks == res.backtracks
+
+
+def test_jw_heuristic_branching_and_validation():
+    import pytest
+
+    # x2 xuất hiện 3 lần ở cực tính âm (-2) -> J(-2)=0.75 > J(+1)=0.25.
+    # JW phải chọn biến 2 trước và thử False trước -> cả 3 mệnh đề SAT ngay sau 1 decision.
+    clauses = [[-2, 1], [-2, 3], [-2, 4]]
+    res_smallest = solve(clauses=clauses, total_vars=4, heuristic="smallest")
+    res_jw = solve(clauses=clauses, total_vars=4, heuristic="jw")
+    assert res_smallest.is_sat is True and res_smallest.decisions == 2
+    assert res_jw.is_sat is True
+    assert res_jw.model is not None
+    assert _is_model_valid(clauses, (), res_jw.model)
+    assert res_jw.model[2] is False
+    assert res_jw.decisions == 1
+    assert res_jw.backtracks == 0
+
+    # So sánh với PHP(4,3): cả smallest và jw đều phải kết luận UNSAT.
+    total_vars, php_clauses = _pigeonhole_cnf(4, 3)
+    php_jw = solve(clauses=php_clauses, total_vars=total_vars, heuristic="jw")
+    assert php_jw.is_sat is False
+    assert php_jw.is_timeout is False
+    assert php_jw.model is None
+
+    # Tham số heuristic không hợp lệ phải báo ValueError rõ ràng.
+    with pytest.raises(ValueError):
+        solve(clauses=[[1, 2]], total_vars=2, heuristic="unknown_strategy")

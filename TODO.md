@@ -124,7 +124,7 @@ clause statistics, and successful integration with Persons 3 and 4.
 - [x] Compare small formulas with a truth-table oracle and test repeated calls.
 - [x] Work with Person 2 to verify formulas containing auxiliary variables.
 - [x] Document DPLL and the selected deterministic branching rule for the report.
-- [ ] Optional after correctness, add another heuristic for controlled comparisons.
+- [x] Optional after correctness, add another heuristic for controlled comparisons.
 
 Acceptance requires complete models, reproducible results, isolated assumptions,
 and correct counters through Person 4's entailment calls.

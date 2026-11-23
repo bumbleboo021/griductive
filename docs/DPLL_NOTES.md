@@ -6,11 +6,12 @@ Tài liệu này tổng hợp phần thiết kế, quy tắc chọn biến, đ�
 
 ## 1. Giao diện tích hợp và phân biệt 3 trạng thái kết quả
 
-Hàm `solve(clauses, total_vars, assumptions=(), timeout_seconds=None) -> SatResult` nhận vào:
+Hàm `solve(clauses, total_vars, assumptions=(), timeout_seconds=None, heuristic="smallest") -> SatResult` nhận vào:
 - `clauses`: công thức CNF dạng chuẩn DIMACS (mỗi mệnh đề gồm các literal nguyên khác `0`; `+v` là $v = \text{True}$, `-v` là $v = \text{False}$).
 - `total_vars`: tổng số biến đã khai báo `1..total_vars` (gồm cả biến chính và biến phụ do Encoder sinh ra).
 - `assumptions`: tập giả định tạm thời cho riêng một lần gọi (ví dụ `(-v,)` để kiểm tra $KB_t \land \neg C_v$).
 - `timeout_seconds`: giới hạn thời gian chạy (giây) hoặc `None`.
+- `heuristic`: chiến lược chọn biến và cực tính rẽ nhánh (`"smallest"` mặc định, hoặc `"jw"` cho đối chứng thực nghiệm; báo `ValueError` nếu truyền giá trị khác).
 
 Kết quả `SatResult` (frozen dataclass) phân biệt tường minh 3 trạng thái:
 
@@ -45,8 +46,8 @@ Kết quả `SatResult` (frozen dataclass) phân biệt tường minh 3 trạng 
 4. **Rẽ nhánh và quay lui (`_dpll`):**
    - Kiểm tra thời hạn `_check_timeout()` ở mỗi nút đệ quy và mỗi lượt lan truyền; nếu quá hạn thì ném ngoại lệ nội bộ `_SolveTimeout` để thoát thẳng về `solve()` và trả `is_timeout=True`.
    - Sau `_unit_propagate`, nếu không còn mệnh đề nào chưa `SAT`, trả về phép gán hiện tại.
-   - Ngược lại, chọn 1 biến `best_var` theo quy tắc tất định, tăng `decisions += 1`, và thử nhánh `True` trên một bản sao `curr_assignment.copy()`.
-   - Nếu nhánh `True` trả về `None` (mọi đường đi dưới nó đều xung đột), tăng `backtracks += 1`, quay lui về trạng thái cha (không bị ảnh hưởng bởi các phép gán đã thử ở nhánh `True`) và thử tiếp nhánh `False` trên bản sao độc lập.
+   - Ngược lại, gọi bộ chọn rẽ nhánh theo `heuristic` để lấy `(best_var, first_val)`, tăng `decisions += 1`, và thử nhánh `first_val` trên một bản sao `curr_assignment.copy()`.
+   - Nếu nhánh đầu trả về `None` (mọi đường đi dưới nó đều xung đột), tăng `backtracks += 1`, quay lui về trạng thái cha (không bị ảnh hưởng bởi các phép gán đã thử ở nhánh trước) và thử tiếp nhánh `not first_val` trên bản sao độc lập.
 
 5. **Hoàn thiện biến tự do:**
    - Khi `_dpll` trả về nghiệm hợp lệ, mọi biến $v \in \{1, \dots, \text{total\_vars}\}$ chưa xuất hiện trong nghiệm (biến không bị ràng buộc hoặc chỉ nằm trong các mệnh đề đã thỏa) được gán mặc định `False`, đảm bảo `model` luôn phủ đầy đủ toàn bộ các biến đã khai báo.
@@ -55,11 +56,22 @@ Kết quả `SatResult` (frozen dataclass) phân biệt tường minh 3 trạng 
 
 ## 3. Quy tắc chọn biến rẽ nhánh xác định
 
-- **Quy tắc đã chọn:** **Smallest-Variable-ID** — chọn biến chưa gán có chỉ số nguyên dương nhỏ nhất trong số các literal xuất hiện ở những mệnh đề chưa đạt trạng thái `SAT`, và luôn thử phân cực **`True` trước, `False` sau**.
-- **Lý do lựa chọn:**
-  1. **Tính tất định tuyệt đối:** Không sử dụng yếu tố ngẫu nhiên; cùng một đầu vào luôn cho ra cùng cây tìm kiếm, cùng `model` và cùng các bộ đếm.
+Bộ giải hỗ trợ hai chiến lược chọn biến tất định (không dùng yếu tố ngẫu nhiên):
+
+### 3.1. Chiến lược cơ sở: Smallest-Variable-ID (`heuristic="smallest"`, mặc định)
+- **Quy tắc:** Chọn biến chưa gán có chỉ số nguyên dương nhỏ nhất trong số các literal xuất hiện ở những mệnh đề chưa đạt trạng thái `SAT`, và luôn thử phân cực **`True` trước, `False` sau**.
+- **Lý do lựa chọn làm baseline:**
+  1. **Tính tất định tuyệt đối:** Cùng một đầu vào luôn cho ra cùng cây tìm kiếm, cùng `model` và cùng các bộ đếm.
   2. **Ưu tiên biến chính trước biến phụ:** Bộ mã hóa của Thành viên 2 cấp phát biến chính (các ô trên lưới) là `1..N²` và biến phụ là `N² + 1..total_vars`. Việc ưu tiên ID nhỏ nhất giúp DPLL rẽ nhánh trên các biến bàn cờ trước, để các biến phụ của ràng buộc đếm tuần tự (`EXACTLY`/`AT_MOST`/`AT_LEAST`), chẵn lẻ (`ODD`/`EVEN`) và liên thông (`CONNECTED`) tự động được suy ra qua Unit Propagation.
   3. **Tránh rẽ nhánh dư thừa:** Bỏ qua các biến chỉ nằm trong mệnh đề đã `SAT` và các biến tự do.
+
+### 3.2. Chiến lược đối chứng: Dynamic Two-Sided Jeroslow–Wang (`heuristic="jw"`)
+- **Công thức:** Tại mỗi nút rẽ nhánh, trên các mệnh đề chưa `SAT` (với $|C'|$ là số literal chưa gán phân biệt còn lại trong mệnh đề $C$), tính trọng số cho từng literal:
+  $$J(\ell) = \sum_{\substack{C \in \text{UnSAT} \\ \ell \in C}} 2^{-|C'|}$$
+- **Chọn biến & cực tính:**
+  - Chọn biến $v$ tối đa hóa tổng $J(+v) + J(-v)$; nếu hòa điểm, ưu tiên `v` nhỏ nhất (qua khóa `(score, -v)`) để đảm bảo tính tất định 100%.
+  - Thử `True` trước nếu $J(+v) \ge J(-v)$, ngược lại thử `False` trước.
+- **Nhận xét đối chứng sơ bộ trên 13 màn chơi (`timeout_seconds=10.0`):** Cả hai chiến lược đều giải **13/13 màn** với `0` backtracks; `jw` giảm tổng số quyết định trên toàn bộ 13 màn từ `11,442` xuống `10,122` (**giảm 11.5%**, nổi bật nhất ở `5x5/level_02` giảm `36.9%` từ `1,350` xuống `852`), với tổng thời gian solver giảm nhẹ từ `5.39s` xuống `5.30s`.
 
 ---
 
@@ -67,9 +79,9 @@ Kết quả `SatResult` (frozen dataclass) phân biệt tường minh 3 trạng 
 
 Mỗi lần gọi `solve()` trả về một đối tượng `SatResult` với các bộ đếm cho **riêng lần gọi đó**:
 
-- **`decisions` (`int`):** Số nút rẽ nhánh đã mở, tính mỗi khi `_dpll` chọn một biến chưa gán `best_var` để tách thành nhánh `True`/`False`. Các phép ép từ `UNIT` và `assumptions` đầu vào không tính vào `decisions`.
+- **`decisions` (`int`):** Số nút rẽ nhánh đã mở, tính mỗi khi `_dpll` chọn một biến chưa gán `best_var` để tách thành hai nhánh giá trị. Các phép ép từ `UNIT` và `assumptions` đầu vào không tính vào `decisions`.
 - **`propagations` (`int`):** Số phép gán biến được suy ra bắt buộc từ một mệnh đề `UNIT` trong `_unit_propagate` (bao gồm cả mệnh đề đơn vị sẵn có ở gốc và các mệnh đề trở thành đơn vị trong quá trình lan truyền dây chuyền). Các phần tử trong `assumptions` đầu vào không tính vào `propagations`.
-- **`backtracks` (`int`):** Số lần nhánh thử `True` thất bại do xung đột và bộ giải quay lui sang thử nhánh `False` tại một nút quyết định.
+- **`backtracks` (`int`):** Số lần nhánh thử đầu tiên (`first_val`) thất bại do xung đột và bộ giải quay lui sang thử giá trị còn lại (`not first_val`) tại một nút quyết định.
 - **`runtime` (`float`):** Thời gian đồng hồ thực (tính bằng giây qua `time.perf_counter()`) từ lúc bắt đầu `solve()` đến khi trả về `SatResult`.
 
 ### Quy ước tổng hợp số liệu trên một màn chơi (cho Thành viên 5)
