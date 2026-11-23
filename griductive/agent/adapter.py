@@ -1,5 +1,7 @@
 from __future__ import annotations
 import logging
+from collections.abc import Mapping
+from time import perf_counter
 from typing import Tuple
 from griductive.domain.models import Analysis, PublicState, Status
 from griductive.agent.trace import DeductionTrace, TraceStep
@@ -13,6 +15,9 @@ class Agent:
           self.timeout_seconds = timeout_seconds
           self.strict_dpll = strict_dpll
           self.last_query_count = 0
+          self.last_sat_calls = 0
+          self.last_solver_metrics = dict(decisions=0, propagations=0, backtracks=0)
+          self.last_solver_runtime_ms = 0.0
           self.trace = None
 
      def analyze(self, state: PublicState) -> Analysis:
@@ -22,15 +27,39 @@ class Agent:
                Analysis(consistent = False, verdicts = ()) nếu KB công khai bị mâu thuẫn
                Analysis(consistent = True, verdicts = tuple(...)) chứa phân loại cho tất cả các ô chưa giải theo đúng thứ tự hàng trước
           """
-          if self.strict_dpll:
-               return self._analyze_via_dpll(state)
-
+          # Capture this live call, including failures, without reading puzzle files.
+          self.last_trace_step = TraceStep(1, [clue.id for clue in state.clues])
+          self.last_backend = "CNF / DPLL"
+          self.last_fallback_reason = None
+          self.last_cnf_counts = None
+          self.last_query_count = 0
+          self.last_sat_calls = 0
+          self.last_solver_metrics = dict(decisions=0, propagations=0, backtracks=0)
+          self.last_solver_runtime_ms = 0.0
           try:
-               return self._analyze_via_dpll(state)
+               return self._analyze_with_trace(state, self.last_trace_step)
+          finally:
+               self.last_query_count = self.last_sat_calls
 
-          except (ImportError, ModuleNotFoundError, NotImplementedError) as err:
-               logger.debug("Các module CNF/DPLL chưa sẵn sàng (%s). Chuyển sang bộ giải tham chiếu", err)
-               return self._fallback_reference(state)
+     def _solve_recorded(self, solve, **kwargs):
+          """Measure actual solver invocations; missing counters stay unavailable."""
+          self.last_sat_calls += 1
+          started = perf_counter()
+          try:
+               result = solve(**kwargs)
+          except Exception:
+               self.last_solver_metrics = dict.fromkeys(self.last_solver_metrics)
+               raise
+          finally:
+               self.last_solver_runtime_ms += (perf_counter()-started)*1000
+          stats = getattr(result, 'stats', None)
+          for name, total in self.last_solver_metrics.items():
+               value = getattr(result, name, None)
+               if value is None and stats is not None:
+                    value = stats.get(name) if isinstance(stats, Mapping) else getattr(stats, name, None)
+               valid = isinstance(value, int) and not isinstance(value, bool) and value >= 0
+               self.last_solver_metrics[name] = total+value if total is not None and valid else None
+          return result
 
      def run_trace(
                self,
@@ -120,14 +149,11 @@ class Agent:
                return self._analyze_via_dpll(state, trace_step = trace_step)
 
           except(ImportError, ModuleNotFoundError, NotImplementedError) as err:
+               if self.strict_dpll:
+                    raise
                logger.debug("Các module CNF/DPLL chưa sẵn sàng (%s). Chuyển sang bộ giải tham chiếu", err)
-
-               from griductive.agent.trace import SatQueryRecord
-               trace_step.sat_queries.append(SatQueryRecord(
-                    cell = "KB",
-                    assumption_type = "BASE_CHECK",
-                    outcome = "SAT"
-               ))
+               self.last_backend = "Reference fallback"
+               self.last_fallback_reason = str(err)
                return self._fallback_reference(state)
 
      def _analyze_via_dpll(self, state: PublicState, trace_step: TraceStep | None = None) -> Analysis:
@@ -138,13 +164,18 @@ class Agent:
                trace_step: Nếu không phải None, ghi nhận chi tiết các truy vấn SAT
           """
           from griductive.logic.encoder import encode
-          from griductive.sat.dpll import solve
+          self.last_sat_calls = 0
+          self.last_solver_metrics = dict(decisions=0, propagations=0, backtracks=0)
+          self.last_solver_runtime_ms = 0.0
 
           # Mã hóa trạng thái sang CNF
           cnf_result = encode(state)
+          self.last_cnf_counts = (cnf_result.num_primary_vars,
+                                  cnf_result.num_aux_vars, cnf_result.num_clauses)
+          from griductive.sat.dpll import solve
 
           # Kiểm tra tính nhất quán của KBt
-          base_res = solve(
+          base_res = self._solve_recorded(solve,
                clauses = cnf_result.clauses,
                total_vars = cnf_result.total_vars,
                assumptions = (),
@@ -188,7 +219,7 @@ class Agent:
 
                # Query 1: Giả sử ô này là Innocent (Ci = False => assumption là -var_id)
                # Nếu KBt ^ ¬Ci là UNSAT => KBt |= Ci (ô này bắt buộc là CRIMINAL)
-               res_innocent = solve(
+               res_innocent = self._solve_recorded(solve,
                     clauses = cnf_result.clauses,
                     total_vars = cnf_result.total_vars,
                     assumptions = (-var_id,),
@@ -196,6 +227,10 @@ class Agent:
                )
                queries += 1
                if getattr(res_innocent, "is_timeout", False):
+                    if trace_step is not None:
+                         from griductive.agent.trace import SatQueryRecord
+                         trace_step.sat_queries.append(SatQueryRecord(
+                              cell, "ASSUME_INNOCENT", "TIMEOUT"))
                     raise TimeoutError(f"Bộ giải SAT bị quá thời gian khi phân tích ô {cell}")
 
                if not res_innocent.is_sat:
@@ -223,7 +258,7 @@ class Agent:
 
                # Query 2: Giả sử ô này là Criminal (Ci = True => assumption là +var_id)
                # Nếu KBt ^ Ci là UNSAT => KBt |= ¬Ci (ô này bắt buộc là INNOCENT)
-               res_criminal = solve(
+               res_criminal = self._solve_recorded(solve,
                     clauses = cnf_result.clauses,
                     total_vars = cnf_result.total_vars,
                     assumptions = (var_id,),
@@ -231,6 +266,10 @@ class Agent:
                )
                queries += 1
                if getattr(res_criminal, "is_timeout", False):
+                    if trace_step is not None:
+                         from griductive.agent.trace import SatQueryRecord
+                         trace_step.sat_queries.append(SatQueryRecord(
+                              cell, "ASSUME_CRIMINAL", "TIMEOUT"))
                     raise TimeoutError(f"Bộ giải SAT bị quá thời gian khi phân tích ô {cell}")
 
                if not res_criminal.is_sat:

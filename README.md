@@ -73,8 +73,8 @@ python main.py --puzzle data/puzzles/5x5/level_05.json
 - Stage opens the named level list. Restart restores initial reveals. Hint points
   to a forced character. Auto Solve plays proved moves and Stop pauses it after
   any in-progress analysis.
-- The top-right `?` explains the rules. Music toggles playback and Tracks selects
-  a WAV, OGG, MP3, or FLAC file from `assets/sounds/`.
+- The top-right `?` explains the rules. Music opens the track picker with an
+  on/off toggle and WAV, OGG, MP3, or FLAC files from `assets/sounds/`.
 - Escape closes the active popup. On the main screen it exits the game.
 
 The default stage is `data/puzzles/3x3/level_01.json`. Each stage has a root `name`
@@ -87,6 +87,43 @@ on the cast. Source JSON character names currently must be unique and alphabetic
 in row-major order. GUI randomization happens after loading.
 
 Stage names, coverage and validation instructions are in [docs/LEVELS.md](docs/LEVELS.md).
+
+## Inspect the agent in the game
+
+Open **Agent** near the top-right of the board.
+The window expands to dock the inspector beside the game and scales to fit
+smaller displays; closing it restores the original size. Click the board to play with mouse/keyboard, or click the
+inspector to use arrow keys for scrolling and history navigation.
+
+**Analyze** classifies the public
+board without revealing cards; **Next move** proves and reveals one character.
+**Auto Solve / Stop** runs or pauses the normal solver while recording its calls.
+Use Previous/Next to browse calls and the wheel or arrow keys
+to scroll details. The inspector also records ordinary Hint and verdict actions.
+
+Previous/Next also previews the public board after that call's action. Historical
+cards and clues are read-only; the live engine is not rewound. **Live**, returning
+to the newest call, or closing the inspector restores the live board. Browsing
+pauses Auto Solve; new moves are disabled until you return to Live.
+
+Experiment metrics include primary/auxiliary variables, CNF clauses, actual SAT
+calls, solver decisions/propagations/backtracks, accepted deduction steps and reveal
+waves, and analysis runtime. Per-call values and cumulative totals are shown
+separately. Runtime excludes animations, idle time, and extra diagnostic encoding.
+Initial face-up cards and hints do not count as deduction steps. Totals survive
+history eviction, and reset on Restart, Stage, or backend changes. Missing solver
+counters are **N/A**; reference analysis has zero SAT calls. CNF sizes refer to the
+call's input KB, while the replay board shows its post-action state.
+
+Each call shows its actual backend, public clues, classifications, elapsed time,
+CNF variable/clause counts when available, recorded SAT assumptions and results,
+and newly revealed clues. History keeps the latest 128 calls and resets on
+Restart or Stage changes. Calls are analysis invocations, not reveal-step counts.
+
+**Use Reference** and **Use Logic Agent** switch backends while preserving proved
+cards and clearing history. Logic Agent explicitly displays **Reference fallback**
+if CNF/DPLL is unavailable; it never invents SAT results for reference analysis.
+This branch still needs `griductive/sat/dpll.py` for real DPLL execution.
 
 ## First checks after pulling the project
 

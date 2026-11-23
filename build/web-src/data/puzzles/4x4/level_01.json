@@ -1,0 +1,323 @@
+{
+  "title": "4x4 - Quiet Rows",
+  "size": 4,
+  "initially_revealed": [
+    "A1"
+  ],
+  "metadata": {
+    "author": "Project team with AI assistance",
+    "seed": 401,
+    "source": "Original project level; not an imported official puzzle",
+    "design": "Regional counts, overlap deductions and odd parity",
+    "pre_pruning_construction_plan": [
+      {
+        "owner": "A1",
+        "forces": [
+          "B1",
+          "C1",
+          "D1"
+        ]
+      },
+      {
+        "owner": "B1",
+        "forces": [
+          "C3",
+          "D3"
+        ]
+      },
+      {
+        "owner": "C1",
+        "forces": [
+          "C4",
+          "D4"
+        ]
+      },
+      {
+        "owner": "D1",
+        "forces": [
+          "C2",
+          "D2"
+        ]
+      },
+      {
+        "owner": "C3",
+        "forces": [
+          "B2"
+        ]
+      },
+      {
+        "owner": "D3",
+        "forces": [
+          "B4"
+        ]
+      },
+      {
+        "owner": "C4",
+        "forces": [
+          "A2",
+          "B3",
+          "A4"
+        ]
+      },
+      {
+        "owner": "D4",
+        "forces": [
+          "A3"
+        ]
+      }
+    ],
+    "quote_cells": [
+      "B1",
+      "C1",
+      "A2",
+      "B2",
+      "C2",
+      "B3",
+      "A4",
+      "D4"
+    ]
+  },
+  "characters": [
+    {
+      "cell": "A1",
+      "name": "Arlecchino",
+      "origin": "Khaenri'ah",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-A1",
+        "type": "EXACTLY",
+        "region": {
+          "type": "row",
+          "index": 1
+        },
+        "count": 4,
+        "target_status": "INNOCENT"
+      }
+    },
+    {
+      "cell": "B1",
+      "name": "Ayaka",
+      "origin": "Inazuma",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-B1",
+        "type": "QUOTE"
+      }
+    },
+    {
+      "cell": "C1",
+      "name": "Chiori",
+      "origin": "Inazuma",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-C1",
+        "type": "QUOTE"
+      }
+    },
+    {
+      "cell": "D1",
+      "name": "Columbina",
+      "origin": "Snezhnaya",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-D1",
+        "type": "AT_LEAST",
+        "region": {
+          "type": "intersection",
+          "regions": [
+            {
+              "type": "neighbors",
+              "cell": "D1"
+            },
+            {
+              "type": "row",
+              "index": 2
+            }
+          ]
+        },
+        "count": 2
+      }
+    },
+    {
+      "cell": "A2",
+      "name": "Escoffier",
+      "origin": "Fontaine",
+      "status": "CRIMINAL",
+      "clue": {
+        "id": "clue-A2",
+        "type": "QUOTE"
+      }
+    },
+    {
+      "cell": "B2",
+      "name": "Eula",
+      "origin": "Mondstadt",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-B2",
+        "type": "QUOTE"
+      }
+    },
+    {
+      "cell": "C2",
+      "name": "Furina",
+      "origin": "Fontaine",
+      "status": "CRIMINAL",
+      "clue": {
+        "id": "clue-C2",
+        "type": "QUOTE"
+      }
+    },
+    {
+      "cell": "D2",
+      "name": "Ganyu",
+      "origin": "Liyue",
+      "status": "CRIMINAL",
+      "clue": {
+        "id": "clue-D2",
+        "type": "EXACTLY",
+        "region": {
+          "type": "intersection",
+          "regions": [
+            {
+              "type": "neighbors",
+              "cell": "A4"
+            },
+            {
+              "type": "row",
+              "index": 3
+            }
+          ]
+        },
+        "count": 2
+      }
+    },
+    {
+      "cell": "A3",
+      "name": "Hu Tao",
+      "origin": "Liyue",
+      "status": "CRIMINAL",
+      "clue": {
+        "id": "clue-A3",
+        "type": "EXACTLY",
+        "region": {
+          "type": "row",
+          "index": 3
+        },
+        "count": 2,
+        "target_status": "INNOCENT"
+      }
+    },
+    {
+      "cell": "B3",
+      "name": "Kazuha",
+      "origin": "Inazuma",
+      "status": "CRIMINAL",
+      "clue": {
+        "id": "clue-B3",
+        "type": "QUOTE"
+      }
+    },
+    {
+      "cell": "C3",
+      "name": "Keqing",
+      "origin": "Liyue",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-C3",
+        "type": "EXACTLY",
+        "region": {
+          "type": "neighbors",
+          "cell": "C1"
+        },
+        "count": 3,
+        "target_status": "INNOCENT"
+      }
+    },
+    {
+      "cell": "D3",
+      "name": "Lumine",
+      "origin": "Traveller",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-D3",
+        "type": "EXACTLY",
+        "region": {
+          "type": "intersection",
+          "regions": [
+            {
+              "type": "neighbors",
+              "cell": "C4"
+            },
+            {
+              "type": "row",
+              "index": 4
+            }
+          ]
+        },
+        "count": 0
+      }
+    },
+    {
+      "cell": "A4",
+      "name": "Mitya",
+      "origin": "Snezhnaya",
+      "status": "CRIMINAL",
+      "clue": {
+        "id": "clue-A4",
+        "type": "QUOTE"
+      }
+    },
+    {
+      "cell": "B4",
+      "name": "Nahida",
+      "origin": "Sumeru",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-B4",
+        "type": "EXACTLY",
+        "region": {
+          "type": "intersection",
+          "regions": [
+            {
+              "type": "neighbors",
+              "cell": "C3"
+            },
+            {
+              "type": "row",
+              "index": 4
+            }
+          ]
+        },
+        "count": 0
+      }
+    },
+    {
+      "cell": "C4",
+      "name": "Nicole",
+      "origin": "Celestia",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-C4",
+        "type": "EXACTLY",
+        "region": {
+          "type": "neighbors",
+          "cell": "A3"
+        },
+        "count": 2,
+        "target_status": "INNOCENT"
+      }
+    },
+    {
+      "cell": "D4",
+      "name": "Odette",
+      "origin": "Snezhnaya",
+      "status": "INNOCENT",
+      "clue": {
+        "id": "clue-D4",
+        "type": "QUOTE"
+      }
+    }
+  ],
+  "name": "4x4 - Quiet Rows"
+}
