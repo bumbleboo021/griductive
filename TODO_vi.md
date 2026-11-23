@@ -97,7 +97,7 @@ Tiêu chí nghiệm thu (acceptance) yêu cầu sự thống nhất giữa ngữ
 - [x] Đối chiếu các công thức nhỏ với bộ kiểm chứng bằng bảng chân trị (truth-table oracle) và kiểm thử các lần gọi lặp lại.
 - [x] Phối hợp với Thành viên 2 để kiểm chứng các công thức có chứa biến phụ trợ.
 - [x] Viết tài liệu mô tả `DPLL` và quy tắc chọn biến rẽ nhánh (branching rule) xác định đã chọn cho báo cáo.
-- [ ] Tùy chọn sau khi đã đảm bảo tính đúng đắn: bổ sung một chiến lược heuristic khác để thực hiện các so sánh có đối chứng.
+- [x] Tùy chọn sau khi đã đảm bảo tính đúng đắn: bổ sung một chiến lược heuristic khác để thực hiện các so sánh có đối chứng.
 
 Tiêu chí nghiệm thu yêu cầu trả về mô hình đầy đủ, kết quả có thể tái lập, các giả định được cô lập và các bộ đếm chính xác thông qua các lời gọi kiểm tra hệ quả logic (entailment) của Thành viên 4.
 
