@@ -22,3 +22,9 @@ Các yêu cầu dưới đây được tóm lược từ lịch sử làm việc
 Luật chơi tham khảo từ Griductive~\cite{griductive} và đề bài. Ảnh, phông chữ và âm nhạc được cung cấp từ bên ngoài, không do AI tạo; nguồn được ghi trong \path{assets/ATTRIBUTION.md}~\cite{assetRecord}.
 
 Đối với mô-đun mã hóa CNF, toàn bộ mã nguồn sản phẩm trong \texttt{griductive/logic/encoder.py} do Người~2 tự thiết kế và lập trình hoàn toàn, không đưa mã nguồn sản phẩm cho AI hay dùng AI sinh mã cài đặt. Các tệp kiểm thử do AI hỗ trợ tạo ra đều được rà soát và chạy nghiệm thu cục bộ, đạt kết quả $189/189$ ca kiểm thử thành công.
+
+Đối với mô-đun Tác tử suy diễn logic (\texttt{griductive/agent/}):
+\begin{itemize}
+    \item \textbf{Về trách nhiệm lập trình:} Chịu trách nhiệm chính về toàn bộ thiết kế kiến trúc \texttt{adapter.py}, quy trình suy diễn phản chứng, bộ ghi vết \texttt{trace.py} và thuật toán kiểm tra tính duy nhất \texttt{uniqueness.py}. Công cụ AI được sử dụng với vai trò trợ lý thảo luận lý thuyết logic, rà soát cú pháp, sửa lỗi logic và hỗ trợ gỡ lỗi thụt dòng. Mã nguồn cốt lõi được thành viên tự cài đặt, kiểm chứng và chạy nghiệm thu thành công trên toàn bộ các màn chơi của đề tài.
+    \item \textbf{Về tài liệu tham khảo:} Lý thuyết về suy diễn phản chứng trong logic mệnh đề và nguyên lý vòng lặp suy luận được tham khảo từ sách giáo trình \textit{Artificial Intelligence: A Modern Approach} (AIMA) của Russell \& Norvig~\cite{russell2020aima}.
+\end{itemize}
