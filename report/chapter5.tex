@@ -126,7 +126,7 @@ Vòng lặp suy diễn kết thúc khi gặp một trong các trạng thái dừ
 \label{sec:deduction_trace}
 
 \subsection{Ý nghĩa và cấu trúc dữ liệu lưu vết}
-Để phục vụ việc kiểm chứng tính đúng đắn của thuật toán, đánh giá hiệu năng thực nghiệm và phân tích quá trình giải đố, tác tử được tích hợp cơ chế ghi nhận \textbf{vết suy diễn} (\textit{Deduction Trace}) độc lập tại tệp \texttt{griductive/agent/trace.py}. Vết suy diễn lưu lại toàn bộ diễn biến của từng bước lật thẻ theo thời gian.
+Để phục vụ việc kiểm chứng tính đúng đắn của thuật toán, đánh giá hiệu năng thực nghiệm và phân tích quá trình giải đố, tác tử được tích hợp cơ chế ghi nhận vết suy diễn độc lập tại tệp \texttt{griductive/agent/trace.py}. Vết suy diễn lưu lại toàn bộ diễn biến của từng bước lật thẻ theo thời gian.
 
 Cấu trúc vết suy diễn được tổ chức theo hai tầng dữ liệu chính:
 \begin{itemize}
@@ -226,7 +226,7 @@ Thay vì phải duyệt toàn bộ không gian trạng thái $2^{N \times N}$ b�
             \neg v, & \text{nếu } M_1[v] = \text{False}.
         \end{cases}
     \end{equation}
-    Để ngăn bộ giải tìm lại chính xác cấu hình bàn cờ này ở lượt giải tiếp theo, ta phủ định hội trên theo quy tắc De Morgan để tạo ra một mệnh đề tuyển mới:
+    Để ngăn bộ giải tìm lại chính xác cấu hình bàn cờ này ở lượt giải tiếp theo, ta phủ định hội trên theo quy tắc De Morgan để tạo ra một mệnh đề mới:
     \begin{equation}
         \text{BlockingClause}(M_1) = \neg \left( \bigwedge_{v \in \mathcal{V}_{\text{primary}}} \ell_v \right) \equiv \bigvee_{v \in \mathcal{V}_{\text{primary}}} \neg \ell_v
     \end{equation}
