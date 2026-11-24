@@ -638,3 +638,20 @@ def test_agent_history_replays_public_board_without_rewinding_engine(window):
     assert any('Decisions:' in line and 'Propagations:' in line and 'Backtracks:' in line for line in metrics)
     assert any('Deduction steps: 3 | Reveal waves: 3' in line for line in metrics)
     assert any('Runtime (analysis total)' in line for line in metrics)
+
+
+def test_quote_uses_visible_owner_even_for_custom_clue_id(window, monkeypatch):
+    from dataclasses import replace
+    from griductive.domain.models import Clue
+    from griductive.ui import config
+
+    state = window.engine.public_state()
+    quote = Clue("personal-remark", "QUOTE", ())
+    state = replace(state, clues=(quote,))
+    owner = state.verdicts[0][0]
+    monkeypatch.setattr(window, "public_view_state", lambda: state)
+    monkeypatch.setattr(config, "CHARACTER_QUOTES", {"Ayaka": ["Tea."], "Venti": ["Lyre."]})
+    for name, expected in (("Ayaka", "Tea."), ("Venti", "Lyre."), ("Guest", "...")):
+        state = replace(state, characters=tuple(
+            replace(c, name=name) if c.cell == owner else c for c in state.characters))
+        assert window.clue_text(quote) == expected
