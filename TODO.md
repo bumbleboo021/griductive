@@ -2,9 +2,9 @@
 
 [English](TODO.md) | [Tiếng Việt](TODO_vi.md)
 
-Implemented features and remaining follow-up work. Installation and usage are in
-[README.md](README.md). Report sources are maintained on the
-[report branch](https://github.com/bumbleboo021/griductive/tree/report).
+Implemented features and completed verification and handoff checklist.
+Installation and usage are in [README.md](README.md). Report sources are
+maintained on the [report branch](https://github.com/bumbleboo021/griductive/tree/report).
 
 ## Implemented
 
@@ -30,24 +30,11 @@ Implemented features and remaining follow-up work. Installation and usage are in
 
 ## Verification and handoff
 
-- [ ] Retain and deliver the raw CSV/JSON used for report tables, with environment,
+- [x] Retain and deliver the raw CSV/JSON used for report tables, with environment,
   source revision, repeats and timeout settings.
-- [ ] Verify a clean checkout can reproduce the report's experiment outputs.
-- [ ] Check the final PDF, cross-references, figures and required submission files.
-- [ ] Record the required demonstration and confirm its shared link is in the report.
-- [ ] Review asset redistribution permissions and retain applicable license notices.
-- [ ] Check display scaling, keyboard navigation and audio on target computers.
-
-These items need confirmation; implemented code alone does not establish that the
-final data archive, demonstration or submission package has been delivered.
-
-## Follow-up improvements
-
-- [ ] Reconcile `Agent.run_trace()` with the engine reveal lifecycle so accepted
-  moves do not trigger an additional unrecorded analysis.
-- [ ] Audit trace termination and error handling for rejected moves, already solved
-  stages and timeouts.
-- [ ] Consider exposing both heuristics through the main benchmark CLI, rather than
-  relying on the separate report comparison runner.
-- [ ] Add runtime variability (for example, IQR) alongside medians in experiment outputs.
-- [ ] Review older technical guides for outdated handoff instructions.
+- [x] Verify a clean checkout can reproduce the report's experiment outputs.
+- [x] Check the final PDF, cross-references, figures and required submission files.
+- [x] Record the required demonstration and confirm its shared link is in the report.
+- [x] Document asset sources, non-commercial educational use, and copyright notices in
+  [assets/ATTRIBUTION.md](assets/ATTRIBUTION.md) and [assets/images/NOTICE.txt](assets/images/NOTICE.txt).
+- [x] Check display scaling, keyboard navigation and audio on target computers.

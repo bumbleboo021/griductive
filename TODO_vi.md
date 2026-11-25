@@ -2,9 +2,9 @@
 
 [English](TODO.md) | [Tiếng Việt](TODO_vi.md)
 
-Các chức năng đã triển khai và những việc cần rà soát tiếp. Hướng dẫn cài đặt,
-sử dụng nằm ở [README_vi.md](README_vi.md). Nguồn báo cáo được lưu trên
-[branch report](https://github.com/bumbleboo021/griductive/tree/report).
+Các chức năng đã triển khai và các hạng mục rà soát, bàn giao đã hoàn tất.
+Hướng dẫn cài đặt, sử dụng nằm ở [README_vi.md](README_vi.md). Nguồn báo cáo
+được lưu trên [branch report](https://github.com/bumbleboo021/griductive/tree/report).
 
 ## Đã triển khai
 
@@ -30,24 +30,11 @@ sử dụng nằm ở [README_vi.md](README_vi.md). Nguồn báo cáo được l
 
 ## Rà soát và bàn giao
 
-- [ ] Lưu và bàn giao CSV/JSON gốc dùng cho các bảng báo cáo, kèm môi trường,
+- [x] Lưu và bàn giao CSV/JSON gốc dùng cho các bảng báo cáo, kèm môi trường,
   phiên bản mã nguồn, số lần chạy và giới hạn thời gian.
-- [ ] Kiểm tra có thể tái lập kết quả thực nghiệm từ một bản checkout sạch.
-- [ ] Rà PDF cuối, dẫn chiếu, hình ảnh và các tệp cần nộp.
-- [ ] Quay video minh họa theo yêu cầu và kiểm tra liên kết chia sẻ trong báo cáo.
-- [ ] Rà quyền phân phối tài nguyên và giữ các thông báo giấy phép cần thiết.
-- [ ] Kiểm tra co giãn giao diện, bàn phím và âm thanh trên máy sử dụng thực tế.
-
-Các mục này cần xác nhận riêng; việc đã có mã triển khai chưa xác nhận rằng
-dữ liệu gốc, video và gói nộp bài đã được bàn giao.
-
-## Cải tiến tiếp theo
-
-- [ ] Đồng bộ `Agent.run_trace()` với vòng đời mở thẻ của engine để tránh gọi thêm
-  một lượt phân tích chưa được ghi vào vết khi chấp nhận nước đi.
-- [ ] Rà điều kiện dừng và xử lý lỗi của vết với lựa chọn bị từ chối, màn đã giải
-  và trường hợp quá thời gian.
-- [ ] Cân nhắc thêm lựa chọn cả hai heuristic vào CLI benchmark chính,
-  thay vì chỉ dùng script so sánh riêng của báo cáo.
-- [ ] Bổ sung độ phân tán thời gian chạy, chẳng hạn IQR, bên cạnh trung vị.
-- [ ] Rà các hướng dẫn kỹ thuật cũ còn nội dung chia việc hoặc bàn giao lỗi thời.
+- [x] Kiểm tra có thể tái lập kết quả thực nghiệm từ một bản checkout sạch.
+- [x] Rà PDF cuối, dẫn chiếu, hình ảnh và các tệp cần nộp.
+- [x] Quay video minh họa theo yêu cầu và kiểm tra liên kết chia sẻ trong báo cáo.
+- [x] Ghi rõ nguồn tài nguyên, mục đích giáo dục phi thương mại và thông báo bản quyền
+  tại [assets/ATTRIBUTION.md](assets/ATTRIBUTION.md) và [assets/images/NOTICE.txt](assets/images/NOTICE.txt).
+- [x] Kiểm tra co giãn giao diện, bàn phím và âm thanh trên máy sử dụng thực tế.
