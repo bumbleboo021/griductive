@@ -1,5 +1,6 @@
 """Pygame view with a single daemon worker for potentially slow analysis."""
 from pathlib import Path
+from functools import partial
 from queue import Queue, Empty
 from threading import Thread
 import pygame
@@ -35,6 +36,7 @@ class GameWindow:
         self.auto_focus_until = 0
         self.factory, self.puzzle_dir, self.analyzer_name = factory, Path(puzzle_dir), analyzer_name
         self.observer = ObservedAnalyzer(factory())
+        self.logic_heuristic = getattr(self.observer.analyzer, 'heuristic', None) or 'smallest'
         self.inspector = AgentInspector()
         self.engine = GameEngine(self.artwork.cast_puzzle(load_puzzle(path)), self.observer)
         self.queue = Queue()
@@ -287,27 +289,35 @@ class GameWindow:
         if (self.busy or self.auto) and not (key == "auto" and self.auto):
             return
         if (self.inspector.selected_record(self.observer) is not None and
-                key in ('agent_reference','agent_logic','agent_analyze','agent_step',
+                key in ('agent_reference','agent_logic','agent_heuristic','agent_analyze','agent_step',
                         'hint','auto','criminal','innocent')):
             return
-        if key in ('agent_reference', 'agent_logic'):
+        if key in ('agent_reference', 'agent_logic', 'agent_heuristic'):
             try:
-                if key == 'agent_logic':
+                heuristic = self.logic_heuristic
+                if key in ('agent_logic', 'agent_heuristic'):
                     from griductive.agent.adapter import Agent
-                    factory = Agent
+                    if key == 'agent_heuristic':
+                        if not isinstance(self.observer.analyzer, Agent):
+                            return
+                        heuristic = 'jw' if heuristic == 'smallest' else 'smallest'
+                    factory = partial(Agent, heuristic=heuristic)
+                    name = f'Logic Agent ({heuristic})'
                 else:
                     from griductive.engine.reference import ReferenceAnalyzer
                     factory = ReferenceAnalyzer
+                    name = 'ReferenceAnalyzer'
                 observer = ObservedAnalyzer(factory())
             except Exception as exc:
                 self.message = f'Analyzer unavailable: {exc}'
                 return
             self.factory = factory
-            self.analyzer_name = factory.__name__
+            self.logic_heuristic = heuristic
+            self.analyzer_name = name
             self.observer = observer
             self.engine.set_analyzer(observer)
             self.inspector.reset()
-            self.message = f'Switched to {factory.__name__}; proved cards preserved.'
+            self.message = f'Switched to {name}; proved cards preserved; history cleared.'
             return
         if key == 'agent_analyze':
             def analyze():
@@ -432,7 +442,7 @@ class GameWindow:
                 self.inspector.scroll += -event.y*60
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and over_panel:
                 for key in ('agent_close','agent_prev','agent_next','agent_live',
-                            'agent_analyze','agent_step','agent_auto','agent_reference','agent_logic'):
+                            'agent_analyze','agent_step','agent_auto','agent_reference','agent_logic','agent_heuristic'):
                     entry = self.buttons.get(key)
                     if entry and entry[1] and entry[0].collidepoint(event.pos):
                         if key == 'agent_close':

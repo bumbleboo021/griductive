@@ -42,6 +42,7 @@ class Observation:
     note: str = ''
     outcome: str = ''
     new_clues: tuple = ()
+    heuristic: str | None = None
 
 
 class ObservedAnalyzer:
@@ -111,7 +112,9 @@ class ObservedAnalyzer:
                     tuple(getattr(result, 'verdicts', ())), queries,
                     counts, sat_calls=sat_calls, **counters,
                     solver_runtime_ms=getattr(self.analyzer,'last_solver_runtime_ms',None),
-                    totals=self._totals, note=note))
+                    totals=self._totals, note=note,
+                    heuristic=(getattr(self.analyzer, 'heuristic', None) or 'smallest')
+                    if backend == 'CNF / DPLL' else None))
 
     def finish_action(self, outcome, public_state):
         with self._lock:
@@ -162,6 +165,8 @@ class AgentInspector:
         names = {c.cell: c.name for c in record.state.characters}
         lines = [f'Backend: {record.backend} | Analysis time: {record.elapsed_ms:.1f} ms',
                  f'Known verdicts: {len(record.state.verdicts)}']
+        if record.heuristic is not None:
+            lines.insert(1, f'DPLL heuristic: {record.heuristic}')
         value = lambda x: 'N/A' if x is None else str(x)
         primary, auxiliary, clauses = record.cnf_counts or (None,None,None)
         lines += ['', 'EXPERIMENT METRICS (input KB / selected call)',
@@ -174,7 +179,7 @@ class AgentInspector:
                   f'Analysis calls: {totals.analysis_calls} | SAT calls: {value(totals.sat_calls)}',
                   f'Decisions: {value(totals.decisions if totals.sat_calls else None)} | Propagations: {value(totals.propagations if totals.sat_calls else None)} | Backtracks: {value(totals.backtracks if totals.sat_calls else None)}',
                   f'Deduction steps: {totals.deduction_steps} | Reveal waves: {totals.reveal_waves}',
-                  f'Runtime: {totals.runtime_ms:.2f} ms']
+                  f'Runtime (analysis total): {totals.runtime_ms:.2f} ms']
         if record.note:
             lines.append(record.note)
         if record.consistent is not None:
@@ -214,17 +219,21 @@ class AgentInspector:
         free = not view.busy and not view.auto and not preview
         view.button('agent_reference', 'Use Reference', pygame.Rect(rect.x+20, rect.y+116, 240, 40), free)
         view.button('agent_logic', 'Use Logic Agent', pygame.Rect(rect.x+272, rect.y+116, 284, 40), free)
+        from griductive.agent.adapter import Agent
+        view.button('agent_heuristic', f'Heuristic: {view.logic_heuristic} (click to switch)',
+                    pygame.Rect(rect.x+20, rect.y+164, rect.width-40, 36),
+                    free and isinstance(view.observer.analyzer, Agent))
         view.label('Historical board: after action' if preview else 'Live board | Switching clears history.',
-                   (rect.x+20, rect.y+170), MUTED, view.small)
-        view.button('agent_live','Live',pygame.Rect(rect.right-100,rect.y+164,80,30),preview)
+                   (rect.x+20, rect.y+218), MUTED, view.small)
+        view.button('agent_live','Live',pygame.Rect(rect.right-100,rect.y+212,80,30),preview)
         records = view.observer.snapshot()
         index = len(records)-1 if self.index < 0 else min(self.index, len(records)-1)
         label = (f'Analysis call {records[index].number} | {len(records)} retained'
                  if records else 'No analysis yet. Click Analyze or Next move.')
         if view.busy:
             label += ' | Working...'
-        view.label(label, (rect.x+20, rect.y+198), ACCENT, view.small)
-        viewport = pygame.Rect(rect.x+20, rect.y+230, rect.width-40, rect.height-370)
+        view.label(label, (rect.x+20, rect.y+246), ACCENT, view.small)
+        viewport = pygame.Rect(rect.x+20, rect.y+278, rect.width-40, rect.height-418)
         pygame.draw.rect(view.screen, BG, viewport, border_radius=8)
         if records:
             raw_lines = self.lines(view, records[index])
