@@ -18,12 +18,14 @@ Nguyễn Xuân Hoàng - 25122021 \\ Vương Thành Phát - 25122034}
 
 %--------------------------------------
 \addbibresource{biblio.bib}
-
+\input{generated/experiment-data}
 
 \begin{document}
 
+\hypersetup{pageanchor=false}
 \cover
-\pageNumber
+\hypersetup{pageanchor=true}
+\fancyfoot[C]{\thepage}
 
 \contents
 % \listTables
@@ -37,9 +39,8 @@ Nguyễn Xuân Hoàng - 25122021 \\ Vương Thành Phát - 25122034}
 \input{chapter2}
 \input{chapter3}
 \input{chapter4}
-
-\input{chapter5.tex}
-
+\input{chapter5}
+\input{chapter6}
 
 \insertbibliography
 

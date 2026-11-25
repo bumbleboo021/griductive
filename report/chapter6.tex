@@ -1,0 +1,227 @@
+\chapter{Thực nghiệm và đánh giá}
+\label{chap:experiments}
+\begingroup
+\linespread{1.23}\selectfont
+\setlength{\intextsep}{9pt}
+
+\section{Mục tiêu thực nghiệm}
+
+Nhóm so sánh hai chiến lược chọn biến của DPLL, \texttt{smallest} và \texttt{jw}, theo ba câu hỏi:
+\begin{enumerate}
+    \item Mỗi chiến lược mất bao lâu để giải một màn, trong đó DPLL chiếm bao nhiêu thời gian?
+    \item Đỉnh cấp phát bộ nhớ Python thay đổi ra sao giữa hai chiến lược?
+    \item Hai chiến lược có lật thẻ theo cùng thứ tự không? Các bộ đếm của DPLL khác nhau thế nào?
+\end{enumerate}
+
+\section{Thiết kế thực nghiệm}
+
+\subsection{Lựa chọn màn chơi}
+
+Nhóm chính gồm \ExpMainStageCount{} màn. Hai màn đầu ở mỗi kích thước chủ yếu dùng manh mối đếm và tính chẵn lẻ. Các màn còn lại bổ sung các quan hệ như liên thông, so sánh số lượng và kéo theo. Màn \(5\times5\)/05 giữ nguyên nhóm nhân vật Liyue bằng \texttt{fixed\_cast} để bảo toàn tập ô mà manh mối tham chiếu.
+
+Màn \ExpStressLabel{} được trình bày riêng vì có CNF lớn nhất trong khảo sát ban đầu. Cả hai nhóm màn dùng cùng quy trình đo. Bảng kê phiên bản 1 cố định kích thước, seed và SHA-256 của từng JSON. Mã \(n\times n\)/\texttt{XX} tương ứng tệp \path{data/puzzles/NxN/level_XX.json}. Hai cấu hình dùng cùng encoder và trạng thái đầu.
+
+\clearpage
+\subsection{Chỉ số và cách tổng hợp}
+
+\begin{itemize}
+    \item \textbf{Thời gian.} Đồng hồ toàn lượt bắt đầu sau khi nạp màn và tạo engine, bao gồm mã hóa KB, giải SAT, lật thẻ và ghi bộ đếm trong bộ nhớ. Thời gian DPLL là tổng thời gian do các lần gọi SAT trả về. Cả hai chỉ số tính bằng ms. Tiến trình thời gian lưu vết theo bước và từng truy vấn.
+    \item \textbf{Bộ nhớ cực đại.} \texttt{tracemalloc} đo đỉnh cấp phát Python trong vòng lặp lật thẻ, tính bằng KiB. Tiến trình này bật theo dõi sau khi tạo engine; phần ghi vết benchmark theo lượt không được bật. Tác tử vẫn giữ vết nội bộ của bước đang phân tích như khi chạy bình thường.
+    \item \textbf{Quy mô KB.} Mỗi ô tương ứng một biến chính. Biến phụ và mệnh đề lấy giá trị lớn nhất trong các KB công khai được mã hóa trước khi lật thẻ, rồi lấy mức đỉnh trên các lượt thành công của màn. Giả định truyền vào từng truy vấn và phép kiểm tra nghiệm duy nhất nằm ngoài phép đếm CNF.
+    \item \textbf{Công việc suy diễn.} Lượt gọi SAT tính cả kiểm tra nhất quán và các lần thử giả định. Quyết định, lan truyền và quay lui cộng trên toàn màn. Một bước lật là một lần engine mở thành công một thẻ.
+\end{itemize}
+
+Thời gian, bộ nhớ và các bộ đếm toàn lượt được tổng hợp bằng trung vị của những lượt thành công ở pha tương ứng. Bảng~\ref{tab:experiment_status} ghi cả các lượt lỗi và quá thời gian. CSV lưu một dòng cho mỗi lượt với trạng thái của hai pha. JSON có thêm kết quả kiểm định và vết chi tiết của pha thời gian.
+
+\section{Kết quả trên \ExpMainStageCount{} màn đại diện}
+
+\subsection{Đối chiếu tính đúng đắn}
+
+Trước khi đo, nhóm kiểm tra chân trị của manh mối, so nghiệm duy nhất với đáp án JSON và đối chiếu phân loại mọi ô chưa mở với \texttt{ReferenceAnalyzer} tại từng bước. Số màn đạt là \ExpValidatedSmallest{}/\ExpStageCount{} với \texttt{smallest} và \ExpValidatedJW{}/\ExpStageCount{} với \texttt{jw}. Số trạng thái bàn cờ được đối chiếu tương ứng là \ExpSnapshotsSmallest{} và \ExpSnapshotsJW{}. Dãy ô lật, kích thước CNF và số lượt gọi SAT ở mỗi bước trùng nhau trên \ExpMatchedStages{}/\ExpStageCount{} màn.
+
+\begin{table}[H]
+    \centering
+    \small\linespread{1.12}\selectfont
+    \caption{Trạng thái của từng pha đo ở nhóm chính và màn khảo sát riêng.}
+    \label{tab:experiment_status}
+    \begin{tabular}{@{}lllrrrr@{}}
+        \toprule
+        Tập màn & Cấu hình & Pha đo & Giải xong & Bế tắc & Timeout & Lỗi/khác \\
+        \midrule
+        \ExpStatusRows
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Thời gian giải}
+
+\noindent\begin{minipage}[t]{0.49\textwidth}
+    \vspace{0pt}
+    \centering
+    \small\linespread{1.12}\selectfont
+    \captionof{table}{Trung vị thời gian (ms).}
+    \label{tab:experiment_runtime}
+    \setlength{\tabcolsep}{3pt}
+    \begin{tabular}{@{}lrrrr@{}}
+        \toprule
+        & \multicolumn{2}{c}{\texttt{smallest}} & \multicolumn{2}{c}{\texttt{jw}} \\
+        \cmidrule(lr){2-3}\cmidrule(l){4-5}
+        Màn & DPLL & Toàn lượt & DPLL & Toàn lượt \\
+        \midrule
+        \ExpRuntimeRows
+        \bottomrule
+    \end{tabular}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}
+    \vspace{0pt}
+    \centering
+    \ifnum\ExpTimePairs>0
+    \begin{tikzpicture}
+    \begin{loglogaxis}[
+        width=0.76\linewidth, height=0.76\linewidth, scale only axis,
+        enlargelimits=false, axis lines*=left,
+        xlabel={Trung vị \texttt{smallest} (ms)}, ylabel={Trung vị \texttt{jw} (ms)},
+        label style={font=\small}, tick label style={font=\scriptsize},
+        tick style={draw=none}, grid=major, major grid style={gray!25},
+        log ticks with fixed point, minor tick num=0, legend columns=-1,
+        legend style={at={(0.02,0.98)}, anchor=north west, draw=none, fill=none, font=\scriptsize},
+        cycle list={{violet!75!black, mark=o, mark size=2.3pt},
+                    {blue!65!black, mark=*, mark size=1.6pt},
+                    {teal!80!black, mark=triangle*, mark size=2.3pt}},
+        experiment identity/.style={dashed, gray!75!black, no marks, forget plot},
+    ]
+        \ExpScatterPlot
+    \end{loglogaxis}
+    \end{tikzpicture}
+    \else
+    Chưa có cặp thời gian hợp lệ để vẽ biểu đồ.
+    \fi
+    \captionof{figure}{Thời gian toàn lượt trên hai trục log. Mỗi chấm là một màn. Dưới \(y=x\), \texttt{jw} có trung vị thấp hơn.}
+    \label{fig:experiment_runtime_scatter}
+\end{minipage}\par
+
+\texttt{jw} có trung vị thời gian toàn lượt thấp hơn ở \ExpTimeJWFaster{}/\ExpTimePairs{} màn có kết quả ở cả hai cấu hình. Chẳng hạn, màn \(5\times5\)/02 có trung vị \ExpTimeExampleBase{} ms với \texttt{smallest} và \ExpTimeExampleJW{} ms với \texttt{jw}. Chi phí chấm điểm nghĩa văn của \texttt{jw} đã được tính vào thời gian DPLL.
+
+\clearpage
+\subsection{Bộ nhớ cực đại}
+
+\begin{table}[H]
+    \centering
+    \small\linespread{1.12}\selectfont
+    \caption{Trung vị đỉnh cấp phát Python trên các màn đại diện (KiB).}
+    \label{tab:experiment_memory}
+    \begin{tabular}{@{}lrr@{}}
+        \toprule
+        Màn & \texttt{smallest} & \texttt{jw} \\
+        \midrule
+        \ExpMemoryRows
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\newcommand{\ExpBarChart}[2]{%
+    \begin{tikzpicture}
+    \begin{axis}[
+        xbar, bar width=3.5pt, width=0.84\textwidth, height=0.31\textheight,
+        xmin=0, y dir=reverse, enlarge y limits=0.06, enlarge x limits={upper,value=0.05},
+        experiment levels, tick style={draw=none}, tick label style={font=\scriptsize},
+        xmajorgrids, major grid style={gray!25}, axis lines*=left, scaled x ticks=false,
+        xlabel={#1}, label style={font=\small}, legend columns=2,
+        legend style={at={(0.5,1.02)}, anchor=south, draw=none, fill=none, font=\scriptsize},
+        cycle list={{fill=blue!65!black,draw=none}, {fill=teal!78!black,draw=none}},
+    ]
+        #2
+    \end{axis}
+    \end{tikzpicture}%
+}
+
+\begin{figure}[H]
+    \centering
+    \ifx\ExpMemoryPlot\empty
+    Chưa có lượt đo bộ nhớ thành công để vẽ biểu đồ.
+    \else
+    \ExpBarChart{Đỉnh cấp phát Python (KiB)}{\ExpMemoryPlot}
+    \fi
+    \caption{So sánh bộ nhớ cực đại trên \ExpMainStageCount{} màn đại diện.}
+    \label{fig:experiment_memory}
+\end{figure}
+
+\texttt{jw} có đỉnh cấp phát trung vị thấp hơn ở \ExpMemoryJWLower{}/\ExpMemoryPairs{} màn có số liệu ở cả hai cấu hình. Tại \(5\times5\)/01, hai trung vị là \ExpMemoryExampleBase{} KiB và \ExpMemoryExampleJW{} KiB theo thứ tự \texttt{smallest} rồi \texttt{jw}. Bộ nhớ do hệ điều hành và thư viện gốc quản lý nằm ngoài phạm vi phép đo.
+
+\clearpage
+\subsection{Quy mô tri thức và công việc của DPLL}
+
+\begin{table}[H]
+    \centering
+    \small\linespread{1.12}\selectfont
+    \caption{Quy mô KB và số bước lật thu được từ cấu hình \texttt{smallest}.}
+    \label{tab:experiment_workload}
+    \begin{tabular}{@{}lrrrrrr@{}}
+        \toprule
+        Màn & Seed & Biến chính & Biến phụ & Mệnh đề & Lượt gọi SAT & Bước lật \\
+        \midrule
+        \ExpWorkloadRows
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \small\linespread{1.12}\selectfont
+    \caption{Trung vị số quyết định (QĐ), lan truyền (LT) và quay lui (QL) trên mỗi lượt.}
+    \label{tab:experiment_heuristics}
+    \begin{tabular}{@{}lrrrrrr@{}}
+        \toprule
+        & \multicolumn{3}{c}{\texttt{smallest}} & \multicolumn{3}{c}{\texttt{jw}} \\
+        \cmidrule(lr){2-4}\cmidrule(l){5-7}
+        Màn & QĐ & LT & QL & QĐ & LT & QL \\
+        \midrule
+        \ExpCountRows
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Khi hai cấu hình đi qua cùng chuỗi KB, số truy vấn phản ánh lượng kiểm tra hệ quả do tác tử yêu cầu. Số quyết định và lan truyền phản ánh lượng công việc bên trong DPLL. Bộ đếm quay lui chỉ tăng khi DPLL thử cực tính thứ hai; lan truyền đơn vị có thể phát hiện mâu thuẫn trước khi cần rẽ nhánh.
+
+\clearpage
+\begin{figure}[H]
+    \centering
+    \ifx\ExpDecisionPlot\empty
+    Chưa có lượt giải thành công để vẽ biểu đồ.
+    \else
+    \ExpBarChart{Số quyết định DPLL}{\ExpDecisionPlot}
+    \fi
+    \caption{So sánh trung vị số quyết định của hai chiến lược DPLL.}
+    \label{fig:experiment_decisions}
+\end{figure}
+
+\section{Khảo sát riêng màn có CNF lớn nhất}
+
+\begin{table}[H]
+    \centering
+    \small\linespread{1.12}\selectfont
+    \caption{Kết quả trên màn \ExpStressLabel{}.}
+    \label{tab:experiment_stress}
+    \begin{tabular}{@{}lrr@{}}
+        \toprule
+        Chỉ số & \texttt{smallest} & \texttt{jw} \\
+        \midrule
+        \ExpStressRows
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Màn này có seed \ExpStressSeed{}. Với cùng dãy KB, \texttt{smallest} có \ExpStressDecisionBase{} quyết định, thời gian toàn lượt \ExpStressTimeBase{} ms và đỉnh cấp phát \ExpStressMemoryBase{} KiB. Với \texttt{jw}, các giá trị tương ứng là \ExpStressDecisionJW{}, \ExpStressTimeJW{} ms và \ExpStressMemoryJW{} KiB.
+\ifnum\ExpStressTradeoff=1 Số quyết định giảm trong lần đo này, còn thời gian và bộ nhớ tăng. Chi phí xử lý mỗi nút rẽ nhánh cũng ảnh hưởng đến kết quả.\fi
+
+\clearpage
+\section{Trường hợp dừng, hạn chế và tái lập}
+
+\paragraph{Trường hợp dừng.}
+Kiểm thử riêng xác nhận rằng một bản sao màn \(3\times3\)/01 với danh sách ô mở sẵn rỗng trả về \texttt{STALLED} và giới hạn SAT bằng 0 giây buộc lượt dừng ở truy vấn đầu tiên với \texttt{TIMEOUT}. Lỗi nhãn thời gian trong bài kiểm thử giao diện Agent Inspector thuộc bộ kiểm thử tích hợp; các lượt đo của chương này chạy không giao diện.
+
+\paragraph{Hạn chế.}
+Kết quả phụ thuộc vào bộ màn và môi trường chạy. Những chênh lệch nhỏ có thể nằm trong dao động giữa các lượt. Các màn hiện tại ít tạo tình huống phải thử nhánh thứ hai; cần thêm trường hợp có quay lui để đánh giá tiêu chí đó. Độ khó thực tế đối với người chơi cần dữ liệu chơi thử.
+
+\clearpage
+\endgroup

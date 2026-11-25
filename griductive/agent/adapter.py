@@ -11,8 +11,9 @@ logger = logging.getLogger(__name__)
 class Agent:
      """Tác tử suy luận logic xây dựng trên bộ giải DPLL SAT"""
 
-     def __init__(self, timeout_seconds: float = 3.0, strict_dpll: bool = False) -> None:
+     def __init__(self, timeout_seconds: float = 3.0, strict_dpll: bool = False, *, on_sat_result=None) -> None:
           self.timeout_seconds = timeout_seconds
+          self.on_sat_result = on_sat_result
           self.strict_dpll = strict_dpll
           self.last_query_count = 0
           self.last_sat_calls = 0
@@ -52,6 +53,8 @@ class Agent:
                raise
           finally:
                self.last_solver_runtime_ms += (perf_counter()-started)*1000
+          if self.on_sat_result is not None:
+               self.on_sat_result(result)
           stats = getattr(result, 'stats', None)
           for name, total in self.last_solver_metrics.items():
                value = getattr(result, name, None)

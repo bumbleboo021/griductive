@@ -4,7 +4,7 @@
 \section{Phạm vi hỗ trợ}
 OpenAI Codex được sử dụng để lập kế hoạch, chia việc, sinh và chỉnh sửa mã Python/Pygame, xử lý lỗi và soạn tài liệu.
 
-Đối với mô-đun biểu diễn tri thức và mã hóa CNF (\texttt{griductive/logic/encoder.py}), Google Gemini được sử dụng ở vai trò trợ lý trao đổi lý thuyết và sinh mã kiểm thử tự động: giải thích cơ sở biến đổi công thức logic mệnh đề, rà soát hợp đồng giao diện \texttt{encode(state: PublicState) -> CNFResult}, và tạo các bộ kiểm thử \texttt{pytest} (\texttt{test\_easy\_encoder.py}, \texttt{test\_hard\_encoder.py}, \texttt{test\_superhard\_encoder.py}, \texttt{test\_integration.py}).
+Đối với mô-đun biểu diễn tri thức và mã hóa CNF (\path{griductive/logic/encoder.py}), Google Gemini được sử dụng ở vai trò trợ lý trao đổi lý thuyết và sinh mã kiểm thử tự động: giải thích cơ sở biến đổi công thức logic mệnh đề, rà soát hợp đồng giao diện \texttt{encode(state: PublicState) -> CNFResult}, và tạo các bộ kiểm thử \texttt{pytest} (\texttt{test\_easy\_encoder.py}, \texttt{test\_hard\_encoder.py}, \texttt{test\_superhard\_encoder.py}, \texttt{test\_integration.py}).
 
 Đối với mô-đun bộ giải SAT bằng DPLL (\texttt{griductive/sat/dpll.py}), trợ lý AI tích hợp trong Antigravity IDE (Google Gemini) được sử dụng để giải thích lý thuyết từng bước về lan truyền đơn vị, cô lập giả định và quay lui, rà soát lỗi trong quá trình tự cài đặt mã nguồn, đề xuất và giải thích chiến lược rẽ nhánh mở rộng Dynamic Two-Sided Jeroslow--Wang (\texttt{jw}), sinh bộ kiểm thử tự động \texttt{tests/sat/test\_dpll.py} (gồm kiểm chứng bằng bảng chân trị $2^n$), và biên soạn tài liệu kỹ thuật.
 
@@ -25,7 +25,7 @@ Các yêu cầu dưới đây được tóm lược từ lịch sử làm việc
 \section{Trách nhiệm và nguồn tài nguyên}
 Luật chơi tham khảo từ Griductive~\cite{griductive} và đề bài. Ảnh, phông chữ và âm nhạc được cung cấp từ bên ngoài, không do AI tạo; nguồn được ghi trong \path{assets/ATTRIBUTION.md}~\cite{assetRecord}.
 
-Đối với mô-đun mã hóa CNF, toàn bộ mã nguồn sản phẩm trong \texttt{griductive/logic/encoder.py} do Người~2 tự thiết kế và lập trình hoàn toàn, không đưa mã nguồn sản phẩm cho AI hay dùng AI sinh mã cài đặt. Các tệp kiểm thử do AI hỗ trợ tạo ra đều được rà soát và chạy nghiệm thu cục bộ, đạt kết quả $189/189$ ca kiểm thử thành công.
+Đối với mô-đun mã hóa CNF, toàn bộ mã nguồn sản phẩm trong \path{griductive/logic/encoder.py} do Người~2 tự thiết kế và lập trình hoàn toàn, không đưa mã nguồn sản phẩm cho AI hay dùng AI sinh mã cài đặt. Các tệp kiểm thử do AI hỗ trợ tạo ra đều được rà soát và chạy nghiệm thu cục bộ, đạt kết quả $189/189$ ca kiểm thử thành công.
 
 Đối với mô-đun bộ giải DPLL, Người~3 tự thiết kế, lập trình và gỡ lỗi toàn bộ phần lõi trong \texttt{griductive/sat/dpll.py} (cấu trúc \texttt{SatResult}, \texttt{\_inspect\_clause}, \texttt{\_unit\_propagate}, \texttt{\_dpll} với chiến lược cơ sở \texttt{smallest} và cơ chế \texttt{timeout}), đồng thời rà soát và kiểm định phần mở rộng chiến lược \texttt{jw} cùng toàn bộ $10/10$ ca kiểm thử trong \texttt{tests/sat/test\_dpll.py}.
 
@@ -34,3 +34,5 @@ Luật chơi tham khảo từ Griductive~\cite{griductive} và đề bài. Ảnh
     \item \textbf{Về trách nhiệm lập trình:} Chịu trách nhiệm chính về toàn bộ thiết kế kiến trúc \texttt{adapter.py}, quy trình suy diễn phản chứng, bộ ghi vết \texttt{trace.py} và thuật toán kiểm tra tính duy nhất \texttt{uniqueness.py}. Công cụ AI được sử dụng với vai trò trợ lý thảo luận lý thuyết logic, rà soát cú pháp, sửa lỗi logic và hỗ trợ gỡ lỗi thụt dòng. Mã nguồn cốt lõi được thành viên tự cài đặt, kiểm chứng và chạy nghiệm thu thành công trên toàn bộ các màn chơi của đề tài.
     \item \textbf{Về tài liệu tham khảo:} Lý thuyết về suy diễn phản chứng trong logic mệnh đề và nguyên lý vòng lặp suy luận được tham khảo từ sách giáo trình \textit{Artificial Intelligence: A Modern Approach} (AIMA) của Russell \& Norvig~\cite{russell2020aima}.
 \end{itemize}
+
+Đối với phần thực nghiệm, OpenAI Codex hỗ trợ xây dựng trình chạy không giao diện, đối chiếu kết quả với bộ phân tích tham chiếu, xử lý dữ liệu đo và soạn Chương~\ref{chap:experiments}. Một yêu cầu tiêu biểu là đối chiếu phần thực nghiệm với \path{TODO_vi.md}, gồm kiểm định lại 13 màn, thu thập số liệu trực tiếp từ CNF/DPLL và phân tích kết quả theo từng cấu hình. Các bảng và hình của chương sử dụng dữ liệu xuất từ lần chạy được mô tả trong phần thiết lập thực nghiệm.
