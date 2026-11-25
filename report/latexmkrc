@@ -1,0 +1,3 @@
+# Regenerate the experiment tables from the CSV/JSON before each LaTeX build.
+system('python', 'experiments/render_report_data.py') == 0
+    or die "Could not generate experiment figures and tables from results/benchmark.\n";
