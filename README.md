@@ -123,7 +123,12 @@ Restart or Stage changes. Calls are analysis invocations, not reveal-step counts
 **Use Reference** and **Use Logic Agent** switch backends while preserving proved
 cards and clearing history. Logic Agent explicitly displays **Reference fallback**
 if CNF/DPLL is unavailable; it never invents SAT results for reference analysis.
-This branch still needs `griductive/sat/dpll.py` for real DPLL execution.
+With **Use Logic Agent** selected, click **Heuristic** to switch between
+**smallest** (the default) and **jw** (dynamic two-sided Jeroslow–Wang).
+Switching preserves proved cards and clears analysis history and accumulated
+metrics. The choice persists across Restart, Stage changes and backend switches.
+The control is disabled during analysis, Auto Solve, and history playback.
+Each recorded Logic Agent call shows the heuristic it used.
 
 ## First checks after pulling the project
 

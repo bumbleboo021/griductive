@@ -27,6 +27,31 @@ def install_solver(monkeypatch, outcomes):
     monkeypatch.setitem(sys.modules, solver.__name__, solver)
 
 
+@pytest.mark.parametrize('heuristic', ['smallest', 'jw'])
+def test_configured_heuristic_reaches_every_sat_query(monkeypatch, heuristic):
+    from griductive.sat import dpll
+    original = dpll.solve
+    calls = []
+
+    def solve(**kwargs):
+        calls.append(kwargs['heuristic'])
+        return original(**kwargs)
+
+    monkeypatch.setattr(dpll, 'solve', solve)
+    public = state()
+    agent = Agent(strict_dpll=True, heuristic=heuristic)
+    observer = ObservedAnalyzer(agent)
+    assert observer.analyze(public) == ReferenceAnalyzer().analyze(public)
+    assert len(calls) == agent.last_sat_calls > 1
+    assert set(calls) == {heuristic}
+    assert observer.snapshot()[-1].heuristic == heuristic
+
+
+def test_invalid_heuristic_is_rejected():
+    with pytest.raises(ValueError, match='heuristic'):
+        Agent(heuristic='unsupported')
+
+
 def test_missing_solver_fallback_is_not_a_sat_query(monkeypatch):
     monkeypatch.setitem(sys.modules, 'griductive.sat.dpll', None)
     agent = Agent()

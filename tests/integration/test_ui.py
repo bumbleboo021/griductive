@@ -574,6 +574,45 @@ def test_agent_history_browsing_and_restart(window):
     assert window.observer.snapshot() == ()
 
 
+def test_heuristic_switch_preserves_board_and_resets_metrics(window):
+    window.action('agent')
+    window.draw()
+    assert not window.buttons['agent_heuristic'][1]
+    window.action('agent_logic')
+    window.action('agent_step')
+    wait(window)
+    proved = window.engine.public_state()
+    assert window.observer.snapshot()
+    click(window, window.buttons['agent_heuristic'][0].center)
+    assert window.logic_heuristic == window.observer.analyzer.heuristic == 'jw'
+    assert window.engine.public_state() == proved
+    assert not window.observer.snapshot()
+    window.action('agent_analyze')
+    wait(window)
+    record, = window.observer.snapshot()
+    assert record.heuristic == 'jw' and record.totals.analysis_calls == 1
+
+    for flag in ('busy', 'auto'):
+        setattr(window, flag, True)
+        window.action('agent_heuristic')
+        assert window.logic_heuristic == 'jw'
+        setattr(window, flag, False)
+    window.action('agent_analyze')
+    wait(window)
+    window.browse_history(-1)
+    window.action('agent_heuristic')
+    assert window.logic_heuristic == 'jw'
+    window.action('agent_live')
+    window.action('agent_reference')
+    window.action('agent_logic')
+    assert window.observer.analyzer.heuristic == 'jw'
+    window.load(ROOT/'tests/fixtures/chain_5.json')
+    assert window.observer.analyzer.heuristic == 'jw'
+    window.draw()
+    click(window, window.buttons['agent_heuristic'][0].center)
+    assert window.logic_heuristic == window.observer.analyzer.heuristic == 'smallest'
+
+
 def test_docked_inspector_keeps_board_visible_and_playable(window):
     from griductive.ui import config
     before = dict(window.cards)
