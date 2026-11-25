@@ -10,6 +10,7 @@ BOARD_Y = 132
 BOARD_WIDTH = 700
 BOARD_HEIGHT = 600
 WINDOW_SIZE = (1180, 850)
+AGENT_PANEL_WIDTH = 600  # Extra logical width while the inspector is docked.
 WEB_FPS = 30
 PORTRAIT_CACHE_BYTES = 8*1024*1024
 TEXT_CACHE_BYTES = 4*1024*1024
@@ -39,14 +40,36 @@ CLUE_SCROLL_STEP = 55  # Pixels per wheel notch.
 CLUE_SCROLL_TIME_MS = 110  # Lower values settle more quickly.
 MUSIC_FILE = 'Chon Mat Gui Vàng Instrumental.mp3'  # Relative to assets/sounds/.
 MUSIC_VOLUME = 0.22
-CHARACTER_QUOTES = [
-    'Even the stars have their secrets.',
-    'A cup of tea makes every mystery easier.',
-    'I wonder what tomorrow will bring.',
-    'The wind carries stories from far away.',
-    'There is always time for a little adventure.',
-    'I could use a quiet afternoon.',
-]
+CHARACTER_QUOTES = {
+    "Arlecchino": ["Staring into my eyes is ill-advised. I can't promise you'll like what you see."],
+    "Ayaka": ["I only wish life could be as leisurely as this a little more often... How greedy of me."],
+    "Chiori": ["Looking at that tragic ensemble you call an outfit, it’s no mystery why you’re still single."],
+    "Columbina": ["What a starry night... wouldn't it be lovely to sing a sweet lullaby right outside Sandrone's door?"],
+    "Escoffier": ["What are you, an idiot sandwich?"],
+    "Eula": ["Hmph, a snowy day like this is practically begging for a mug of warm milk, mark my words, vengeance will be mine!"],
+    "Furina": ["Buy me Prada, Balenciaga, cut the drama, let's go Bahama"],
+    "Ganyu": ["Only the chosen one deserves the fresh cocomilk from the cocogoat"],
+    "Hu Tao": ["Silly-churl, billy-churl, silly-billy hilichurl."],
+    "Kazuha": ["This scenery is wonderful... Surely enough to convince anyone to become a wanderer."],
+    "Keqing": ["I'm all for work-life balance, but I think this is pushing it"],
+    "Lumine": ["Multiple catastrophic crises threatening Teyvat? Oh, you mean a surge in Primogem rewards."],
+    "Linnea": [" So shiny... Lumi, no! You can't eat that!"],
+    "Mitya": ["Riemann Hypothesis is such a child plaything"],
+    "Nahida": ["Get some good rest! Ya know... Use the bathroom and flush your anxiety-dookie away"],
+    "Nicole": ["So, the lore is...."],
+    "Odette": ["Witness the snow swan's grace"],
+    "Raiden Ei": ["After all, very few in eternity ever get the privilege of tasting my cooking"],
+    "Sandrone": ["What do you mean clank clank clank? I designed to go plap plap plap"],
+    "Skirk": ["The Abyss is like the world's shadow. It's always there, and it will never perish."],
+    "Venti": ["Ehe"],
+    "Vesna": ["One for you, one for me, one for Her Majesty, and another for me! None for Danica, hehe!"],
+    "Vodyanitsa": ["Odette, do you wanna build a snowman?"],
+    "Xiangling": [" I can't decide whether Pyro slimes taste better with salt and pepper or garlic and herbs."],
+    "Xianyun": ["Oh did you know when Shenhe and Ganyu were kids..."],
+    "Yae Miko": ["Right here! Right now! Emerge! Come on out! Show them!"],
+    "Yelan": ["No, i won't step on you"],
+    "Zibai": ["I would rather parry a Celestial nail than hanging out with you."],
+}
 
 FONT_SIZE = 17
 SMALL_FONT_SIZE = 13

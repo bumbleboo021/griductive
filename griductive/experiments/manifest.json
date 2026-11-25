@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "stages": [
+    {
+      "path": "data/puzzles/3x3/level_01.json",
+      "seed": 301,
+      "size": 3,
+      "sha256": "7c93fbceee31e02392c1e0ec5b9b47dda107d16b4129b8a88498573ebb61348b"
+    },
+    {
+      "path": "data/puzzles/3x3/level_02.json",
+      "seed": 302,
+      "size": 3,
+      "sha256": "896d26139558700d00a6e104dd5b5dfa74c21adb983d475e315bed1557da52ed"
+    },
+    {
+      "path": "data/puzzles/3x3/level_03.json",
+      "seed": 30300,
+      "size": 3,
+      "sha256": "fd19960f8880bbde234b675f70e66be1e253cea3d42bf1f89d624847762f861a"
+    },
+    {
+      "path": "data/puzzles/3x3/level_04.json",
+      "seed": 30400,
+      "size": 3,
+      "sha256": "42d827ed106b19ab8d16823d0c404abd017550ce54a67686ef05c7c5163744f3"
+    },
+    {
+      "path": "data/puzzles/4x4/level_01.json",
+      "seed": 401,
+      "size": 4,
+      "sha256": "4368de2159e57b1b32fa98bfbb88660cfc53ddbe3acdc0386519ba656fe7ae7e"
+    },
+    {
+      "path": "data/puzzles/4x4/level_02.json",
+      "seed": 402,
+      "size": 4,
+      "sha256": "7b70cc3109b62a0421c1db91b5493edfa645954a315ac6914533f7fa367435c8"
+    },
+    {
+      "path": "data/puzzles/4x4/level_03.json",
+      "seed": 40300,
+      "size": 4,
+      "sha256": "65d5d8f3d6cd4171f02e916a65e1e205bfe62f21ee72097849d3c7fa6689dbe8"
+    },
+    {
+      "path": "data/puzzles/4x4/level_04.json",
+      "seed": 40400,
+      "size": 4,
+      "sha256": "94b764bbe5d46ad45aada2b7438899fd79ccb19094938a8dd50dcd2a4ef86b4b"
+    },
+    {
+      "path": "data/puzzles/5x5/level_01.json",
+      "seed": 501,
+      "size": 5,
+      "sha256": "65d1ced874cdefdb48850fc2f6629edfe512585443007fab2cac369919a2d6a8"
+    },
+    {
+      "path": "data/puzzles/5x5/level_02.json",
+      "seed": 502,
+      "size": 5,
+      "sha256": "c0061a799663f23b41d2e866083c096bcbc295197a2037572b69cb45c89470a0"
+    },
+    {
+      "path": "data/puzzles/5x5/level_03.json",
+      "seed": 50300,
+      "size": 5,
+      "sha256": "5c2e0bb00a99ac41eca293d0ea3f05e1b605a2a4807093fa2c9c53db32081953"
+    },
+    {
+      "path": "data/puzzles/5x5/level_04.json",
+      "seed": 50400,
+      "size": 5,
+      "sha256": "00bd97ed72b83a475393768b35cb68b15c4479dd17361ce5b1d5353b1aef05fd"
+    },
+    {
+      "path": "data/puzzles/5x5/level_05.json",
+      "seed": 50500,
+      "size": 5,
+      "sha256": "ed6b6b4286f2a3510760412cb1b6ebd71c9a8ad33e3e6e92d65bb17a19169cbf"
+    }
+  ]
+}

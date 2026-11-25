@@ -24,6 +24,14 @@ class GameEngine:
     def restart(self):
         self._revealed = frozenset(self._puzzle.initially_revealed)
 
+    def set_analyzer(self, analyzer: Analyzer):
+        """Replace the analyzer between actions, preserving the revealed board."""
+        self._analyzer = analyzer
+
+    def analyze(self) -> Analysis:
+        """Classify the current public state without revealing any cards."""
+        return self._analysis()
+
     @property
     def solved(self):
         return len(self._revealed) == len(self._puzzle.characters)
@@ -51,7 +59,9 @@ class GameEngine:
 
     async def prepare_analysis(self):
         """Prepare a cooperative browser analyzer before a synchronous action."""
-        await self._analyzer.prepare(self.public_state())
+        prepare = getattr(self._analyzer, 'prepare', None)
+        if prepare is not None:
+            await prepare(self.public_state())
 
     def hint(self) -> Outcome:
         analysis = self._analysis()

@@ -1,3 +1,5 @@
+🌐 **Language:** [English](INTEGRATION.md) | [Tiếng Việt](INTEGRATION_vi.md)
+
 # Start integrating your module
 
 Person 1's engine and Pygame UI are implemented. Local Genshin portraits and fonts
@@ -145,6 +147,29 @@ then expose `solve(cnf, assumptions=())`. The adapter translates SAT results int
 `Analysis`. Keep temporary assumptions isolated, check KB consistency first, and
 complete SAT models over declared variables. Your decisions/propagations/backtracks
 and timing belong in solver results, not in Pygame code.
+
+### Live experiment diagnostics
+
+`Agent` now measures every actual `solve(...)` invocation, including a call that
+raises, and records counters for the client inspector. Return nonnegative integer
+`decisions`, `propagations`, and `backtracks` either directly on each SAT result or
+inside its `stats` mapping/dataclass. Values must describe **that solve call**, not
+lifetime counters. Omitted counters stay unavailable (`N/A`), including when only
+one of several calls omits a counter. Timeout results may carry partial counters.
+
+The adapter exposes `last_sat_calls`, `last_solver_metrics` (the three counter
+keys), `last_solver_runtime_ms`, `last_cnf_counts` (primary, auxiliary, clauses),
+and `last_trace_step`. All are reset per analysis. Other analyzer plugins may
+implement the same optional diagnostics; unknown call counts remain unavailable.
+The client computes end-to-end analysis runtime separately. Extra CNF encoding
+for Reference diagnostics is excluded from that runtime and does not run SAT.
+
+Run totals count every observed analysis, including manual verdict validation,
+Hint, failures and timeouts. Deduction steps count newly accepted reveals, not
+analysis calls; a reveal wave is one successful revealing action (currently one
+card per wave). Initial reveals are excluded. Previous/Next selects immutable
+public post-action snapshots without modifying the live engine. Totals remain
+correct when older history entries are evicted.
 
 ## Person 5: write fixtures and integration checks
 

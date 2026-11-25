@@ -1,5 +1,5 @@
 {
-  "title": "3x3 - Quiet Rows",
+  "title": "Stage 1 - 3x3 - Quiet Rows",
   "size": 3,
   "initially_revealed": [
     "A1"
@@ -187,5 +187,5 @@
       }
     }
   ],
-  "name": "3x3 - Quiet Rows"
+  "name": "Stage 1 - 3x3 - Quiet Rows"
 }

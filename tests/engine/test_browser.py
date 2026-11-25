@@ -2,10 +2,12 @@
 import asyncio
 from pathlib import Path
 import pytest
-from griductive.engine.browser import BrowserAnalyzer
+from griductive.agent.adapter import Agent
+from griductive.engine.browser import BrowserAgent, BrowserAnalyzer
 from griductive.engine.game import GameEngine
 from griductive.engine.puzzle import load_puzzle
 from griductive.engine.reference import ReferenceAnalyzer
+from griductive.ui.agent_inspector import ObservedAnalyzer
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -38,4 +40,25 @@ def test_browser_analysis_yields_and_rejects_unprepared_state():
         assert not task.done()
         await task
         assert analyzer.analyze(engine.public_state()).consistent
+    asyncio.run(run())
+
+
+def test_browser_agent_matches_dpll_and_works_with_observer():
+    async def run():
+        agent = BrowserAgent(heuristic='jw')
+        observer = ObservedAnalyzer(agent)
+        engine = GameEngine(load_puzzle(ROOT/'data/puzzles/3x3/level_01.json'), observer)
+        with pytest.raises(RuntimeError, match='prepared'):
+            agent.analyze(engine.public_state())
+        state = engine.public_state()
+        await engine.prepare_analysis()
+        assert agent.analyze(state) == Agent(heuristic='jw').analyze(state)
+        outcome = engine.step()
+        assert outcome.code == 'ACCEPTED'
+        records = observer.snapshot()
+        assert len(records) == 1
+        assert records[0].backend == 'CNF / DPLL'
+        assert records[0].heuristic == 'jw'
+        assert records[0].sat_calls > 0
+        assert records[0].elapsed_ms >= 0
     asyncio.run(run())

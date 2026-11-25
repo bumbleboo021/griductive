@@ -29,7 +29,7 @@ def main():
     shutil.copy2(ROOT/'main.py', STAGE/'main.py')
     for folder in ('griductive', 'assets'):
         shutil.copytree(ROOT/folder, STAGE/folder,
-                        ignore=shutil.ignore_patterns('__pycache__', '*.pyc', '*.mp3', '*.m4a', '*.wav', '*.flac'))
+                        ignore=shutil.ignore_patterns('__pycache__', '*.pyc', '*.mp3', '*.m4a', '*.wav', '*.flac', 'experiments'))
     shutil.copytree(ROOT/'data'/'puzzles', STAGE/'data'/'puzzles')
     for source in sorted((ROOT/'assets'/'sounds').iterdir()):
         if source.suffix.lower() not in ('.mp3', '.m4a', '.wav', '.flac'):

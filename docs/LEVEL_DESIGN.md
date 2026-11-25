@@ -1,3 +1,5 @@
+🌐 **Language:** [English](LEVEL_DESIGN.md) | [Tiếng Việt](LEVEL_DESIGN_vi.md)
+
 # Designing solvable Griductive levels
 
 Implementation update after stage expansion: the loader and development analyzer
