@@ -8,5 +8,3 @@ __pycache__/
 /.pytest_cache/
 /results/*
 !/results/.gitkeep
-/report
-/build

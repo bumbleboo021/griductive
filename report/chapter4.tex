@@ -1,0 +1,201 @@
+\chapter{Bộ giải SAT bằng DPLL}
+\label{chap:dpll}
+
+\section{Ý tưởng thuật toán DPLL}
+Từ công thức CNF $\Phi_t$ được sinh ra bởi bộ mã hóa ở Chương~\ref{chap:cnf}, nhiệm vụ của bộ giải SAT là quyết định xem $\Phi_t$ có thỏa mãn được hay không: tìm một phép gán chân trị đầy đủ $\mathcal{M}: \{1, 2, \dots, V\} \to \{\text{True}, \text{False}\}$ (với $V = N^2 + M$ là tổng số biến chính và biến phụ đã khai báo) sao cho mọi mệnh đề trong $\Phi_t$ đều đúng (\texttt{SAT}), hoặc chứng minh không tồn tại phép gán nào như vậy (\texttt{UNSAT}).
+
+Thay vì duyệt vét cạn toàn bộ $2^V$ tổ hợp chân trị, nhóm cài đặt thuật toán \textbf{DPLL} (Davis--Putnam--Logemann--Loveland)~\cite{dpll1962,russell2020aima}. Ý tưởng cốt lõi của DPLL là kết hợp \textit{tìm kiếm quay lui có hệ thống} với phép suy diễn \textit{lan truyền đơn vị} (unit propagation) tại mỗi nút của cây tìm kiếm: bất cứ khi nào một mệnh đề chỉ còn duy nhất một nghĩa văn chưa được gán giá trị (và mọi nghĩa văn còn lại đều đã sai), nghĩa văn đó bắt buộc phải nhận giá trị đúng. Phép ép giá trị này tạo ra hiệu ứng dây chuyền làm thu gọn nhanh không gian tìm kiếm và sớm phát hiện xung đột để cắt tỉa toàn bộ nhánh con không khả thi.
+
+\section{Các bước xử lý}
+Bộ giải DPLL trong \texttt{griductive/sat/dpll.py} vận hành hoàn toàn trên biểu diễn số nguyên chuẩn DIMACS (mỗi mệnh đề là dãy nghĩa văn khác $0$) và được tổ chức thành năm cơ chế phối hợp chặt chẽ.
+
+\subsection{Đánh giá trạng thái mệnh đề và phát hiện xung đột}
+Với một phép gán bộ phận hiện hành $A$ (ánh xạ từ chỉ số biến sang \texttt{True}/\texttt{False}), hàm \texttt{\_inspect\_clause} duyệt các nghĩa văn trong một mệnh đề $c \in \Phi_t$, lọc trùng nghĩa văn chưa gán để tránh nhận nhầm các mệnh đề lặp như $(+1 \lor +1)$, và phân loại $c$ vào đúng một trong bốn trạng thái:
+\begin{itemize}
+    \item \texttt{SAT}: Tồn tại ít nhất một nghĩa văn trong $c$ đã được thỏa mãn bởi $A$.
+    \item \texttt{CONFLICT}: Không có nghĩa văn nào thỏa mãn và số nghĩa văn chưa gán bằng $0$ (bao gồm cả trường hợp mệnh đề rỗng $()$).
+    \item \texttt{UNIT}: Không có nghĩa văn nào thỏa mãn và còn đúng $1$ nghĩa văn chưa gán $\ell$.
+    \item \texttt{OPEN}: Không có nghĩa văn nào thỏa mãn và còn từ $2$ nghĩa văn chưa gán trở lên.
+\end{itemize}
+
+\subsection{Lan truyền đơn vị (\texttt{\_unit\_propagate})}
+Hàm \texttt{\_unit\_propagate} lặp lại việc quét toàn bộ các mệnh đề trong $\Phi_t$:
+\begin{enumerate}
+    \item Nếu gặp bất kỳ mệnh đề nào ở trạng thái \texttt{CONFLICT}, hàm dừng ngay và trả về \texttt{False} để kích hoạt quay lui.
+    \item Nếu gặp mệnh đề ở trạng thái \texttt{UNIT} với nghĩa văn duy nhất $\ell$, bộ giải ép gán biến $v = |\ell|$ nhận giá trị $(\ell > 0)$, tăng bộ đếm \texttt{propagations} thêm $1$, và đánh dấu trạng thái đã thay đổi để tiếp tục vòng quét tiếp theo nhằm xử lý hiệu ứng dây chuyền.
+    \item Quá trình dừng và trả về \texttt{True} khi hoàn tất một vòng quét trọn vẹn mà không phát sinh thêm phép gán ép nào.
+\end{enumerate}
+
+\subsection{Chọn biến rẽ nhánh tất định}
+Khi lan truyền đơn vị kết thúc mà vẫn còn mệnh đề ở trạng thái \texttt{OPEN}, DPLL cần chọn một biến chưa gán $v$ và cực tính thử đầu tiên $b \in \{\text{True}, \text{False}\}$. Bộ giải hỗ trợ hai chiến lược hoàn toàn tất định (không dùng yếu tố ngẫu nhiên), điều khiển qua tham số \texttt{heuristic}. Gọi $\Phi_{\text{open}} \subseteq \Phi_t$ là tập các mệnh đề chưa đạt trạng thái \texttt{SAT} dưới phép gán hiện hành $A$, và $L = \sum_{c \in \Phi_t} |c|$ là tổng số nghĩa văn của công thức.
+
+\subsubsection{Chiến lược cơ sở: Chỉ số biến nhỏ nhất (\texttt{heuristic="smallest"})}
+Đây là chiến lược mặc định làm mốc cơ sở cho toàn hệ thống. Tại mỗi nút quyết định, hàm \texttt{\_select\_branch\_smallest} duyệt qua các mệnh đề thuộc $\Phi_{\text{open}}$, chọn biến chưa gán có chỉ số nguyên dương nhỏ nhất:
+\begin{equation}
+    v^* = \min \big\{ | \ell | : c \in \Phi_{\text{open}},\; \ell \in c,\; |\ell| \notin \text{dom}(A) \big\},
+\end{equation}
+và luôn thử giá trị \texttt{True} trước, \texttt{False} sau. Chiến lược này sở hữu các tính chất sau:
+\begin{itemize}
+    \item \textbf{Tính tất định tuyệt đối:} Với cùng công thức $\Phi_t$ và tập giả định, thứ tự chọn biến hoàn toàn cố định, đảm bảo cây tìm kiếm, mô hình đầu ra và mọi bộ đếm đều tái lập $100\%$.
+    \item \textbf{Ưu tiên biến chính trước biến phụ:} Theo quy ước cấp phát ở Chương~\ref{chap:cnf}, các biến chính (ô bàn cờ) mang chỉ số $1 \dots N^2$, nhỏ hơn toàn bộ biến phụ $N^2 + 1 \dots N^2 + M$. Việc chọn $v^*$ nhỏ nhất giúp DPLL luôn rẽ nhánh trên biến bàn cờ trước, để các biến phụ của bộ đếm tuần tự, chuỗi XOR và tính liên thông tự động được ép giá trị qua lan truyền đơn vị.
+    \item \textbf{Tránh rẽ nhánh dư thừa và chi phí thấp tại mỗi nút:} Các biến tự do hoặc chỉ nằm trong mệnh đề đã \texttt{SAT} bị loại khỏi phạm vi xét. Chi phí tính toán tại mỗi nút là $O(L)$ với hằng số rất nhỏ vì chỉ thực hiện phép so sánh số nguyên trực tiếp.
+\end{itemize}
+
+\subsubsection{Chiến lược đối chứng: Dynamic Two-Sided Jeroslow--Wang (\texttt{heuristic="jw"})}
+Chiến lược này được cài đặt bổ sung nhằm đối chứng thực nghiệm với mốc cơ sở ở Chương~6~\cite{jeroslow1990}. Tại mỗi nút rẽ nhánh, với mỗi mệnh đề $c \in \Phi_{\text{open}}$, gọi $|c'|$ là số nghĩa văn chưa gán phân biệt còn lại trong $c$. Hàm \texttt{\_select\_branch\_jw} tính động trọng số cho từng nghĩa văn dương $+v$ và âm $-v$:
+\begin{equation}
+    J(\ell) = \sum_{\substack{c \in \Phi_{\text{open}} \\ \ell \in c}} 2^{-|c'|}, \qquad S(v) = J(+v) + J(-v).
+\end{equation}
+Bộ giải chọn biến $v^*$ tối đa hóa tổng hai phía $S(v)$; nếu có nhiều biến đạt cùng giá trị lớn nhất, chỉ số biến nhỏ nhất được ưu tiên thông qua khóa sắp xếp $(S(v), -v)$. Cực tính thử trước được xác định theo phía có trọng số lớn hơn: thử \texttt{True} trước nếu $J(+v^*) \ge J(-v^*)$, ngược lại thử \texttt{False} trước. Chiến lược \texttt{jw} mang các tính chất chính sau:
+\begin{itemize}
+    \item \textbf{Ý nghĩa xác suất của trọng số $2^{-|c'|}$:} Dưới phép gán chân trị đều ngẫu nhiên cho các biến chưa gán, một mệnh đề mở còn $|c'|$ nghĩa văn bị vi phạm với xác suất đúng bằng $2^{-|c'|}$. Do đó, các mệnh đề ngắn (chẳng hạn mệnh đề $2$ nghĩa văn nhận trọng số $2^{-2} = 0{,}25$, gấp đôi mệnh đề $3$ nghĩa văn $2^{-3} = 0{,}125$) có ảnh hưởng vượt trội. Việc tối đa hóa $S(v) = J(+v) + J(-v)$ ưu tiên biến xuất hiện dày đặc trong các mệnh đề ngắn nhất --- những biến dễ kích hoạt hiệu ứng dây chuyền lan truyền đơn vị hoặc sớm bộc lộ xung đột nhất để cắt tỉa cây tìm kiếm; đồng thời chọn cực tính có $J(\ell)$ lớn hơn giúp thỏa mãn trực tiếp nhiều mệnh đề ngắn ngay ở nhánh đầu.
+    \item \textbf{Tính tất định hoàn toàn:} Nhờ quy tắc phá hòa theo chỉ số nhỏ nhất $(-v)$ và ngưỡng so sánh tường minh $J(+v^*) \ge J(-v^*)$, chiến lược \texttt{jw} không chứa bất kỳ yếu tố ngẫu nhiên nào và bảo đảm khả năng tái lập tuyệt đối khi chạy thực nghiệm.
+    \item \textbf{Đánh đổi chi phí tại mỗi nút:} Về mặt tiệm cận, \texttt{jw} vẫn có độ phức tạp tuyến tính $O(L)$ tại mỗi nút quyết định, nhưng hằng số tính toán lớn hơn \texttt{smallest} do phải tính lũy thừa $2^{-|c'|}$ và tích lũy hai bảng điểm dương/âm. Sự đánh đổi này hướng tới việc giảm tổng số nút quyết định (\texttt{decisions}) trên các công thức có nhiều ràng buộc phức tạp.
+\end{itemize}
+
+\paragraph{Tính bảo toàn đúng đắn, đầy đủ và tính dừng chung.}
+Cả \texttt{smallest} và \texttt{jw} chỉ quyết định \textit{thứ tự chọn biến và cực tính thử trước} trên tập biến chưa gán, hoàn toàn không thêm, bớt hay làm sai lệch ngữ nghĩa của công thức $\Phi_t$. Do tổng số biến $V$ hữu hạn và mỗi bước rẽ nhánh cố định thêm ít nhất một biến, không gian tìm kiếm luôn hữu hạn; vì vậy thuật toán DPLL luôn dừng và trả về cùng kết luận \texttt{SAT}/\texttt{UNSAT} dưới cả hai chiến lược (ngoại trừ trường hợp chủ động ngắt sớm khi chạm mốc \texttt{timeout\_seconds}).
+
+\subsection{Rẽ nhánh, quay lui, kiểm soát thời gian và hoàn thiện mô hình}
+Tại mỗi nút đệ quy \texttt{\_dpll}:
+\begin{enumerate}
+    \item \textbf{Kiểm tra quá thời gian:} Trước mỗi bước đệ quy và mỗi vòng lan truyền đơn vị, bộ giải kiểm tra mốc \texttt{deadline}. Nếu thời gian thực vượt quá \texttt{timeout\_seconds}, một ngoại lệ nội bộ \texttt{\_SolveTimeout} được phát sinh để thoát ngay khỏi toàn bộ ngăn xếp đệ quy và trả về trạng thái \texttt{TIMEOUT}.
+    \item \textbf{Rẽ nhánh và quay lui an toàn:} Nếu sau lan truyền đơn vị không còn mệnh đề chưa \texttt{SAT}, nút trả về phép gán hiện hành. Ngược lại, bộ giải chọn cặp $(v, b)$, tăng \texttt{decisions} thêm $1$ và gọi đệ quy trên một \textit{bản sao độc lập} $A \cup \{v \mapsto b\}$. Nếu nhánh đầu trả về rỗng (mọi đường đi bên dưới đều xung đột), bộ giải tăng \texttt{backtracks} thêm $1$, quay lui về trạng thái cha $A$ nguyên vẹn và thử tiếp nhánh đối lập trên bản sao $A \cup \{v \mapsto \neg b\}$.
+    \item \textbf{Hoàn thiện biến tự do:} Khi tìm thấy phép gán thỏa mãn, mọi biến $v \in \{1, \dots, V\}$ chưa xuất hiện trong phép gán (biến không bị ràng buộc hoặc chỉ nằm trong các mệnh đề đã thỏa mãn sớm) được điền mặc định \texttt{False}, đảm bảo mô hình đầu ra luôn đầy đủ trên toàn bộ tập biến đã khai báo.
+\end{enumerate}
+
+Hình~\ref{fig:dpll_pseudocode} tóm tắt mã giả của thủ tục DPLL đệ quy đã cài đặt.
+
+\begin{figure}[!htbp]
+\centering
+\begin{tcolorbox}[
+    colback=docs_lightgray,
+    colframe=central_blue,
+    boxrule=0.8pt,
+    arc=2pt,
+    left=8pt,
+    right=8pt,
+    top=6pt,
+    bottom=6pt,
+    title={\textbf{Thuật toán: Thủ tục \texttt{DPLL}($\Phi, A$) với lan truyền đơn vị và quay lui}},
+    fonttitle=\bfseries\small,
+    coltitle=white
+]
+\small\linespread{1.2}\selectfont
+\begin{enumerate}[label=\textbf{\arabic*.}, leftmargin=1.8em, itemsep=1.5pt]
+    \item \textbf{if} quá giới hạn thời gian \texttt{timeout\_seconds} \textbf{then raise} \texttt{\_SolveTimeout}
+    \item \textbf{if not} \texttt{UnitPropagate}($\Phi, A$) \textbf{then return} \texttt{None} \hfill $\triangleright$ \textit{Phát hiện xung đột (\texttt{CONFLICT})}
+    \item $\text{branch} \gets \texttt{SelectBranch}(\Phi, A, \text{heuristic})$ \hfill $\triangleright$ \textit{\texttt{smallest} hoặc \texttt{jw} trên mệnh đề chưa \texttt{SAT}}
+    \item \textbf{if} $\text{branch} = \texttt{None}$ \textbf{then return} $A$ \hfill $\triangleright$ \textit{Mọi mệnh đề đã \texttt{SAT}}
+    \item $(v, b) \gets \text{branch}$; \quad $\text{decisions} \gets \text{decisions} + 1$
+    \item $A_1 \gets \texttt{Copy}(A)$; \quad $A_1[v] \gets b$
+    \item $\text{res} \gets \texttt{DPLL}(\Phi, A_1)$
+    \item \textbf{if} $\text{res} \neq \texttt{None}$ \textbf{then return} $\text{res}$
+    \item $\text{backtracks} \gets \text{backtracks} + 1$ \hfill $\triangleright$ \textit{Quay lui về $A$ và thử cực tính còn lại}
+    \item $A_2 \gets \texttt{Copy}(A)$; \quad $A_2[v] \gets \neg b$
+    \item \textbf{return} $\texttt{DPLL}(\Phi, A_2)$
+\end{enumerate}
+\end{tcolorbox}
+\caption{Mã giả thủ tục đệ quy \texttt{\_dpll} trong \texttt{griductive/sat/dpll.py}.}
+\label{fig:dpll_pseudocode}
+\end{figure}
+
+\section{Ví dụ minh họa}
+Để minh họa rõ quá trình lan truyền đơn vị, phát hiện xung đột và quay lui, xét công thức CNF $\Phi$ trên $V = 4$ biến ($v \in \{1, 2, 3, 4\}$) gồm $5$ mệnh đề, với tập giả định rỗng ($\text{assumptions} = \emptyset$) và chiến lược cơ sở \texttt{heuristic="smallest"}:
+\begin{equation}
+    \Phi = \underbrace{(-1 \lor +2)}_{c_1} \land \underbrace{(-2 \lor +3)}_{c_2} \land \underbrace{(-1 \lor -3)}_{c_3} \land \underbrace{(+1 \lor +2)}_{c_4} \land \underbrace{(-2 \lor +4)}_{c_5}.
+\end{equation}
+
+Quá trình thực thi của bộ giải diễn ra theo các bước sau (tổng hợp trong Bảng~\ref{tab:dpll_trace}):
+\begin{enumerate}
+    \item \textbf{Trạng thái gốc ($A = \emptyset$):} Cả năm mệnh đề $c_1 \dots c_5$ đều ở trạng thái \texttt{OPEN} (mỗi mệnh đề còn $2$ nghĩa văn chưa gán). Hàm \texttt{\_unit\_propagate} không suy ra được biến nào và kết thúc.
+    \item \textbf{Quyết định 1 ($\text{decisions} = 1$):} Chiến lược \texttt{smallest} chọn biến chưa gán có chỉ số nhỏ nhất là $v = 1$ và thử nhánh đầu tiên $1 = \text{True}$ trên bản sao $A_1 = \{1 \mapsto \text{True}\}$.
+    \item \textbf{Lan truyền đơn vị và xung đột trên nhánh $1 = \text{True}$:}
+    \begin{itemize}
+        \item $c_1 = (-1 \lor +2)$ còn duy nhất $+2$ (\texttt{UNIT}) $\Rightarrow$ ép $2 = \text{True}$ ($\text{propagations} = 1$).
+        \item $c_2 = (-2 \lor +3)$ còn duy nhất $+3$ (\texttt{UNIT}) $\Rightarrow$ ép $3 = \text{True}$ ($\text{propagations} = 2$).
+        \item $c_3 = (-1 \lor -3)$ có cả $-1$ và $-3$ đều sai $\Rightarrow$ \texttt{CONFLICT}. Nhánh $1 = \text{True}$ bị cắt tỉa ngay lập tức mà không cần xét đến biến $4$.
+    \end{itemize}
+    \item \textbf{Quay lui ($\text{backtracks} = 1$):} Bộ giải quay lui về trạng thái cha $A = \emptyset$ (không bị ảnh hưởng bởi các phép gán $2 = \text{True}, 3 = \text{True}$ ở nhánh trước) và thử nhánh đối lập $A_2 = \{1 \mapsto \text{False}\}$.
+    \item \textbf{Lan truyền dây chuyền trên nhánh $1 = \text{False}$:}
+    \begin{itemize}
+        \item \textit{Lượt quét 1:} $c_1, c_3$ đã \texttt{SAT} nhờ $-1$; $c_4 = (+1 \lor +2)$ ở trạng thái \texttt{UNIT} $\Rightarrow$ ép $2 = \text{True}$ ($\text{propagations} = 3$); ngay sau đó $c_5 = (-2 \lor +4)$ trở thành \texttt{UNIT} $\Rightarrow$ ép $4 = \text{True}$ ($\text{propagations} = 4$).
+        \item \textit{Lượt quét 2:} Vì phép gán đã thay đổi ở lượt trước, vòng lặp quét lại và phát hiện $c_2 = (-2 \lor +3)$ ở trạng thái \texttt{UNIT} $\Rightarrow$ ép $3 = \text{True}$ ($\text{propagations} = 5$).
+        \item \textit{Lượt quét 3:} Toàn bộ $c_1 \dots c_5$ đều ở trạng thái \texttt{SAT}, không còn biến chưa gán trong các mệnh đề mở.
+    \end{itemize}
+\end{enumerate}
+
+Bộ giải kết thúc với kết quả \texttt{SAT}, mô hình đầy đủ $\{1 \mapsto \text{False},\; 2 \mapsto \text{True},\; 3 \mapsto \text{True},\; 4 \mapsto \text{True}\}$ cùng các bộ đếm $\text{decisions} = 1$, $\text{propagations} = 5$ và $\text{backtracks} = 1$.
+
+\begingroup
+\small\linespread{1.15}\selectfont
+\begin{longtable}{@{}p{0.07\textwidth}p{0.23\textwidth}p{0.31\textwidth}p{0.29\textwidth}@{}}
+\caption{Diễn biến từng bước của DPLL trên công thức minh họa $\Phi$}\label{tab:dpll_trace}\\
+\toprule
+\textbf{Bước} & \textbf{Hành động} & \textbf{Phép gán hiện hành $A$} & \textbf{Trạng thái / Ghi chú} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Bước} & \textbf{Hành động} & \textbf{Phép gán hiện hành $A$} & \textbf{Trạng thái / Ghi chú} \\
+\midrule
+\endhead
+1 & Khởi tạo gốc & $\emptyset$ & Mọi mệnh đề $c_1 \dots c_5$ đều \texttt{OPEN} \\
+\addlinespace
+2 & Rẽ nhánh $1 = \text{True}$ & $\{1 \mapsto \text{T}\}$ & $\text{decisions} = 1$ (chọn $v_{\min} = 1$) \\
+\addlinespace
+3 & Lan truyền từ $c_1, c_2$ & $\{1 \mapsto \text{T},\; 2 \mapsto \text{T},\; 3 \mapsto \text{T}\}$ & $\text{propagations} = 2$; $c_3$ gặp \texttt{CONFLICT} \\
+\addlinespace
+4 & Quay lui sang $1 = \text{False}$ & $\{1 \mapsto \text{F}\}$ & $\text{backtracks} = 1$; bỏ nhánh $1 = \text{True}$ \\
+\addlinespace
+5 & Lan truyền từ $c_4, c_5, c_2$ & $\{1 \mapsto \text{F},\; 2 \mapsto \text{T},\; 4 \mapsto \text{T},\; 3 \mapsto \text{T}\}$ & $\text{propagations} = 5$; toàn bộ $c_1 \dots c_5$ \texttt{SAT} \\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\section{Giao diện bộ giải và chỉ số đo lường}
+Để tách biệt rõ tầng giải SAT với bộ mã hóa (Chương~\ref{chap:cnf}) và tác tử suy diễn (Chương~5), mô-đun \texttt{griductive/sat/dpll.py} cung cấp một điểm gọi duy nhất với hợp đồng đầu vào/đầu ra chặt chẽ.
+
+\subsection{Đầu vào và cơ chế cô lập giả định}
+Hàm chính có chữ ký:
+\begin{center}
+    \small\texttt{solve(clauses, total\_vars, assumptions=(), timeout\_seconds=None,}\\
+    \small\texttt{heuristic="smallest") -> SatResult}
+\end{center}
+trong đó \texttt{clauses} là danh sách mệnh đề CNF của $KB_t$, \texttt{total\_vars} là tổng số biến đã khai báo $1 \dots V$, \texttt{assumptions} là bộ các nghĩa văn giả định tạm thời cho riêng truy vấn hiện tại (ví dụ \texttt{(-i,)} khi kiểm tra $KB_t \land \neg C_i$), \texttt{timeout\_seconds} là giới hạn thời gian theo giây (hoặc \texttt{None}), và \texttt{heuristic} nhận \texttt{"smallest"} hoặc \texttt{"jw"} (phát sinh \texttt{ValueError} nếu giá trị không hợp lệ).
+
+Khi bắt đầu \texttt{solve()}, các nghĩa văn trong \texttt{assumptions} được nạp vào một bảng gán cục bộ mới tạo mà \textit{không sửa đổi} tập \texttt{clauses} gốc. Nếu tập giả định tự mâu thuẫn (chứa đồng thời $+v$ và $-v$), hàm kết thúc ngay với kết quả \texttt{UNSAT}. Do mọi trạng thái tìm kiếm đều mang phạm vi cục bộ trong mỗi lần gọi, các giả định tạm thời không bao giờ bị rò rỉ giữa các truy vấn hệ quả logic liên tiếp của tác tử.
+
+\subsection{Đầu ra và phân biệt ba trạng thái kết quả}
+Kết quả trả về là đối tượng bất biến (\texttt{@dataclass(frozen=True)}) \texttt{SatResult}~\cite{pythonDataclasses}, phân biệt tường minh ba trạng thái như trình bày trong Bảng~\ref{tab:sat_result}. Việc tách riêng \texttt{TIMEOUT} khỏi \texttt{UNSAT} là yêu cầu bắt buộc nhằm ngăn tác tử suy diễn nhầm một truy vấn hết thời gian thành bằng chứng phản chứng hợp lệ.
+
+\begingroup
+\small\linespread{1.15}\selectfont
+\begin{longtable}{@{}p{0.12\textwidth}p{0.09\textwidth}p{0.13\textwidth}p{0.23\textwidth}p{0.29\textwidth}@{}}
+\caption{Phân biệt ba trạng thái đầu ra của cấu trúc \texttt{SatResult}}\label{tab:sat_result}\\
+\toprule
+\textbf{Trạng thái} & \texttt{is\_sat} & \texttt{is\_timeout} & \texttt{model} & \textbf{Ý nghĩa với tác tử suy diễn} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Trạng thái} & \texttt{is\_sat} & \texttt{is\_timeout} & \texttt{model} & \textbf{Ý nghĩa với tác tử suy diễn} \\
+\midrule
+\endhead
+\texttt{SAT} & \texttt{True} & \texttt{False} & \texttt{dict[int, bool]} đầy đủ $1 \dots V$ & Tồn tại ít nhất một phép gán thỏa mãn $KB_t \land \text{assumptions}$. \\
+\addlinespace
+\texttt{UNSAT} & \texttt{False} & \texttt{False} & \texttt{None} & Không tồn tại phép gán thỏa mãn; dùng để chứng minh hệ quả logic. \\
+\addlinespace
+\texttt{TIMEOUT} & \texttt{False} & \texttt{True} & \texttt{None} & Quá giới hạn thời gian; không được suy diễn thành \texttt{UNSAT} hay \texttt{UNKNOWN}. \\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\subsection{Định nghĩa các bộ đếm đo lường}
+Mỗi đối tượng \texttt{SatResult} ghi nhận bốn chỉ số hiệu năng cho \textit{riêng lần gọi} \texttt{solve()} đó, làm cơ sở cho việc tổng hợp và phân tích thực nghiệm ở Chương~6:
+\begin{itemize}
+    \item \texttt{decisions} (\texttt{int}): Số nút rẽ nhánh đã mở khi \texttt{\_dpll} chọn một biến chưa gán để tách thành hai nhánh. Các phép gán nạp từ \texttt{assumptions} đầu vào và các phép ép từ mệnh đề \texttt{UNIT} không tính vào \texttt{decisions}.
+    \item \texttt{propagations} (\texttt{int}): Số phép gán biến bắt buộc được suy ra từ mệnh đề \texttt{UNIT} trong \texttt{\_unit\_propagate} (gồm cả mệnh đề đơn có sẵn ở gốc và mệnh đề sinh ra theo dây chuyền). Các phần tử trong \texttt{assumptions} không tính vào \texttt{propagations}.
+    \item \texttt{backtracks} (\texttt{int}): Số lần nhánh thử đầu tiên thất bại do xung đột khiến bộ giải phải quay lui về trạng thái cha để thử cực tính còn lại tại một nút quyết định.
+    \item \texttt{runtime} (\texttt{float}): Thời gian đồng hồ thực (tính bằng giây thông qua \texttt{time.perf\_counter()}) từ thời điểm bắt đầu gọi \texttt{solve()} đến khi trả về \texttt{SatResult}.
+\end{itemize}
+
+Trên một màn chơi hoàn chỉnh, mỗi bước suy diễn bao gồm một truy vấn kiểm tra tính nhất quán của $KB_t$ và từ một đến hai truy vấn phản chứng cho mỗi ô chưa xác định. Do đó, khi đánh giá thực nghiệm, các bộ đếm trên được phân biệt rõ ở hai mức: \textit{theo từng lần gọi SAT} (giá trị trung bình hoặc cực đại trên một lời gọi \texttt{solve()}) và \textit{tổng toàn màn chơi} (tổng số lượt gọi SAT cùng tổng cộng dồn \texttt{decisions}, \texttt{propagations}, \texttt{backtracks} và \texttt{runtime} riêng của bộ giải DPLL, tách biệt với thời gian mã hóa CNF và giao diện).

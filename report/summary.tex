@@ -1,0 +1,8 @@
+\chapter*{\MakeUppercase{Tóm tắt}}
+% \addcontentsline{toc}{chapter}{{\bf \MakeUppercase{Tóm tắt tổng quan}}}
+
+Griductive Solver là đồ án xây dựng trò chơi suy luận trên lưới và tích hợp tác tử logic theo yêu cầu học phần Cơ sở Trí tuệ nhân tạo. Mỗi nhân vật mang một trong hai trạng thái ẩn: tội phạm hoặc vô tội. Người chơi chỉ được lật một thẻ khi kết luận về nhân vật đó là hệ quả của các thông tin đã công khai. Vì vậy, một dự đoán trùng với đáp án vẫn phải bị từ chối nếu chưa đủ căn cứ suy luận.
+
+Trò chơi được cài đặt bằng Python và Pygame, hỗ trợ \ExpStageCount{} màn với lưới $3\times3$, $4\times4$ và $5\times5$, cùng các chức năng chọn màn, chơi lại, gợi ý và giải tự động. Tác tử mã hóa trạng thái công khai sang CNF và dùng bộ giải SAT bằng DPLL để xác định các kết luận bắt buộc. Báo cáo trình bày cơ chế mã hóa, hai chiến lược rẽ nhánh của DPLL, vòng lặp suy diễn và phép kiểm tra tính duy nhất của nghiệm.
+
+Trong thực nghiệm không giao diện, cấu hình \texttt{smallest} giải xong \ExpSolvedSmallest{}/\ExpTotalSmallest{} lượt, còn \texttt{jw} giải xong \ExpSolvedJW{}/\ExpTotalJW{} lượt. Báo cáo đối chiếu kết quả với bộ phân tích tham chiếu và phân tích bộ đếm tìm kiếm cùng thời gian của từng cấu hình.
