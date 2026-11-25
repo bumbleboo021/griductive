@@ -1,251 +1,166 @@
-﻿🌐 **Language:** [English](README.md) | [Tiếng Việt](README_vi.md)
-
 # Griductive
 
-Python/Pygame deduction game for CSC14003, Introduction to Artificial Intelligence.
-The assignment requirements are in [AI - Project 2.pdf](AI%20-%20Project%202.pdf).
-Gameplay follows [Griductive](https://knotwise.games/games/griductive).
+[English](README.md) | [Tiếng Việt](README_vi.md)
 
-## Current handoff
+A deduction puzzle game built with Python and Pygame for CSC14003 — Introduction
+to Artificial Intelligence. Inspired by [Griductive](https://knotwise.games/games/griductive),
+the game combines progressive clue reveals with a custom CNF encoder, DPLL SAT
+solver and logic agent.
 
-The game engine, interface, asset integration, and 13 playable stages are ready
-for teammate integration. The application currently uses a semantic backtracking
-reference analyzer. The CNF encoder, assessed DPLL solver, final logic-agent
-adapter, and benchmark runner still need implementation.
+## Features
 
-| Area | Current implementation | Next owner |
-| --- | --- | --- |
-| Game and UI | Manual verdict popup, reveals, rejection notifications, Stage, Restart, Hint, Auto Solve, help, music, hover and reveal animations | Person 1 reviews final integration |
-| Shared models and loading | Frozen public models, validated JSON, expanded regions, normalized counting clues | Person 2 builds the encoder against these models |
-| SAT | `griductive/sat/` contains a package placeholder | Person 3 implements DPLL |
-| Logic agent | `griductive/agent/` contains a package placeholder | Person 4 adds the adapter, trace and uniqueness API |
-| Stages and validation | 4 stages for 3x3, 4 for 4x4, 5 for 5x5, semantic validator and saved traces | Person 5 builds reproducible experiments |
+- 13 stages: four 3×3, four 4×4 and five 5×5 puzzles.
+- Manual verdicts, hints and automatic solving without guessing.
+- Identity, counting, parity, comparison, implication and connectivity clues.
+- Character portraits, animated reveals, smooth clue scrolling and music selection.
+- Docked Agent inspector with public-board replay, SAT queries and performance metrics.
+- Selectable DPLL heuristics: smallest variable ID and dynamic two-sided Jeroslow–Wang.
+- Headless validation and CSV/JSON benchmark export.
 
-Use [TODO.md](TODO.md) for task ownership and acceptance checks.
+## Installation
 
-## Run locally
-
-Use Python 3.11 or newer and run commands from the repository root.
-Create an environment on the OS where the game will run.
+Use Python 3.11 or newer. Run commands from the repository root.
 
 ### Windows PowerShell
 
 ```powershell
-python -m venv .venv-win
-.\.venv-win\Scripts\python.exe -m pip install -r requirements-dev.txt
-.\.venv-win\Scripts\python.exe main.py
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe main.py
 ```
 
-If this checkout already has a working `.venv-win`, use its Python directly.
-The environment folder is local and excluded from Git. If `python` resolves to
-an interpreter without venv support, select an installed CPython interpreter in
-your IDE and use that interpreter to create the environment.
-
-### Linux or macOS
+### Linux / macOS
 
 ```bash
 python3 -m venv .venv
-.venv/bin/python -m pip install -r requirements-dev.txt
-.venv/bin/python main.py
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python main.py
 ```
 
-`requirements.txt` installs Pygame. `requirements-dev.txt` adds pytest.
-The following examples use `python` after activating your chosen environment.
-On Windows, you can substitute `.\.venv-win\Scripts\python.exe` in each command.
+For development, install `requirements-dev.txt` instead. Use your environment's
+Python for the commands below; on Windows, substitute
+`.\.venv\Scripts\python.exe` for `python`.
 
-## Playing and selecting stages
+## Running the game
 
-```text
+```bash
 python main.py
 python main.py --puzzle data/puzzles/5x5/level_05.json
-```
-
-- Click an unresolved character and choose Criminal or Innocent in the popup.
-- The top-left card starts selected. WASD or arrows move to adjacent cards,
-  stopping at board edges. Enter opens an unresolved card's verdict popup with
-  Innocent selected. A/Left selects Innocent, D/Right selects Criminal, and
-  S/Down selects Cancel; W/Up returns from Cancel to Innocent. Enter confirms
-  the choice, and Escape closes the popup. Selecting a solved card shows its clue.
-- An accepted verdict reveals a clue. Rejected choices show Incorrect verdict or
-  Not enough evidence. Hint is optional.
-- Click a solved card or revealed clue to highlight its referenced cells. The
-  clue panel scrolls smoothly and shows the complete text of shortened card clues.
-- Stage opens the named level list. Restart restores initial reveals. Hint points
-  to a forced character. Auto Solve plays proved moves and Stop pauses it after
-  any in-progress analysis.
-- The top-right `?` explains the rules. Music opens the track picker with an
-  on/off toggle and WAV, OGG, MP3, or FLAC files from `assets/sounds/`.
-- Escape closes the active popup. On the main screen it exits the game.
-
-The default stage is `data/puzzles/3x3/level_01.json`. Each stage has a root `name`
-field for display. Legacy `title` fields are accepted. Tutorial stages were removed
-from the picker. FACT-chain data used by tests lives under `tests/fixtures/`.
-
-Portraits are randomized when a stage is loaded and stay stable on Restart.
-`5x5/level_05.json` uses `fixed_cast: true` because its Liyue-origin clue depends
-on the cast. Source JSON character names currently must be unique and alphabetical
-in row-major order. GUI randomization happens after loading.
-
-Stage names, coverage and validation instructions are in [docs/LEVELS.md](docs/LEVELS.md).
-
-## Inspect the agent in the game
-
-Open **Agent** near the top-right of the board.
-The window expands to dock the inspector beside the game and scales to fit
-smaller displays; closing it restores the original size. Click the board to play with mouse/keyboard, or click the
-inspector to use arrow keys for scrolling and history navigation.
-
-**Analyze** classifies the public
-board without revealing cards; **Next move** proves and reveals one character.
-**Auto Solve / Stop** runs or pauses the normal solver while recording its calls.
-Use Previous/Next to browse calls and the wheel or arrow keys
-to scroll details. The inspector also records ordinary Hint and verdict actions.
-
-Previous/Next also previews the public board after that call's action. Historical
-cards and clues are read-only; the live engine is not rewound. **Live**, returning
-to the newest call, or closing the inspector restores the live board. Browsing
-pauses Auto Solve; new moves are disabled until you return to Live.
-
-Experiment metrics include primary/auxiliary variables, CNF clauses, actual SAT
-calls, solver decisions/propagations/backtracks, accepted deduction steps and reveal
-waves, and analysis runtime. Per-call values and cumulative totals are shown
-separately. Runtime excludes animations, idle time, and extra diagnostic encoding.
-Initial face-up cards and hints do not count as deduction steps. Totals survive
-history eviction, and reset on Restart, Stage, or backend changes. Missing solver
-counters are **N/A**; reference analysis has zero SAT calls. CNF sizes refer to the
-call's input KB, while the replay board shows its post-action state.
-
-Each call shows its actual backend, public clues, classifications, elapsed time,
-CNF variable/clause counts when available, recorded SAT assumptions and results,
-and newly revealed clues. History keeps the latest 128 calls and resets on
-Restart or Stage changes. Calls are analysis invocations, not reveal-step counts.
-
-**Use Reference** and **Use Logic Agent** switch backends while preserving proved
-cards and clearing history. Logic Agent explicitly displays **Reference fallback**
-if CNF/DPLL is unavailable; it never invents SAT results for reference analysis.
-With **Use Logic Agent** selected, click **Heuristic** to switch between
-**smallest** (the default) and **jw** (dynamic two-sided Jeroslow–Wang).
-Switching preserves proved cards and clears analysis history and accumulated
-metrics. The choice persists across Restart, Stage changes and backend switches.
-The control is disabled during analysis, Auto Solve, and history playback.
-Each recorded Logic Agent call shows the heuristic it used.
-
-## First checks after pulling the project
-
-```text
-python -m pytest tests -q
-python main.py --headless
-python -m griductive.check_analyzer
-python scripts/validate_levels.py
-```
-
-| Command | What it verifies |
-| --- | --- |
-| `pytest` | Engine transitions, clue semantics, levels, and offscreen Pygame interactions |
-| `main.py --headless` | Progressive solving of the selected stage using the selected analyzer |
-| `griductive.check_analyzer` | Public classifications against the reference analyzer on level 01 across all board sizes and small core/parity cases |
-| `scripts/validate_levels.py` | Truth of every stored clue, complete-clue uniqueness, and public progressive solving on all 13 stages |
-
-The current checker covers core/parity cases and the original level-01 set.
-Person 4 should add extended-agent comparisons for levels 03 and above.
-The standalone level validator uses semantic search and the reference analyzer.
-Final CNF/DPLL validation and experiment measurements remain on the task list.
-
-Some systems emit `no fast renderer available` under SDL's offscreen test driver.
-Check the pytest result and any actual failures separately.
-
-## Connect the teammate agent
-
-Person 4 should implement a no-argument class or factory in
-`griductive/agent/adapter.py`. The existing public interface is
-`analyze(state: PublicState) -> Analysis`.
-
-```text
 python main.py --analyzer griductive.agent.adapter:Agent
+```
+
+The default analyzer is semantic backtracking (`ReferenceAnalyzer`).
+Use the last command to start with the CNF/DPLL agent, or switch analyzers in
+the Agent inspector.
+
+### Controls
+
+| Action | Control |
+| --- | --- |
+| Select a character | Mouse click, WASD or arrow keys |
+| Open / confirm verdict | Enter; the popup initially selects Innocent |
+| Choose a verdict | Mouse or directional keys in the popup |
+| Close a popup | Escape |
+| Change / restart a stage | Stage / Restart |
+| Find a provable move | Hint |
+| Solve progressively / pause | Auto Solve / Stop |
+| Instructions / music | ? / Music |
+
+A verdict reveals the character's clue only when it follows from public evidence.
+The game distinguishes insufficient evidence from a contradicted verdict.
+Click revealed cards or clues to highlight referenced characters.
+
+Portraits are randomized on stage load and remain stable on Restart. Stages with
+`fixed_cast: true` preserve their cast for clues that depend on character origins.
+
+## Agent inspector
+
+Open **Agent** to dock the inspector beside the board.
+
+- **Use Reference / Use Logic Agent** changes the analysis backend.
+- **Heuristic** toggles `smallest` and `jw` when Logic Agent is selected.
+- **Analyze** classifies the current board without revealing a card.
+- **Next move** proves and reveals one character.
+- **Previous call / Next call** previews the public board after a recorded action;
+  **Live** restores the current board. Replay does not rewind the engine.
+
+Each logic call records its heuristic, classifications, SAT queries, CNF size and
+available solver counters. Metrics include primary/auxiliary variables, clauses,
+SAT calls, decisions, propagations, backtracks, deduction steps, reveal waves and
+analysis runtime. Input CNF sizes and the post-action replay board refer to
+different points in the action.
+
+Changing backend or heuristic preserves proved cards and clears history and
+accumulated metrics. Restart and stage changes also reset them. Heuristic
+selection persists within the session. Switching is disabled during analysis,
+Auto Solve and history playback. Reference analysis makes no SAT calls;
+unavailable counters display **N/A**, and any reference fallback is labeled.
+
+## Validation and experiments
+
+```bash
+python -m pip install -r requirements-dev.txt
+python -m pytest tests -q
 python main.py --headless --analyzer griductive.agent.adapter:Agent
 python -m griductive.check_analyzer --analyzer griductive.agent.adapter:Agent
-python main.py --headless --puzzle data/puzzles/5x5/level_05.json --analyzer griductive.agent.adapter:Agent
+python scripts/validate_levels.py
+python -m griductive.experiments.benchmark --runs 3 --timeout 3 --output results
 ```
 
-These adapter commands become available after that module is implemented.
+The benchmark uses the fixed [stage manifest](griductive/experiments/manifest.json),
+strict CNF/DPLL execution and the `smallest` heuristic. It writes
+`results/benchmark.csv` and `results/benchmark.json`, including failures and
+timeouts. `--timeout` limits each SAT call, not the complete stage. Generated
+results are ignored by Git.
 
-The adapter receives revealed clues, proved verdicts, and public character metadata.
-Return `Analysis(False, ())` for an inconsistent KB. For a consistent KB, return
-`Analysis(True, verdicts)` with every unresolved cell classified exactly once in
-row-major order, using `Status.CRIMINAL`, `Status.INNOCENT`, or `Status.UNKNOWN`.
-Raise on unsupported templates or timeouts. The engine checks this result shape
-and owns verdict acceptance and clue reveals.
+The LaTeX report and the two-heuristic experiment runner are maintained on the
+[report branch](https://github.com/bumbleboo021/griductive/tree/report).
+Its `report/experiments/compare_heuristics.py` compares `smallest` and `jw`;
+the benchmark command above measures `smallest` only.
 
-Keep primary variable IDs tied to cells rather than randomized display names.
-The GUI serializes analyzer calls through a background worker. An analyzer
-instance must handle arbitrary public snapshots, including a restarted stage.
-The default `ReferenceAnalyzer` has a three-second deadline per analysis.
-
-The detailed schema and integration examples are in [docs/INTEGRATION.md](docs/INTEGRATION.md).
-
-## Clue rules the encoder must preserve
-
-| Public template | Encoding contract |
-| --- | --- |
-| FACT | `cells` contains one cell and `status` is its asserted status |
-| SAME / DIFFERENT | Two cells have equal / different Boolean statuses |
-| EXACTLY / AT_LEAST / AT_MOST | `kind` and `count` already describe the normalized criminal count |
-| ODD / EVEN | `kind` already describes parity of the criminal count |
-| COUNT_COMPARE | Compare counts of the actual `target_status` in `cells` and `other_cells`, using `operator` GT, LT or EQ |
-| CONNECTED | Target-status cells form an orthogonally connected group within `cells`. Empty and singleton groups satisfy this constraint |
-| IMPLIES | `cells[0]` with `antecedent_status` implies `cells[1]` with `consequent_status`. Preserve this order |
-| QUOTE | Personal remark with no logical constraint |
-
-For core counting/parity clues, `target_status` preserves display wording.
-The loader already converts innocent counts and their bounds/parity to criminal
-constraints. Applying that conversion again changes the meaning.
-COUNT_COMPARE and CONNECTED retain the actual target status for evaluation.
-`clue.referenced_cells` includes both regions of a comparison for highlighting.
-
-Regions are expanded by the loader, including rows, columns, neighbors,
-intersections, common neighbors, directions, the grid, boundary, corners, and
-named groups. Neighbors include diagonals. Connectivity uses four directions.
-
-## Repository map
+## Project structure
 
 ```text
-main.py                          Entry point
-griductive/app.py                CLI and analyzer factory loading
-griductive/domain/models.py      Public models and clue fields
-griductive/engine/puzzle.py      Private puzzle model, schema and regions
-griductive/engine/game.py        Verdict checks and reveal lifecycle
-griductive/engine/reference.py   Development semantic analyzer
-griductive/engine/advanced_clues.py  Extended semantic constraints
-griductive/ui/                   Rendering, input, assets, config and music
-griductive/logic/                Person 2 encoder implementation area
-griductive/sat/                  Person 3 DPLL implementation area
-griductive/agent/                Person 4 adapter and trace implementation area
-griductive/experiments/          Person 5 benchmark implementation area
-data/puzzles/                   Thirteen playable stage JSON files
-tests/fixtures/                 Development chain fixtures
-scripts/validate_levels.py       Offline semantic validator
-scripts/build_levels.py          Rebuild levels 01-02
-scripts/build_extended_levels.py Rebuild levels 03 and above
-scripts/polish_levels.py         Replace removable clues with quote cards
-docs/level_validation.json       Saved semantic validation traces
-results/                        Generated experiment outputs, ignored by Git
+main.py                    Application entry point
+griductive/
+  domain/                  Immutable public models
+  engine/                  Puzzle loading, reveal rules and reference analyzer
+  logic/                   CNF encoding
+  sat/                     DPLL solver and branching heuristics
+  agent/                   Entailment, deduction traces and uniqueness checks
+  ui/                      Pygame rendering, input, inspector, assets and music
+  experiments/             Fixed manifest and benchmark runner
+data/puzzles/              Stage JSON files
+assets/                    Portraits, background, fonts and audio
+tests/                     Unit and integration tests
+scripts/                   Stage generation and semantic validation tools
+docs/                      Technical and customization guides
+results/                   Local benchmark outputs
 ```
 
-Stage-building scripts overwrite their generated files. Coordinate stage changes
-with Person 5 and rerun validation after editing clues or initial reveals.
+The engine owns hidden answers and unrevealed clues. Analyzers receive only an
+immutable `PublicState` through `analyze(PublicState) -> Analysis`.
 
-## UI, assets and report material
+## Documentation
 
-Edit `griductive/ui/config.py` for colors, fonts, card sizes, hover/reveal timing,
-clue scrolling, quotes, and music defaults. The current logical window is 1180x850
-and Pygame scales it for the display. Portrait filenames provide names and origins.
-
+- [Project report (PDF, Vietnamese)](Report.pdf)
+- [LaTeX sources and report experiments](https://github.com/bumbleboo021/griductive/tree/report/report)
+- [Stage catalog](docs/LEVELS.md)
+- [Integration and data contracts](docs/INTEGRATION.md)
+- [DPLL implementation notes](docs/DPLL_NOTES.md)
+- [Level design](docs/LEVEL_DESIGN.md)
 - [UI customization](docs/UI_CUSTOMIZATION.md)
-- [Level-design notes](docs/LEVEL_DESIGN.md)
-- [Asset attribution template](assets/ATTRIBUTION.md)
-- [Asset license folder guide](assets/licenses/README.md)
-- [AI-assistance appendix](appendix.md)
+- [Project checklist](TODO.md)
 
-Complete the asset attribution placeholders and keep the supplied notices with
-the assets. Each member should review the AI-assistance appendix and add their
-subsequent usage and actual contributions before the final report.
+UI settings, quotes and animation timing are in `griductive/ui/config.py`.
+Stage-generation scripts overwrite generated JSON files; rerun validation after
+changing clues or initial reveals.
+
+## Credits and assets
+
+See [asset attribution](assets/ATTRIBUTION.md) and the
+[image notice](assets/images/NOTICE.txt) for sources and notices.
+Third-party images, fonts and audio remain subject to their respective owners'
+terms; a source credit alone does not grant redistribution permission.
+AI assistance is recorded in [appendix.md](appendix.md).
