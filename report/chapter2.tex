@@ -45,12 +45,14 @@ Các tính năng chính gồm:
 
 Trong bảng Agent, \texttt{Previous call}/\texttt{Next call} cho phép xem lại bàn cờ sau hành động tương ứng. Chế độ lịch sử chỉ đọc, không thay đổi trạng thái trò chơi đang chạy; \texttt{Live} đưa người chơi trở về bàn cờ hiện tại. Bảng cũng hiển thị số biến chính/phụ, mệnh đề CNF, lượt gọi SAT, quyết định, lan truyền, quay lui, bước suy diễn và thời gian, tách theo lượt phân tích và tổng tích lũy. Bộ đếm chưa được cung cấp hiển thị \texttt{N/A}.
 
-Hình~\ref{fig:agent-inspector} minh họa bảng Agent khi sử dụng tác tử CNF/DPLL và xem lại một lượt phân tích trước đó.
+Khi chọn \texttt{Use Logic Agent}, nút \texttt{Heuristic} cho phép chuyển giữa \texttt{smallest} (mặc định) và \texttt{jw}; hai chiến lược được trình bày ở Chương~\ref{chap:dpll}. Việc chuyển giữ nguyên các thẻ đã chứng minh nhưng xóa lịch sử và bộ đếm tích lũy để không trộn số liệu giữa các cấu hình. Lựa chọn được giữ khi chơi lại hoặc đổi màn. Nút này bị khóa khi đang phân tích, giải tự động hoặc xem lịch sử; mỗi lượt phân tích ghi rõ heuristic đã sử dụng.
+
+Hình~\ref{fig:agent-inspector} minh họa bảng Agent hiện tại với lựa chọn heuristic và lịch sử phân tích của tác tử CNF/DPLL.
 
 \begin{figure}[!htbp]
     \centering
     \includegraphics[width=0.8\textwidth]{figures/agent_inspector.png}
-    \caption{Agent inspector hiển thị lịch sử phân tích và các chỉ số của tác tử CNF/DPLL.}
+    \caption{Agent inspector với nút chọn heuristic, lịch sử phân tích và các chỉ số của tác tử CNF/DPLL.}
     \label{fig:agent-inspector}
 \end{figure}
 
