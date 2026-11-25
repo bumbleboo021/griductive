@@ -4,6 +4,25 @@
 \section{Giới thiệu}
 Nhóm xây dựng phiên bản Griductive bằng Python và Pygame, tham khảo luật chơi gốc~\cite{griductive,pygameDocs}. Trò chơi hỗ trợ bàn cờ $3\times3$, $4\times4$ và $5\times5$. Mỗi nhân vật có trạng thái ẩn là tội phạm hoặc vô tội; người chơi chỉ được mở thẻ khi kết luận được chứng minh từ thông tin công khai.
 
+\section{Dữ liệu và nạp màn chơi}
+\label{sec:game-loading}
+Mỗi màn được lưu trong một tệp JSON tại \path{data/puzzles/}, gồm tên màn, kích thước, danh sách nhân vật, trạng thái đáp án, manh mối của từng thẻ và tập thẻ mở sẵn \texttt{initially\_revealed}. Tọa độ dùng chữ cái cho cột và số cho hàng, chẳng hạn \texttt{A1} là ô trên cùng bên trái. Manh mối được lưu dưới dạng cấu trúc có loại và tham số; chương trình không suy luận trực tiếp từ câu văn hiển thị.
+
+Khi chọn \texttt{Stage}, hàm \texttt{load\_puzzle()} đọc JSON, kiểm tra kích thước, số lượng và tọa độ nhân vật, trạng thái, mã manh mối và danh sách thẻ mở ban đầu. Bộ nạp đồng thời chuyển các mô tả vùng và ràng buộc đếm về biểu diễn thống nhất để các bộ phân tích sử dụng; chi tiết chuẩn hóa được trình bày ở Chương~\ref{chap:cnf}. Dữ liệu hợp lệ được đóng gói thành \texttt{Puzzle}, sau đó truyền cho \texttt{GameEngine}. Engine khởi tạo tập thẻ đã mở và cung cấp trạng thái ban đầu cho giao diện. Kiểm tra cấu trúc khi nạp không thay thế việc kiểm tra nghiệm duy nhất và khả năng giải tiến triển ở Chương~\ref{chap:agent}.
+
+\section{Trạng thái công khai và quy tắc mở thẻ}
+\label{sec:game-public-state}
+\texttt{GameEngine} giữ dữ liệu đầy đủ của màn chơi, bao gồm đáp án và các manh mối chưa mở. Bộ phân tích chỉ nhận bản chụp bất biến \texttt{PublicState}, gồm bốn thành phần:
+\begin{itemize}
+    \item \texttt{size}: kích thước cạnh bàn cờ.
+    \item \texttt{characters}: tọa độ, tên và xuất xứ của tất cả nhân vật, không chứa trạng thái ẩn.
+    \item \texttt{verdicts}: trạng thái đã biết của các thẻ mở sẵn hoặc đã được chứng minh.
+    \item \texttt{clues}: manh mối gắn với những thẻ đã mở.
+\end{itemize}
+Như vậy, một manh mối công khai có thể nhắc tới ô chưa mở, nhưng manh mối nằm trên chính thẻ chưa mở đó vẫn được giữ kín. Chương~\ref{chap:cnf} biểu diễn các dữ liệu này thành cơ sở tri thức; Chương~\ref{chap:agent} trình bày cách suy ra kết luận bắt buộc.
+
+Khi người chơi chọn trạng thái cho một ô, engine yêu cầu bộ phân tích kiểm tra thông tin công khai hiện tại. Nếu kết luận chưa bắt buộc hoặc bị chứng minh ngược lại, bàn cờ giữ nguyên. Với kết luận hợp lệ, engine đối chiếu đáp án để phát hiện lỗi dữ liệu hoặc bộ phân tích, rồi mới mở thẻ và công khai manh mối mới. Chẳng hạn, nếu manh mối đã mở cho biết mọi người ở hàng 1 đều vô tội, người chơi có thể chứng minh \texttt{B1} vô tội; sau khi mở \texttt{B1}, manh mối của thẻ này mới được dùng cho lượt tiếp theo. \texttt{Hint} chỉ gợi ý ô có thể chứng minh, không mở thẻ.
+
 \section{Giao diện và các tính năng chính}
 Giao diện gồm bàn cờ ở bên trái và bảng manh mối ở bên phải. Mỗi thẻ hiển thị tọa độ, tên, xuất xứ và ảnh nhân vật. Thẻ đã mở hiển thị thêm trạng thái cùng manh mối; người chơi có thể chọn manh mối để làm nổi bật các ô liên quan.
 
@@ -38,8 +57,9 @@ Hình~\ref{fig:agent-inspector} minh họa bảng Agent khi sử dụng tác t�
 Ảnh nền, chân dung, phông chữ và âm nhạc được nạp từ \texttt{assets/}; nguồn được ghi tại \path{assets/ATTRIBUTION.md}~\cite{assetRecord}. Màu sắc, kích thước thẻ và thời gian hoạt ảnh được cấu hình trong \texttt{griductive/ui/config.py}.
 
 \section{Tổ chức và tích hợp bộ phân tích}
-\texttt{GameEngine} quản lý đáp án và các manh mối chưa mở. Bộ phân tích chỉ nhận \texttt{PublicState}, gồm thông tin nhân vật, trạng thái đã biết và manh mối công khai. Kết quả phân tích được engine sử dụng để chấp nhận hoặc từ chối lựa chọn; chỉ sau khi chấp nhận, trạng thái và manh mối mới được công khai.
+\label{sec:game-analyzers}
+Để phát triển giao diện và kiểm tra luật chơi độc lập với bộ giải SAT, nhóm xây dựng \texttt{ReferenceAnalyzer} bằng quay lui ngữ nghĩa. Bộ phân tích cố định các trạng thái đã biết, thử các phép gán cho ô chưa mở và cắt nhánh khi một manh mối công khai không còn khả năng thỏa mãn. Với mỗi ô, chương trình kiểm tra khả năng tồn tại nghiệm ở cả hai trạng thái: nếu cả hai đều có thể xảy ra thì trả \texttt{UNKNOWN}; nếu chỉ một trạng thái có thể xảy ra thì đó là kết luận bắt buộc. Nếu không có phép gán thỏa mãn, kết quả báo dữ liệu công khai mâu thuẫn. Quá thời gian được báo riêng, không được xem là \texttt{UNKNOWN}. Bộ này cũng được dùng để đối chiếu kết quả của tác tử trong Chương~\ref{chap:experiments}.
 
-Trò chơi mặc định dùng bộ phân tích tham chiếu bằng quay lui ngữ nghĩa. Repo hiện có bộ mã hóa CNF và bộ giải DPLL; người dùng chuyển giữa \texttt{Use Reference} và \texttt{Use Logic Agent} trong bảng Agent. Cả hai kết nối qua giao diện \texttt{analyze(PublicState) -> Analysis}. Nếu thành phần logic chưa khả dụng, tác tử có thể dùng bộ phân tích tham chiếu dự phòng và ghi rõ \texttt{Reference fallback}.
+Trò chơi mặc định dùng bộ phân tích tham chiếu. Người dùng chuyển giữa \texttt{Use Reference} và \texttt{Use Logic Agent} trong bảng Agent. Cả hai kết nối qua giao diện \texttt{analyze(PublicState) -> Analysis}, trả về tính nhất quán và phân loại từng ô chưa mở. Logic Agent sử dụng bộ mã hóa CNF ở Chương~\ref{chap:cnf}, bộ giải DPLL ở Chương~\ref{chap:dpll} và quy trình suy diễn ở Chương~\ref{chap:agent}. Nếu thành phần logic chưa khả dụng, tác tử có thể dùng bộ phân tích tham chiếu dự phòng và ghi rõ \texttt{Reference fallback}.
 
 Tác vụ phân tích chạy trong luồng nền để giao diện tiếp tục xử lý sự kiện và hiển thị. Các ảnh chụp trạng thái công khai được lưu riêng cho chức năng xem lại; chỉ kết luận được engine chấp nhận mới mở thêm thẻ và được tính là bước suy diễn.

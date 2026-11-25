@@ -82,7 +82,7 @@ Trước khi thực hiện phân loại bất kỳ ô chưa giải nào, tác t�
 Vòng lặp suy diễn của tác tử diễn ra theo các bước tuần tự như sau:
 \begin{enumerate}
     \item \textbf{Khởi tạo và tiếp nhận trạng thái công khai ($t = 0$):}
-    Tác tử nhận \texttt{PublicState} từ \texttt{GameEngine}, gồm các thẻ đã lật ban đầu kèm theo các manh mối tương ứng để thiết lập cơ sở tri thức ban đầu $KB_0$.
+    Tác tử nhận \texttt{PublicState} (Mục~\ref{sec:game-public-state}) từ \texttt{GameEngine}, gồm các thẻ đã lật ban đầu kèm theo các manh mối tương ứng để thiết lập cơ sở tri thức ban đầu $KB_0$.
     
     \item \textbf{Phân loại toàn bộ các ô chưa giải:}
     Tại bước $t$, tác tử tiến hành kiểm tra tính nhất quán của $KB_t$ và áp dụng phương pháp suy diễn phản chứng (Mục~\ref{sec:entailment}) để phân loại tất cả các ô chưa mở thành \texttt{CRIMINAL}, \texttt{INNOCENT}, hoặc \texttt{UNKNOWN}.
@@ -268,6 +268,6 @@ Quy ước dữ liệu đầu vào và đầu ra:
 Nhằm đảm bảo hệ thống có thể phát triển song song giữa các thành viên mà không bị nghẽn, \texttt{Agent} được thiết kế với cơ chế dự phòng an toàn:
 \begin{itemize}
     \item Mặc định, tác tử cố gắng gọi quy trình suy diễn chính thức thông qua chuỗi kết hợp giữa bộ mã hóa CNF (\texttt{griductive.logic.encoder}) và bộ giải DPLL (\texttt{griductive.sat.dpll}).
-    \item Nếu các mô-đun này chưa được nạp hoặc đang trong quá trình phát triển (bắt các ngoại lệ \texttt{ImportError}, \texttt{NotImplementedError}), tác tử sẽ tự động chuyển hướng sang bộ phân tích tham chiếu ngữ nghĩa (\texttt{ReferenceAnalyzer}) làm cơ chế dự phòng (\textit{fallback}).
+    \item Nếu các mô-đun này chưa được nạp hoặc đang trong quá trình phát triển (bắt các ngoại lệ \texttt{ImportError}, \texttt{NotImplementedError}), tác tử sẽ tự động chuyển hướng sang bộ phân tích tham chiếu ngữ nghĩa (\texttt{ReferenceAnalyzer}, Mục~\ref{sec:game-analyzers}) làm cơ chế dự phòng (\textit{fallback}).
 \end{itemize}
 

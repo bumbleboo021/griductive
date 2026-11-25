@@ -2,7 +2,7 @@
 \label{chap:cnf}
 
 \section{Biểu diễn bài toán}
-Để tác tử suy diễn logic có thể kiểm tra hệ quả logic ($\models$) thông qua bộ giải SAT bằng thuật toán DPLL đã giới thiệu ở Chương~\ref{chap:game}, toàn bộ trạng thái bàn cờ và các manh mối của trò chơi Griductive được chuyển đổi sang công thức logic mệnh đề ở dạng chuẩn hội (CNF)~\cite{russell2020aima}. Trước khi xây dựng các quy tắc biến đổi, ta thiết lập hệ thống định nghĩa và ký hiệu đơn nghĩa xuyên suốt chương này như sau:
+Để tác tử suy diễn logic có thể kiểm tra hệ quả logic ($\models$) thông qua bộ giải SAT bằng thuật toán DPLL được trình bày ở Chương~\ref{chap:dpll}, toàn bộ trạng thái bàn cờ và các manh mối của trò chơi Griductive được chuyển đổi sang công thức logic mệnh đề ở dạng chuẩn hội (CNF)~\cite{russell2020aima}. Trước khi xây dựng các quy tắc biến đổi, ta thiết lập hệ thống định nghĩa và ký hiệu đơn nghĩa xuyên suốt chương này như sau:
 
 \begin{itemize}
     \item \textbf{Tọa độ ô và thứ tự đọc sách:} Với bàn cờ vuông kích thước cạnh $N \in \{3, 4, 5\}$, tổng số ô trên bàn cờ là $N^2$. Các ô được đánh chỉ số nguyên liên tiếp $i \in \{1, 2, \dots, N^2\}$ theo thứ tự đọc sách từ trên xuống dưới, từ trái sang phải (row-major order). Ví dụ trên bàn cờ $N = 3$, ô \texttt{A1} ứng với chỉ số $i = 1$, ô \texttt{B1} ứng với $i = 2$, và ô \texttt{C3} ứng với $i = 9$.
@@ -26,7 +26,7 @@
 \end{itemize}
 
 \section{Xây dựng cơ sở tri thức}
-Tại bước suy diễn thứ $t$, tác tử chỉ được phép tiếp cận bản chụp trạng thái công khai \texttt{PublicState} do \texttt{GameEngine} cung cấp. Cơ sở tri thức công khai $KB_t$ được mã hóa thành công thức CNF $\Phi_t$ từ hai thành phần dữ liệu công khai duy nhất:
+Tại bước suy diễn thứ $t$, tác tử chỉ được phép tiếp cận bản chụp trạng thái công khai \texttt{PublicState} (Mục~\ref{sec:game-public-state}) do \texttt{GameEngine} cung cấp. Cơ sở tri thức công khai $KB_t$ được mã hóa thành công thức CNF $\Phi_t$ từ hai thành phần dữ liệu công khai duy nhất:
 
 \begin{enumerate}
     \item \textbf{Tập trạng thái đã biết ($V_t$):} Gồm các cặp $(i, \sigma_i)$ của những ô thuộc tập ô đã mở $R_t$ (bao gồm các thẻ mở sẵn ban đầu và các thẻ đã được chứng minh hợp lệ ở các bước trước). Mỗi cặp $(i, \sigma_i) \in V_t$ đóng góp trực tiếp một mệnh đề đơn (unit clause) có dạng $(\ell(i, \sigma_i))$ vào công thức $\Phi_t$.
@@ -230,5 +230,5 @@ Mô-đun mã hóa được cài đặt tại \texttt{griductive/logic/encoder.py
 
     \item \textbf{Quy trình điều phối và cấp phát biến:} Khi được gọi, hàm khởi tạo hai bảng ánh xạ hai chiều \texttt{cell\_to\_var} và \texttt{var\_to\_cell} cho $N^2$ biến chính $C_1, \dots, C_{N^2}$, đồng thời đặt con trỏ cấp phát biến phụ tại \texttt{next\_aux} $= N^2 + 1$. Tiếp theo, hàm thêm các mệnh đề đơn từ $V_t$ rồi duyệt tuần tự từng manh mối trong $L_t$ để gọi bộ sinh mệnh đề tương ứng theo trường \texttt{clue.kind}. Mỗi khi sinh một biến phụ $A_j$, con trỏ \texttt{next\_aux} tăng đơn điệu lên $1$ nhằm loại bỏ hoàn toàn nguy cơ xung đột định danh biến giữa các manh mối. Đối với các đầu vào vi phạm hợp đồng dữ liệu (thiếu tham số đếm, thiếu trạng thái kéo theo hoặc gặp mẫu manh mối không hợp lệ), hàm chủ động phát sinh ngoại lệ \texttt{ValueError}.
 
-    \item \textbf{Đóng gói đầu ra (\texttt{CNFResult}):} Kết quả trả về là cấu trúc dữ liệu bất biến chứa danh sách các mệnh đề \texttt{clauses}, hai từ điển ánh xạ \texttt{cell\_to\_var} và \texttt{var\_to\_cell}, tập chỉ số biến chính \texttt{primary\_vars}, cùng các chỉ số thống kê \texttt{num\_primary\_vars} ($N^2$), \texttt{num\_aux\_vars} ($M$), \texttt{total\_vars} ($N^2 + M$) và \texttt{num\_clauses} ($|\Phi_t|$) phục vụ trực tiếp cho bộ giải DPLL, tác tử suy diễn và bộ đo thực nghiệm ở các chương sau.
+    \item \textbf{Đóng gói đầu ra (\texttt{CNFResult}):} Kết quả trả về là cấu trúc dữ liệu bất biến chứa danh sách các mệnh đề \texttt{clauses}, hai từ điển ánh xạ \texttt{cell\_to\_var} và \texttt{var\_to\_cell}, tập chỉ số biến chính \texttt{primary\_vars}, cùng các chỉ số thống kê \texttt{num\_primary\_vars} ($N^2$), \texttt{num\_aux\_vars} ($M$), \texttt{total\_vars} ($N^2 + M$) và \texttt{num\_clauses} ($|\Phi_t|$) phục vụ trực tiếp cho bộ giải DPLL, tác tử suy diễn và bộ đo thực nghiệm ở Chương~\ref{chap:dpll}, Chương~\ref{chap:agent} và Chương~\ref{chap:experiments}.
 \end{itemize}

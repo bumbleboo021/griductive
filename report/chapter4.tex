@@ -42,7 +42,7 @@ và luôn thử giá trị \texttt{True} trước, \texttt{False} sau. Chiến l
 \end{itemize}
 
 \subsubsection{Chiến lược đối chứng: Dynamic Two-Sided Jeroslow--Wang (\texttt{heuristic="jw"})}
-Chiến lược này được cài đặt bổ sung nhằm đối chứng thực nghiệm với mốc cơ sở ở Chương~6~\cite{jeroslow1990}. Tại mỗi nút rẽ nhánh, với mỗi mệnh đề $c \in \Phi_{\text{open}}$, gọi $|c'|$ là số nghĩa văn chưa gán phân biệt còn lại trong $c$. Hàm \texttt{\_select\_branch\_jw} tính động trọng số cho từng nghĩa văn dương $+v$ và âm $-v$:
+Chiến lược này được cài đặt bổ sung nhằm đối chứng thực nghiệm với mốc cơ sở ở Chương~\ref{chap:experiments}~\cite{jeroslow1990}. Tại mỗi nút rẽ nhánh, với mỗi mệnh đề $c \in \Phi_{\text{open}}$, gọi $|c'|$ là số nghĩa văn chưa gán phân biệt còn lại trong $c$. Hàm \texttt{\_select\_branch\_jw} tính động trọng số cho từng nghĩa văn dương $+v$ và âm $-v$:
 \begin{equation}
     J(\ell) = \sum_{\substack{c \in \Phi_{\text{open}} \\ \ell \in c}} 2^{-|c'|}, \qquad S(v) = J(+v) + J(-v).
 \end{equation}
@@ -53,7 +53,7 @@ Bộ giải chọn biến $v^*$ tối đa hóa tổng hai phía $S(v)$; nếu c�
     \item \textbf{Đánh đổi chi phí tại mỗi nút:} Về mặt tiệm cận, \texttt{jw} vẫn có độ phức tạp tuyến tính $O(L)$ tại mỗi nút quyết định, nhưng hằng số tính toán lớn hơn \texttt{smallest} do phải tính lũy thừa $2^{-|c'|}$ và tích lũy hai bảng điểm dương/âm. Sự đánh đổi này hướng tới việc giảm tổng số nút quyết định (\texttt{decisions}) trên các công thức có nhiều ràng buộc phức tạp.
 \end{itemize}
 
-\paragraph{Tính bảo toàn đúng đắn, đầy đủ và tính dừng chung.}
+\paragraph{Tính bảo toàn đúng đắn, đầy đủ và tính dừng chung:}
 Cả \texttt{smallest} và \texttt{jw} chỉ quyết định \textit{thứ tự chọn biến và cực tính thử trước} trên tập biến chưa gán, hoàn toàn không thêm, bớt hay làm sai lệch ngữ nghĩa của công thức $\Phi_t$. Do tổng số biến $V$ hữu hạn và mỗi bước rẽ nhánh cố định thêm ít nhất một biến, không gian tìm kiếm luôn hữu hạn; vì vậy thuật toán DPLL luôn dừng và trả về cùng kết luận \texttt{SAT}/\texttt{UNSAT} dưới cả hai chiến lược (ngoại trừ trường hợp chủ động ngắt sớm khi chạm mốc \texttt{timeout\_seconds}).
 
 \subsection{Rẽ nhánh, quay lui, kiểm soát thời gian và hoàn thiện mô hình}
@@ -153,7 +153,7 @@ Bộ giải kết thúc với kết quả \texttt{SAT}, mô hình đầy đủ $
 \endgroup
 
 \section{Giao diện bộ giải và chỉ số đo lường}
-Để tách biệt rõ tầng giải SAT với bộ mã hóa (Chương~\ref{chap:cnf}) và tác tử suy diễn (Chương~5), mô-đun \texttt{griductive/sat/dpll.py} cung cấp một điểm gọi duy nhất với hợp đồng đầu vào/đầu ra chặt chẽ.
+Để tách biệt rõ tầng giải SAT với bộ mã hóa (Chương~\ref{chap:cnf}) và tác tử suy diễn (Chương~\ref{chap:agent}), mô-đun \texttt{griductive/sat/dpll.py} cung cấp một điểm gọi duy nhất với hợp đồng đầu vào/đầu ra chặt chẽ.
 
 \subsection{Đầu vào và cơ chế cô lập giả định}
 Hàm chính có chữ ký:
@@ -190,7 +190,7 @@ Kết quả trả về là đối tượng bất biến (\texttt{@dataclass(froz
 \endgroup
 
 \subsection{Định nghĩa các bộ đếm đo lường}
-Mỗi đối tượng \texttt{SatResult} ghi nhận bốn chỉ số hiệu năng cho \textit{riêng lần gọi} \texttt{solve()} đó, làm cơ sở cho việc tổng hợp và phân tích thực nghiệm ở Chương~6:
+Mỗi đối tượng \texttt{SatResult} ghi nhận bốn chỉ số hiệu năng cho \textit{riêng lần gọi} \texttt{solve()} đó, làm cơ sở cho việc tổng hợp và phân tích thực nghiệm ở Chương~\ref{chap:experiments}:
 \begin{itemize}
     \item \texttt{decisions} (\texttt{int}): Số nút rẽ nhánh đã mở khi \texttt{\_dpll} chọn một biến chưa gán để tách thành hai nhánh. Các phép gán nạp từ \texttt{assumptions} đầu vào và các phép ép từ mệnh đề \texttt{UNIT} không tính vào \texttt{decisions}.
     \item \texttt{propagations} (\texttt{int}): Số phép gán biến bắt buộc được suy ra từ mệnh đề \texttt{UNIT} trong \texttt{\_unit\_propagate} (gồm cả mệnh đề đơn có sẵn ở gốc và mệnh đề sinh ra theo dây chuyền). Các phần tử trong \texttt{assumptions} không tính vào \texttt{propagations}.
