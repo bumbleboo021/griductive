@@ -16,28 +16,50 @@ from griductive.ui.assets import Artwork, ui_font
 from griductive.ui import config as cfg
 from griductive.ui.character_card import draw_character, reveal_progress
 from griductive.ui.config import BG, PANEL, TEXT, MUTED, ACCENT
+from griductive.ui import screens
+from griductive.ui.screens import (
+    StageEntry,
+    StageRecord,
+    draw_centered_text,
+    main_canvas_rect,
+    short_stage_title,
+    spawn_cleared_particles,
+)
 
 
 
 class GameWindow:
-    def __init__(self, path, factory, puzzle_dir, analyzer_name):
-        self.screen = pygame.display.set_mode(cfg.WINDOW_SIZE, pygame.SCALED)
+    def __init__(self, path, factory, puzzle_dir, analyzer_name, start_screen='game'):
+        self.maximized = False
+        self._minimized = False
+        self._windowed_inspector_open = False
+        self._last_display_size = None
         self.output_surface = None
-        pygame.display.set_caption("Griductive | Deduction desk")
+        self.frame_surface = None
+        self.screen = None
+        self.viewport_rect = pygame.Rect(0, 0, *cfg.WINDOW_SIZE)
+        self._veil_cache = {}
+        self._backdrop_cache = {}
+        self._bg_cache = {}
+        self.inspector = AgentInspector()
+        self.last_cursor = None
+        self._resize_window_for_mode()
         self.font = ui_font(cfg.FONT_SIZE)
         self.small = ui_font(cfg.SMALL_FONT_SIZE)
         self.tiny = ui_font(cfg.TINY_FONT_SIZE)
         self.heading = ui_font(cfg.HEADING_FONT_SIZE, heading=True)
+        self.title_font = ui_font(cfg.TITLE_FONT_SIZE, heading=True)
+        self.subtitle_font = ui_font(cfg.SUBTITLE_FONT_SIZE, heading=True)
         self.artwork = Artwork()
-        self.background = self.artwork.background(self.screen.get_size())
+        self.background = self.artwork.background(cfg.WINDOW_SIZE)
         self.reveal_started = {}
         self.last_revealed = None
         self.auto_focus_cell = None
         self.auto_focus_until = 0
         self.factory, self.puzzle_dir, self.analyzer_name = factory, Path(puzzle_dir), analyzer_name
+        self.current_path = Path(path).resolve()
         self.observer = ObservedAnalyzer(factory())
         self.logic_heuristic = getattr(self.observer.analyzer, 'heuristic', None) or 'smallest'
-        self.inspector = AgentInspector()
         self.engine = GameEngine(self.artwork.cast_puzzle(load_puzzle(path)), self.observer)
         self.queue = Queue()
         self.analysis_sequence_before = 0
@@ -70,6 +92,26 @@ class GameWindow:
         self.buttons, self.cards = {}, {}
         self.clue_hits, self.file_hits, self.files = [], [], []
         self.message = "Select a card, read the revealed clues, then call a verdict."
+        # Screen state, menu navigation, and elapsed timer
+        self.screen_state = start_screen
+        self.stage_select_return = 'home'
+        self.has_active_session = start_screen == 'game'
+        self.moves = 0
+        self.hints_used = 0
+        self.hinted_cells = set()
+        self.auto_used = False
+        self.stage_elapsed_ms = 0
+        self.last_timer_tick = pygame.time.get_ticks()
+        self.stage_records = {}
+        self._stage_catalog = None
+        self.stage_filter = 'all'
+        self.stage_select_scroll = 0
+        self.stage_select_max_scroll = 0
+        self.stage_select_hits = []
+        self.cleared_pending_until = None
+        self.cleared_dismissed = False
+        self.cleared_particles = []
+        self._home_preview_chars = None
 
     def label(self, text, pos, color=TEXT, font=None):
         self.screen.blit((font or self.font).render(str(text), True, color), pos)
@@ -117,25 +159,56 @@ class GameWindow:
             self.label(line, (rect.x, rect.y+i*font.get_linesize()), color, font)
         self.screen.set_clip(old)
 
-    def button(self, key, text, rect, enabled=True, focused=False):
+    def button(self, key, text, rect, enabled=True, focused=False, style='default'):
         self.buttons[key] = (rect, enabled)
         amount = self.hover(key, rect, enabled, focused=focused)
         visible = rect.move(0, -round(cfg.HOVER_LIFT*amount))
-        base = cfg.BUTTON if enabled else cfg.BUTTON_DISABLED
-        color = tuple(round(a+(b-a)*amount*.3) for a,b in zip(base,ACCENT))
-        pygame.draw.rect(self.screen, color, visible, border_radius=8)
-        if amount > 0:
-            pygame.draw.rect(self.screen, ACCENT, visible, max(1,round(amount*2)), border_radius=8)
+        if not enabled:
+            base = cfg.BUTTON_DISABLED
+            border_accent = ACCENT
+        elif style == 'primary':
+            base = cfg.BUTTON_PRIMARY
+            border_accent = ACCENT
+        elif style == 'danger':
+            base = cfg.BUTTON_DANGER
+            border_accent = cfg.DANGER
+        elif style == 'gold':
+            base = (76, 62, 34)
+            border_accent = cfg.HIGHLIGHT
+        else:
+            base = cfg.BUTTON
+            border_accent = ACCENT
+        color = tuple(round(a+(b-a)*amount*.32) for a,b in zip(base,border_accent))
+        pygame.draw.rect(self.screen, color, visible, border_radius=9)
+        if style in ('primary', 'gold') and enabled:
+            pygame.draw.rect(self.screen, border_accent, visible, max(1, round(1 + amount)), border_radius=9)
+        elif amount > 0:
+            pygame.draw.rect(self.screen, border_accent, visible, max(1,round(amount*2)), border_radius=9)
+        elif style == 'danger' and enabled:
+            pygame.draw.rect(self.screen, cfg.DANGER, visible, 1, border_radius=9)
         if focused:
-            pygame.draw.rect(self.screen, ACCENT, visible, 2, border_radius=8)
-        font = self.small if self.font.size(text)[0] > rect.width-24 else self.font
-        self.wrapped(text, visible.inflate(-24,-14), TEXT if enabled else MUTED, font)
+            pygame.draw.rect(self.screen, border_accent, visible, 2, border_radius=9)
+        font = self.small if self.font.size(text)[0] > rect.width-20 else self.font
+        if font.size(text)[0] <= visible.width-16:
+            draw_centered_text(self.screen, font, text, visible.center, TEXT if enabled else MUTED)
+        else:
+            self.wrapped(text, visible.inflate(-20,-12), TEXT if enabled else MUTED, font)
 
     def hover(self, key, rect, enabled=True, focused=False):
         pointer = self.mouse_position()
-        active_scope = ('notice' if self.notification else 'music' if self.music_picker else 'help' if self.help_open else
-                        'verdict' if self.verdict_cell else 'stage' if self.picker else
-                        'agent' if self.inspector.open and pointer[0] >= cfg.WINDOW_SIZE[0] else 'main')
+        active_scope = (
+            'notice' if self.notification else
+            'music' if self.music_picker else
+            'help' if self.help_open else
+            'pause' if self.screen_state == 'pause' else
+            'cleared' if self.screen_state == 'cleared' else
+            'home' if self.screen_state == 'home' else
+            'stage_select' if self.screen_state == 'stage_select' else
+            'verdict' if self.verdict_cell else
+            'stage' if self.picker else
+            'agent' if self.inspector.open and pointer[0] >= cfg.WINDOW_SIZE[0] else
+            'main'
+        )
         hovered = enabled and self.hover_scope == active_scope and rect.collidepoint(pointer)
         self.pointer_hover |= hovered
         previous = self.hover_values.get(key, 0.0)
@@ -160,7 +233,169 @@ class GameWindow:
             self.queue.put(result)
         Thread(target=run, daemon=True).start()
 
+    def _tick_stage_timer(self, now=None):
+        now = pygame.time.get_ticks() if now is None else now
+        delta = max(0, min(250, now - self.last_timer_tick))
+        self.last_timer_tick = now
+        if (self.screen_state == 'game' and not self.engine.solved and
+                not self.help_open and not self.music_picker and not self.picker and
+                not self.notification):
+            self.stage_elapsed_ms += delta
+
+    def record_stage_completion(self):
+        existing = self.stage_records.get(self.current_path)
+        if existing is None:
+            self.stage_records[self.current_path] = StageRecord(self.stage_elapsed_ms)
+        else:
+            self.stage_records[self.current_path] = StageRecord(
+                min(existing.best_time_ms, self.stage_elapsed_ms),
+            )
+
+    def maybe_open_cleared(self, now=None):
+        now = pygame.time.get_ticks() if now is None else now
+        if (self.screen_state == 'game' and self.cleared_pending_until is not None
+                and not self.cleared_dismissed and now >= self.cleared_pending_until):
+            self.cleared_pending_until = None
+            self.open_cleared()
+
+    def open_cleared(self):
+        self.auto = False
+        self.verdict_cell = None
+        self.notification = None
+        self.screen_state = 'cleared'
+        self.cleared_particles = spawn_cleared_particles(main_canvas_rect())
+
+    def open_pause(self):
+        if self.busy:
+            return
+        self.auto = False
+        self.verdict_cell = None
+        self.screen_state = 'pause'
+
+    def resume_game(self):
+        self.screen_state = 'game'
+        self.has_active_session = True
+        self.last_timer_tick = pygame.time.get_ticks()
+
+    def go_home(self):
+        if self.busy:
+            return
+        self.auto = False
+        self.picker = False
+        self.verdict_cell = None
+        self.notification = None
+        if self.inspector.open:
+            self.set_inspector_open(False)
+        self.screen_state = 'home'
+
+    def open_stage_select(self, return_to=None):
+        if self.busy:
+            return
+        self.auto = False
+        self.picker = False
+        self.verdict_cell = None
+        self.notification = None
+        if self.inspector.open:
+            self.set_inspector_open(False)
+        self.stage_select_return = return_to or self.screen_state
+        self.stage_select_scroll = 0
+        self.screen_state = 'stage_select'
+
+    def discover_stages(self):
+        if self._stage_catalog is None:
+            entries = []
+            for idx, path in enumerate(sorted(self.puzzle_dir.rglob("*.json")), 1):
+                try:
+                    puzzle = load_puzzle(path)
+                except (ValueError, OSError):
+                    continue
+                entries.append(StageEntry(
+                    path=path.resolve(),
+                    title=puzzle.title,
+                    short_title=short_stage_title(puzzle.title),
+                    size=puzzle.size,
+                    index=idx,
+                ))
+            self._stage_catalog = entries
+        return self._stage_catalog
+
+    def next_stage_path(self):
+        stages = self.discover_stages()
+        for i, entry in enumerate(stages):
+            if entry.path == self.current_path:
+                return stages[i + 1].path if i + 1 < len(stages) else None
+        return stages[0].path if stages else None
+
+    def home_preview_characters(self):
+        if self._home_preview_chars is None:
+            catalog = list(self.artwork.catalog.values())
+            preferred = ('furina', 'arlecchino', 'nahida')
+            chosen = []
+            for name in preferred:
+                if name in self.artwork.catalog:
+                    chosen.append(self.artwork.catalog[name])
+            for item in catalog:
+                if len(chosen) >= 3:
+                    break
+                if item not in chosen:
+                    chosen.append(item)
+            while len(chosen) < 3:
+                chosen.append(None)
+            self._home_preview_chars = chosen[:3]
+        return self._home_preview_chars
+
+    def frame_background(self):
+        size = self.frame_surface.get_size()
+        if size == cfg.WINDOW_SIZE:
+            return self.background
+        bg = self._bg_cache.get(size)
+        if bg is None:
+            bg = self.artwork.background(size)
+            self._bg_cache[size] = bg
+        return bg
+
+    def veil_surface(self, rgba, size=None):
+        size = size or self.frame_surface.get_size()
+        key = (size, rgba)
+        surf = self._veil_cache.get(key)
+        if surf is None:
+            surf = pygame.Surface(size, pygame.SRCALPHA)
+            surf.fill(rgba)
+            self._veil_cache[key] = surf
+        return surf
+
+    def draw_veil(self, rgba):
+        self.frame_surface.blit(self.veil_surface(rgba), (0, 0))
+
+    def draw_backdrop(self, veil_rgba):
+        size = self.frame_surface.get_size()
+        key = (size, veil_rgba)
+        surf = self._backdrop_cache.get(key)
+        if surf is None:
+            surf = pygame.Surface(size).convert()
+            surf.fill(BG)
+            bg = self.frame_background()
+            if bg:
+                surf.blit(bg, (0, 0))
+            surf.blit(self.veil_surface(veil_rgba, size), (0, 0))
+            self._backdrop_cache[key] = surf
+        self.frame_surface.blit(surf, (0, 0))
+
+    def reset_stage_metrics(self):
+        self.moves = 0
+        self.hints_used = 0
+        self.hinted_cells.clear()
+        self.auto_used = False
+        self.stage_elapsed_ms = 0
+        self.last_timer_tick = pygame.time.get_ticks()
+        self.cleared_pending_until = None
+        self.cleared_dismissed = False
+        self.screen_state = 'game'
+        self.has_active_session = True
+
     def update(self):
+        now = pygame.time.get_ticks()
+        self._tick_stage_timer(now)
         try:
             result = self.queue.get_nowait()
         except Empty:
@@ -171,6 +406,12 @@ class GameWindow:
             if records and records[-1].number > self.analysis_sequence_before:
                 self.observer.finish_action(result, self.engine.public_state())
             self.message = f"{result.code}: {result.message}"
+            if result.code == 'HINT':
+                if result.cell and result.cell not in self.hinted_cells:
+                    self.hinted_cells.add(result.cell)
+                    self.hints_used = len(self.hinted_cells)
+            elif result.code in ('ACCEPTED', 'SOLVED', 'CONTRADICTED', 'NOT_PROVABLE'):
+                self.moves += 1
             if result.code in ('CONTRADICTED', 'NOT_PROVABLE'):
                 self.notification = result
                 self.verdict_cell = None
@@ -178,11 +419,15 @@ class GameWindow:
                 self.selected = result.cell
                 if self.auto and result.code in ('ACCEPTED','SOLVED'):
                     self.auto_focus_cell = result.cell
-                    self.auto_focus_until = pygame.time.get_ticks()+max(cfg.REVEAL_DURATION_MS,cfg.HOVER_DURATION_MS*2)+150
+                    self.auto_focus_until = now+max(cfg.REVEAL_DURATION_MS,cfg.HOVER_DURATION_MS*2)+150
+            if result.code == 'SOLVED':
+                self.record_stage_completion()
+                self.cleared_pending_until = now+cfg.REVEAL_DURATION_MS+150
             if result.code != "ACCEPTED":
                 self.auto = False
-            self.next_step = pygame.time.get_ticks()+cfg.REVEAL_DURATION_MS+150
-        if self.auto and not self.busy and pygame.time.get_ticks() >= self.next_step:
+            self.next_step = now+cfg.REVEAL_DURATION_MS+150
+        self.maybe_open_cleared(now)
+        if self.screen_state == 'game' and self.auto and not self.busy and now >= self.next_step:
             self.start(self.engine.step)
 
     def load(self, path):
@@ -192,6 +437,7 @@ class GameWindow:
         except Exception as exc:
             self.message = f"LOAD ERROR: {exc}"
             return
+        self.current_path = Path(path).resolve()
         self.engine = engine
         self.observer = observer
         self.inspector.reset()
@@ -205,13 +451,27 @@ class GameWindow:
         self.clue_scroll_target = 0.0
         self.picker = self.auto = False
         self.stage_drag_offset = None
+        self.reset_stage_metrics()
         self.message = "Puzzle loaded. Select a card or ask for a hint."
 
     def logical_position(self, position):
         if self.output_surface is None:
             return position
-        return (round(position[0]*self.screen.get_width()/self.output_surface.get_width()),
-                round(position[1]*self.screen.get_height()/self.output_surface.get_height()))
+        out_w, out_h = self.output_surface.get_size()
+        frame_w, frame_h = self.frame_surface.get_size()
+        fx = position[0] * frame_w / max(1, out_w)
+        fy = position[1] * frame_h / max(1, out_h)
+        return (round(fx - self.viewport_rect.x), round(fy - self.viewport_rect.y))
+
+    def window_position(self, position):
+        if self.output_surface is None:
+            return position
+        out_w, out_h = self.output_surface.get_size()
+        frame_w, frame_h = self.frame_surface.get_size()
+        return (
+            round((position[0] + self.viewport_rect.x) * out_w / max(1, frame_w)),
+            round((position[1] + self.viewport_rect.y) * out_h / max(1, frame_h)),
+        )
 
     def mouse_position(self):
         return self.logical_position(pygame.mouse.get_pos())
@@ -235,6 +495,64 @@ class GameWindow:
         self.reveal_started.clear()
         self.last_revealed = None
 
+    def _content_size(self):
+        width, height = cfg.WINDOW_SIZE
+        if self.inspector.open:
+            width += cfg.AGENT_PANEL_WIDTH
+        return (width, height)
+
+    def _target_window_size(self):
+        content_w, content_h = self._content_size()
+        if not self.inspector.open and pygame.display.get_driver() == 'dummy':
+            return (content_w, content_h)
+        desktop_sizes = pygame.display.get_desktop_sizes()
+        if not desktop_sizes:
+            return (content_w, content_h)
+        desktop_w, desktop_h = desktop_sizes[0]
+        scale = min(1.0, max(1, desktop_w - 48) / content_w, max(1, desktop_h - 80) / content_h)
+        return (max(1, round(content_w * scale)), max(1, round(content_h * scale)))
+
+    def _resize_window_for_mode(self):
+        target = self._target_window_size()
+        display_surface = pygame.display.set_mode(target, pygame.RESIZABLE)
+        pygame.display.set_caption('Griductive | Deduction desk')
+        self._windowed_inspector_open = self.inspector.open
+        self._sync_display_surface(display_surface)
+        self.last_cursor = None
+
+    def _sync_display_surface(self, display_surface=None):
+        display_surface = display_surface or pygame.display.get_surface()
+        if display_surface is None:
+            return
+        out_w, out_h = display_surface.get_size()
+        if out_w <= 0 or out_h <= 0:
+            return
+        content_w, content_h = self._content_size()
+        self._last_display_size = (out_w, out_h)
+        if (out_w, out_h) == (content_w, content_h) and not self.inspector.open and not self.maximized:
+            self.output_surface = None
+            self.viewport_rect = pygame.Rect(0, 0, content_w, content_h)
+            self.frame_surface = display_surface
+            self.screen = display_surface
+            return
+        self.output_surface = display_surface
+        pad = 24 if (self.maximized and self.inspector.open) else 0
+        min_w, min_h = content_w + pad, content_h + pad
+        if out_w * min_h >= out_h * min_w:
+            logical_h = min_h
+            logical_w = max(min_w, round(min_h * out_w / max(1, out_h)))
+        else:
+            logical_w = min_w
+            logical_h = max(min_h, round(min_w * out_h / max(1, out_w)))
+        offset_x = (logical_w - content_w) // 2
+        offset_y = (logical_h - content_h) // 2
+        self.viewport_rect = pygame.Rect(offset_x, offset_y, content_w, content_h)
+        self.frame_surface = pygame.Surface((logical_w, logical_h)).convert()
+        if self.viewport_rect.size == (logical_w, logical_h):
+            self.screen = self.frame_surface
+        else:
+            self.screen = self.frame_surface.subsurface(self.viewport_rect)
+
     def set_inspector_open(self, opened):
         if self.inspector.open == opened:
             return
@@ -243,27 +561,19 @@ class GameWindow:
         if not opened:
             self.inspector.reset()
             self.clear_replay_view()
-        width, height = cfg.WINDOW_SIZE
-        if opened:
-            width += cfg.AGENT_PANEL_WIDTH
-        # SDL's SCALED renderer must be recreated when its logical size changes.
-        # Keep fonts, audio, cached artwork, and the running engine intact.
-        pygame.display.quit()
-        pygame.display.init()
-        if opened:
-            desktop_width, desktop_height = pygame.display.get_desktop_sizes()[0]
-            scale = min(1.0, max(1,desktop_width-48)/width,
-                        max(1,desktop_height-80)/height)
-            self.output_surface = pygame.display.set_mode((max(1,round(width*scale)),
-                                                          max(1,round(height*scale))))
-            self.screen = pygame.Surface((width,height)).convert()
+        if self.maximized:
+            self._sync_display_surface()
         else:
-            self.screen = pygame.display.set_mode((width,height), pygame.SCALED)
-            self.output_surface = None
-        pygame.display.set_caption('Griductive | Deduction desk')
-        self.last_cursor = None
+            self._resize_window_for_mode()
 
     def action(self, key):
+        if key == 'pause':
+            self.open_pause()
+            return
+        if key == 'reopen_cleared':
+            self.cleared_dismissed = False
+            self.open_cleared()
+            return
         if key == 'agent_live':
             self.inspector.reset()
             self.clear_replay_view()
@@ -355,12 +665,15 @@ class GameWindow:
             self.verdict_cell = None
             self.clue_scroll = 0
             self.clue_scroll_target = 0.0
+            self.reset_stage_metrics()
             self.message = "Restarted with the original face-up cards."
         elif key == "hint":
             self.start(self.engine.hint)
         elif key == "auto":
             self.auto = not self.auto
-            if not self.auto:
+            if self.auto:
+                self.auto_used = True
+            else:
                 self.auto_focus_cell = None
             self.message = "Auto Solve started." if self.auto else "Stopped; the current step may finish."
         elif key in ("criminal", "innocent") and self.verdict_cell:
@@ -408,6 +721,129 @@ class GameWindow:
         if cell != self.selected:
             self.select_character(cell, open_popup=False)
 
+    def _clicked_button(self, pos, *keys):
+        for key in keys:
+            entry = self.buttons.get(key)
+            if entry and entry[1] and entry[0].collidepoint(pos):
+                return key
+        return None
+
+    def _event_home(self, event):
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                return False
+            if event.key in (pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_SPACE):
+                self.resume_game()
+                return True
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            clicked = self._clicked_button(
+                event.pos,
+                'home_play', 'home_stages', 'home_help', 'home_help_cta', 'home_music', 'home_quit'
+            )
+            if clicked == 'home_play':
+                self.resume_game()
+            elif clicked == 'home_stages':
+                self.open_stage_select('home')
+            elif clicked in ('home_help', 'home_help_cta'):
+                self.action('help')
+            elif clicked == 'home_music':
+                self.action('choose_music')
+            elif clicked == 'home_quit':
+                return False
+        return True
+
+    def _event_stage_select(self, event):
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            self.screen_state = self.stage_select_return
+            if self.screen_state == 'game':
+                self.last_timer_tick = pygame.time.get_ticks()
+            return True
+        if event.type == pygame.MOUSEWHEEL:
+            self.stage_select_scroll = max(
+                0, min(self.stage_select_max_scroll, self.stage_select_scroll - event.y * 64)
+            )
+            return True
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            clicked = self._clicked_button(
+                event.pos,
+                'stage_back', 'stage_filter_all', 'stage_filter_3', 'stage_filter_4', 'stage_filter_5'
+            )
+            if clicked == 'stage_back':
+                self.screen_state = self.stage_select_return
+                if self.screen_state == 'game':
+                    self.last_timer_tick = pygame.time.get_ticks()
+                return True
+            if clicked and clicked.startswith('stage_filter_'):
+                value = clicked.split('_')[-1]
+                self.stage_filter = 'all' if value == 'all' else int(value)
+                self.stage_select_scroll = 0
+                return True
+            for rect, path in self.stage_select_hits:
+                if rect.collidepoint(event.pos):
+                    self.load(path)
+                    break
+        return True
+
+    def _event_pause(self, event):
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            self.resume_game()
+            return True
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            clicked = self._clicked_button(
+                event.pos,
+                'pause_resume', 'pause_restart', 'pause_stages',
+                'pause_music', 'pause_help', 'pause_home', 'pause_quit'
+            )
+            if clicked == 'pause_resume':
+                self.resume_game()
+            elif clicked == 'pause_restart':
+                self.action('restart')
+            elif clicked == 'pause_stages':
+                self.open_stage_select('pause')
+            elif clicked == 'pause_music':
+                self.action('choose_music')
+            elif clicked == 'pause_help':
+                self.action('help')
+            elif clicked == 'pause_home':
+                self.go_home()
+            elif clicked == 'pause_quit':
+                return False
+        return True
+
+    def _event_cleared(self, event):
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                self.cleared_dismissed = True
+                self.resume_game()
+                return True
+            if event.key in (pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_SPACE):
+                next_path = self.next_stage_path()
+                if next_path is not None:
+                    self.load(next_path)
+                else:
+                    self.open_stage_select('cleared')
+                return True
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            clicked = self._clicked_button(
+                event.pos, 'cleared_next', 'cleared_replay', 'cleared_board', 'cleared_stages', 'cleared_home'
+            )
+            if clicked == 'cleared_next':
+                next_path = self.next_stage_path()
+                if next_path is not None:
+                    self.load(next_path)
+                else:
+                    self.open_stage_select('cleared')
+            elif clicked == 'cleared_replay':
+                self.action('restart')
+            elif clicked == 'cleared_board':
+                self.cleared_dismissed = True
+                self.resume_game()
+            elif clicked == 'cleared_stages':
+                self.open_stage_select('cleared')
+            elif clicked == 'cleared_home':
+                self.go_home()
+        return True
+
     def event(self, event):
         if self.output_surface is not None and hasattr(event, 'pos'):
             attributes = dict(event.dict)
@@ -417,6 +853,28 @@ class GameWindow:
             return False
         if event.type == pygame.WINDOWFOCUSLOST:
             self.stage_drag_offset = None
+        if event.type == pygame.WINDOWMAXIMIZED:
+            self.maximized = True
+            self._minimized = False
+            self._sync_display_surface()
+            return True
+        if event.type == pygame.WINDOWMINIMIZED:
+            self._minimized = True
+            return True
+        if event.type == pygame.WINDOWRESTORED:
+            if self._minimized:
+                self._minimized = False
+                self._sync_display_surface()
+            else:
+                self.maximized = False
+                if self.inspector.open != self._windowed_inspector_open:
+                    self._resize_window_for_mode()
+                else:
+                    self._sync_display_surface()
+            return True
+        if event.type in (pygame.WINDOWSIZECHANGED, pygame.VIDEORESIZE):
+            self._sync_display_surface()
+            return True
         if self.notification:
             if event.type == pygame.KEYDOWN and event.key in (pygame.K_ESCAPE, pygame.K_RETURN, pygame.K_SPACE):
                 self.notification = None
@@ -425,6 +883,40 @@ class GameWindow:
                 if button and button[0].collidepoint(event.pos):
                     self.notification = None
             return True
+        if self.music_picker:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                self.music_picker = False
+            elif event.type == pygame.MOUSEWHEEL:
+                self.music_scroll = max(0,min(max(0,len(self.music_tracks)-7),self.music_scroll-event.y))
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                close = self.buttons.get('close_music')
+                toggle = self.buttons.get('music')
+                if close and close[0].collidepoint(event.pos):
+                    self.music_picker = False
+                elif toggle and toggle[1] and toggle[0].collidepoint(event.pos):
+                    self.action('music')
+                else:
+                    for rect, path in self.music_hits:
+                        if rect.collidepoint(event.pos):
+                            self.select_music(path)
+                            break
+            return True
+        if self.help_open:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                self.help_open = False
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                button = self.buttons.get('close_help')
+                if button and button[0].collidepoint(event.pos):
+                    self.help_open = False
+            return True
+        if self.screen_state == 'home':
+            return self._event_home(event)
+        if self.screen_state == 'stage_select':
+            return self._event_stage_select(event)
+        if self.screen_state == 'pause':
+            return self._event_pause(event)
+        if self.screen_state == 'cleared':
+            return self._event_cleared(event)
         if self.inspector.open and not (self.music_picker or self.help_open or self.picker or self.verdict_cell):
             pointer = getattr(event, 'pos', self.mouse_position())
             over_panel = pointer[0] >= cfg.WINDOW_SIZE[0]
@@ -456,32 +948,6 @@ class GameWindow:
             if ((event.type != pygame.KEYDOWN and over_panel) or
                     (event.type == pygame.KEYDOWN and self.inspector.focused)):
                 return True
-        if self.music_picker:
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                self.music_picker = False
-            elif event.type == pygame.MOUSEWHEEL:
-                self.music_scroll = max(0,min(max(0,len(self.music_tracks)-7),self.music_scroll-event.y))
-            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                close = self.buttons.get('close_music')
-                toggle = self.buttons.get('music')
-                if close and close[0].collidepoint(event.pos):
-                    self.music_picker = False
-                elif toggle and toggle[1] and toggle[0].collidepoint(event.pos):
-                    self.action('music')
-                else:
-                    for rect, path in self.music_hits:
-                        if rect.collidepoint(event.pos):
-                            self.select_music(path)
-                            break
-            return True
-        if self.help_open:
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                self.help_open = False
-            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                button = self.buttons.get('close_help')
-                if button and button[0].collidepoint(event.pos):
-                    self.help_open = False
-            return True
         if event.type == pygame.KEYDOWN and not self.picker:
             directions = {pygame.K_w:(0,-1),pygame.K_UP:(0,-1),
                           pygame.K_s:(0,1),pygame.K_DOWN:(0,1),
@@ -553,7 +1019,8 @@ class GameWindow:
                         break
             return True
         if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-            return False
+            self.open_pause()
+            return True
         if event.type == pygame.MOUSEWHEEL and self.clue_panel.collidepoint(self.mouse_position()):
             movement = getattr(event,'precise_y',event.y)
             self.clue_scroll_target = max(0, min(self.max_scroll, self.clue_scroll_target-movement*cfg.CLUE_SCROLL_STEP))
@@ -581,19 +1048,63 @@ class GameWindow:
             self.file_scroll = round(position/travel*max(0,len(self.files)-8))
 
     def draw(self):
+        display_surface = pygame.display.get_surface()
+        if display_surface is not None and display_surface.get_size() != self._last_display_size:
+            self._sync_display_surface(display_surface)
         tick = pygame.time.get_ticks()
         self.hover_delta = min(50, max(0,tick-self.hover_time))
         self.hover_time = tick
+        self.maybe_open_cleared(tick)
         self.hover_scope = 'main'
         self.pointer_hover = False
-        self.screen.fill(BG)
-        if self.background:
-            self.screen.blit(self.background, (0, 0))
         self.buttons = {}
+        if self.screen_state == 'home':
+            screens.draw_home(self)
+            if self.help_open:
+                self.draw_help()
+            if self.music_picker:
+                self.draw_music_picker()
+        elif self.screen_state == 'stage_select':
+            screens.draw_stage_select(self)
+            if self.help_open:
+                self.draw_help()
+            if self.music_picker:
+                self.draw_music_picker()
+        else:
+            self.frame_surface.fill(BG)
+            bg = self.frame_background()
+            if bg:
+                self.frame_surface.blit(bg, (0, 0))
+            self._draw_gameplay(tick)
+            if self.inspector.open:
+                self.inspector.draw(self)
+            if self.screen_state == 'game':
+                if self.picker:
+                    self.draw_picker()
+                if self.verdict_cell:
+                    self.draw_verdict_popup()
+            elif self.screen_state == 'pause':
+                screens.draw_pause_overlay(self)
+            elif self.screen_state == 'cleared':
+                screens.draw_cleared_overlay(self)
+            if self.help_open:
+                self.draw_help()
+            if self.music_picker:
+                self.draw_music_picker()
+            if self.notification:
+                self.draw_notification()
+        cursor = pygame.SYSTEM_CURSOR_HAND if self.pointer_hover else pygame.SYSTEM_CURSOR_ARROW
+        if cursor != self.last_cursor and pygame.display.get_driver() != 'dummy':
+            pygame.mouse.set_cursor(cursor)
+            self.last_cursor = cursor
+        if self.output_surface is not None:
+            pygame.transform.smoothscale(self.frame_surface, self.output_surface.get_size(), self.output_surface)
+        pygame.display.flip()
+
+    def _draw_gameplay(self, now):
         history_record = self.inspector.selected_record(self.observer)
         state = self.public_view_state()
         known = dict(state.verdicts)
-        now = pygame.time.get_ticks()
         if self.last_revealed is not None and history_record is None:
             for cell in known.keys() - self.last_revealed:
                 self.reveal_started[cell] = now
@@ -602,6 +1113,7 @@ class GameWindow:
         self.label("GRIDUCTIVE", (30, 22), ACCENT, self.heading)
         self.label(self.engine.title, (30, 63))
         self.label(f"{len(known)}/{len(state.characters)} proved", (626, 65), MUTED)
+        screens.draw_game_hud(self)
         self.button('agent', 'Agent', pygame.Rect(790,22,140,38))
         self.button('choose_music', 'Music', pygame.Rect(942,22,130,38))
         self.button('help', '?', pygame.Rect(1107,22,38,38))
@@ -678,34 +1190,13 @@ class GameWindow:
         message = (f'HISTORY - call {history_record.number}: board after action. Return to Live to continue.'
                    if history_record else self.message)
         self.wrapped(message, pygame.Rect(46, message_y+11, 1080, 44), font=self.font)
-        if self.inspector.open:
-            self.inspector.draw(self)
-        if self.picker:
-            self.draw_picker()
-        if self.verdict_cell:
-            self.draw_verdict_popup()
-        if self.help_open:
-            self.draw_help()
-        if self.music_picker:
-            self.draw_music_picker()
-        if self.notification:
-            self.draw_notification()
-        cursor = pygame.SYSTEM_CURSOR_HAND if self.pointer_hover else pygame.SYSTEM_CURSOR_ARROW
-        if cursor != self.last_cursor and pygame.display.get_driver() != 'dummy':
-            pygame.mouse.set_cursor(cursor)
-            self.last_cursor = cursor
-        if self.output_surface is not None:
-            pygame.transform.smoothscale(self.screen, self.output_surface.get_size(), self.output_surface)
-        pygame.display.flip()
 
     def select_music(self, path):
         self.message = self.music.select(path)
 
     def draw_music_picker(self):
         self.hover_scope = 'music'
-        veil = pygame.Surface(self.screen.get_size(),pygame.SRCALPHA)
-        veil.fill((0,0,0,180))
-        self.screen.blit(veil,(0,0))
+        self.draw_veil((0, 0, 0, 180))
         rect = pygame.Rect(0,0,700,540)
         rect.center = self.screen.get_rect().center
         pygame.draw.rect(self.screen,PANEL,rect,border_radius=14)
@@ -736,22 +1227,18 @@ class GameWindow:
                 'Read the clues again and try another verdict.' if contradicted else
                 f'The revealed clues do not yet prove whether {name} is criminal or innocent. '
                 'Solve another character first, or use Hint to find a provable move.')
-        veil = pygame.Surface(self.screen.get_size(), pygame.SRCALPHA)
-        veil.fill((0, 0, 0, 165))
-        self.screen.blit(veil, (0, 0))
+        self.draw_veil((0, 0, 0, 165))
         rect = pygame.Rect(0, 0, 520, 240)
-        rect.center = self.screen.get_rect().center
+        rect.center = main_canvas_rect().center
         pygame.draw.rect(self.screen, PANEL, rect, border_radius=14)
         pygame.draw.rect(self.screen, color, rect, 2, border_radius=14)
         self.label(title, (rect.x+24, rect.y+20), color, self.font)
         self.wrapped(text, pygame.Rect(rect.x+24, rect.y+62, rect.width-48, 100), font=self.font)
-        self.button('dismiss_notification', 'Continue', pygame.Rect(rect.centerx-85, rect.bottom-61, 170, 44))
+        self.button('dismiss_notification', 'Continue', pygame.Rect(rect.centerx-85, rect.bottom-61, 170, 44), style='primary')
 
     def draw_verdict_popup(self):
         self.hover_scope = 'verdict'
-        veil = pygame.Surface(self.screen.get_size(), pygame.SRCALPHA)
-        veil.fill((0, 0, 0, 135))
-        self.screen.blit(veil, (0, 0))
+        self.draw_veil((0, 0, 0, 135))
         card = self.cards[self.verdict_cell]
         rect = pygame.Rect(card.centerx-180, card.centery-92, 360, 184)
         rect.clamp_ip(self.screen.get_rect().inflate(-32, -32))
@@ -771,9 +1258,7 @@ class GameWindow:
 
     def draw_picker(self):
         self.hover_scope = 'stage'
-        veil = pygame.Surface(self.screen.get_size(), pygame.SRCALPHA)
-        veil.fill((0, 0, 0, 190))
-        self.screen.blit(veil, (0, 0))
+        self.draw_veil((0, 0, 0, 190))
         pygame.draw.rect(self.screen, PANEL, (190, 115, 800, 565), border_radius=14)
         self.label('Choose a stage', (215, 138), ACCENT, self.heading)
         self.label('Select a stage. Scroll or drag the bar to see more.', (215, 185), MUTED, self.small)
@@ -801,9 +1286,7 @@ class GameWindow:
 
     def draw_help(self):
         self.hover_scope = 'help'
-        veil = pygame.Surface(self.screen.get_size(), pygame.SRCALPHA)
-        veil.fill((0, 0, 0, 180))
-        self.screen.blit(veil, (0, 0))
+        self.draw_veil((0, 0, 0, 180))
         rect = pygame.Rect(0, 0, 680, 610)
         rect.center = self.screen.get_rect().center
         pygame.draw.rect(self.screen, PANEL, rect, border_radius=14)

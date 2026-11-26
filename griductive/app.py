@@ -23,13 +23,18 @@ def analyzer_factory(spec):
 
 def main() -> int:
     parser = argparse.ArgumentParser(description='Griductive game and teammate integration harness')
-    parser.add_argument('--puzzle', type=Path, default=ROOT / 'data/puzzles/3x3/level_01.json')
+    parser.add_argument('--puzzle', type=Path, default=None,
+                        help='Puzzle JSON to open directly (default: start on Home screen with Stage 1)')
     parser.add_argument('--analyzer', help='Teammate analyzer, e.g. griductive.agent.adapter:Agent')
     parser.add_argument('--headless', action='store_true', help='Progressive solving without Pygame')
+    parser.add_argument('--screen', choices=('home', 'game'), default=None,
+                        help='Initial UI screen (defaults to home unless --puzzle is passed)')
     args = parser.parse_args()
+    puzzle_path = args.puzzle or (ROOT / 'data/puzzles/3x3/level_01.json')
+    start_screen = args.screen or ('game' if args.puzzle is not None else 'home')
     try:
         factory = analyzer_factory(args.analyzer)
-        puzzle = load_puzzle(args.puzzle)
+        puzzle = load_puzzle(puzzle_path)
         if args.headless:
             engine = GameEngine(puzzle, factory())
             for step in range(puzzle.size*puzzle.size+1):
@@ -42,8 +47,9 @@ def main() -> int:
         from griductive.ui.window import GameWindow
         pygame.init()
         try:
-            GameWindow(args.puzzle, factory, ROOT / 'data/puzzles',
-                       args.analyzer or 'Reference analyzer | development mode').run()
+            GameWindow(puzzle_path, factory, ROOT / 'data/puzzles',
+                       args.analyzer or 'Reference analyzer | development mode',
+                       start_screen=start_screen).run()
         finally:
             pygame.quit()
         return 0
