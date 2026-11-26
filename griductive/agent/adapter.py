@@ -11,8 +11,13 @@ logger = logging.getLogger(__name__)
 class Agent:
      """Tác tử suy luận logic xây dựng trên bộ giải DPLL SAT"""
 
-     def __init__(self, timeout_seconds: float = 3.0, strict_dpll: bool = False) -> None:
+     def __init__(self, timeout_seconds: float = 3.0, strict_dpll: bool = False, *, on_sat_result=None, heuristic: str | None = None) -> None:
+          # None preserves the solver default (and existing benchmark wrappers).
+          if heuristic not in (None, 'smallest', 'jw'):
+               raise ValueError(f'Unsupported heuristic: {heuristic!r}')
+          self.heuristic = heuristic
           self.timeout_seconds = timeout_seconds
+          self.on_sat_result = on_sat_result
           self.strict_dpll = strict_dpll
           self.last_query_count = 0
           self.last_sat_calls = 0
@@ -43,6 +48,8 @@ class Agent:
 
      def _solve_recorded(self, solve, **kwargs):
           """Measure actual solver invocations; missing counters stay unavailable."""
+          if self.heuristic is not None:
+               kwargs['heuristic'] = self.heuristic
           self.last_sat_calls += 1
           started = perf_counter()
           try:
@@ -52,6 +59,8 @@ class Agent:
                raise
           finally:
                self.last_solver_runtime_ms += (perf_counter()-started)*1000
+          if self.on_sat_result is not None:
+               self.on_sat_result(result)
           stats = getattr(result, 'stats', None)
           for name, total in self.last_solver_metrics.items():
                value = getattr(result, name, None)

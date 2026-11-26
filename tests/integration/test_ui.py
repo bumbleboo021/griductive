@@ -574,6 +574,45 @@ def test_agent_history_browsing_and_restart(window):
     assert window.observer.snapshot() == ()
 
 
+def test_heuristic_switch_preserves_board_and_resets_metrics(window):
+    window.action('agent')
+    window.draw()
+    assert not window.buttons['agent_heuristic'][1]
+    window.action('agent_logic')
+    window.action('agent_step')
+    wait(window)
+    proved = window.engine.public_state()
+    assert window.observer.snapshot()
+    click(window, window.buttons['agent_heuristic'][0].center)
+    assert window.logic_heuristic == window.observer.analyzer.heuristic == 'jw'
+    assert window.engine.public_state() == proved
+    assert not window.observer.snapshot()
+    window.action('agent_analyze')
+    wait(window)
+    record, = window.observer.snapshot()
+    assert record.heuristic == 'jw' and record.totals.analysis_calls == 1
+
+    for flag in ('busy', 'auto'):
+        setattr(window, flag, True)
+        window.action('agent_heuristic')
+        assert window.logic_heuristic == 'jw'
+        setattr(window, flag, False)
+    window.action('agent_analyze')
+    wait(window)
+    window.browse_history(-1)
+    window.action('agent_heuristic')
+    assert window.logic_heuristic == 'jw'
+    window.action('agent_live')
+    window.action('agent_reference')
+    window.action('agent_logic')
+    assert window.observer.analyzer.heuristic == 'jw'
+    window.load(ROOT/'tests/fixtures/chain_5.json')
+    assert window.observer.analyzer.heuristic == 'jw'
+    window.draw()
+    click(window, window.buttons['agent_heuristic'][0].center)
+    assert window.logic_heuristic == window.observer.analyzer.heuristic == 'smallest'
+
+
 def test_docked_inspector_keeps_board_visible_and_playable(window):
     from griductive.ui import config
     before = dict(window.cards)
@@ -638,3 +677,20 @@ def test_agent_history_replays_public_board_without_rewinding_engine(window):
     assert any('Decisions:' in line and 'Propagations:' in line and 'Backtracks:' in line for line in metrics)
     assert any('Deduction steps: 3 | Reveal waves: 3' in line for line in metrics)
     assert any('Runtime (analysis total)' in line for line in metrics)
+
+
+def test_quote_uses_visible_owner_even_for_custom_clue_id(window, monkeypatch):
+    from dataclasses import replace
+    from griductive.domain.models import Clue
+    from griductive.ui import config
+
+    state = window.engine.public_state()
+    quote = Clue("personal-remark", "QUOTE", ())
+    state = replace(state, clues=(quote,))
+    owner = state.verdicts[0][0]
+    monkeypatch.setattr(window, "public_view_state", lambda: state)
+    monkeypatch.setattr(config, "CHARACTER_QUOTES", {"Ayaka": ["Tea."], "Venti": ["Lyre."]})
+    for name, expected in (("Ayaka", "Tea."), ("Venti", "Lyre."), ("Guest", "...")):
+        state = replace(state, characters=tuple(
+            replace(c, name=name) if c.cell == owner else c for c in state.characters))
+        assert window.clue_text(quote) == expected
