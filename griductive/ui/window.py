@@ -30,9 +30,20 @@ from griductive.ui.screens import (
 
 class GameWindow:
     def __init__(self, path, factory, puzzle_dir, analyzer_name, start_screen='game'):
-        self.screen = pygame.display.set_mode(cfg.WINDOW_SIZE, pygame.SCALED)
+        self.maximized = False
+        self._minimized = False
+        self._windowed_inspector_open = False
+        self._last_display_size = None
         self.output_surface = None
-        pygame.display.set_caption("Griductive | Deduction desk")
+        self.frame_surface = None
+        self.screen = None
+        self.viewport_rect = pygame.Rect(0, 0, *cfg.WINDOW_SIZE)
+        self._veil_cache = {}
+        self._backdrop_cache = {}
+        self._bg_cache = {}
+        self.inspector = AgentInspector()
+        self.last_cursor = None
+        self._resize_window_for_mode()
         self.font = ui_font(cfg.FONT_SIZE)
         self.small = ui_font(cfg.SMALL_FONT_SIZE)
         self.tiny = ui_font(cfg.TINY_FONT_SIZE)
@@ -40,7 +51,7 @@ class GameWindow:
         self.title_font = ui_font(cfg.TITLE_FONT_SIZE, heading=True)
         self.subtitle_font = ui_font(cfg.SUBTITLE_FONT_SIZE, heading=True)
         self.artwork = Artwork()
-        self.background = self.artwork.background(self.screen.get_size())
+        self.background = self.artwork.background(cfg.WINDOW_SIZE)
         self.reveal_started = {}
         self.last_revealed = None
         self.auto_focus_cell = None
@@ -49,7 +60,6 @@ class GameWindow:
         self.current_path = Path(path).resolve()
         self.observer = ObservedAnalyzer(factory())
         self.logic_heuristic = getattr(self.observer.analyzer, 'heuristic', None) or 'smallest'
-        self.inspector = AgentInspector()
         self.engine = GameEngine(self.artwork.cast_puzzle(load_puzzle(path)), self.observer)
         self.queue = Queue()
         self.analysis_sequence_before = 0
@@ -88,6 +98,7 @@ class GameWindow:
         self.has_active_session = start_screen == 'game'
         self.moves = 0
         self.hints_used = 0
+        self.hinted_cells = set()
         self.auto_used = False
         self.stage_elapsed_ms = 0
         self.last_timer_tick = pygame.time.get_ticks()
@@ -333,9 +344,47 @@ class GameWindow:
             self._home_preview_chars = chosen[:3]
         return self._home_preview_chars
 
+    def frame_background(self):
+        size = self.frame_surface.get_size()
+        if size == cfg.WINDOW_SIZE:
+            return self.background
+        bg = self._bg_cache.get(size)
+        if bg is None:
+            bg = self.artwork.background(size)
+            self._bg_cache[size] = bg
+        return bg
+
+    def veil_surface(self, rgba, size=None):
+        size = size or self.frame_surface.get_size()
+        key = (size, rgba)
+        surf = self._veil_cache.get(key)
+        if surf is None:
+            surf = pygame.Surface(size, pygame.SRCALPHA)
+            surf.fill(rgba)
+            self._veil_cache[key] = surf
+        return surf
+
+    def draw_veil(self, rgba):
+        self.frame_surface.blit(self.veil_surface(rgba), (0, 0))
+
+    def draw_backdrop(self, veil_rgba):
+        size = self.frame_surface.get_size()
+        key = (size, veil_rgba)
+        surf = self._backdrop_cache.get(key)
+        if surf is None:
+            surf = pygame.Surface(size).convert()
+            surf.fill(BG)
+            bg = self.frame_background()
+            if bg:
+                surf.blit(bg, (0, 0))
+            surf.blit(self.veil_surface(veil_rgba, size), (0, 0))
+            self._backdrop_cache[key] = surf
+        self.frame_surface.blit(surf, (0, 0))
+
     def reset_stage_metrics(self):
         self.moves = 0
         self.hints_used = 0
+        self.hinted_cells.clear()
         self.auto_used = False
         self.stage_elapsed_ms = 0
         self.last_timer_tick = pygame.time.get_ticks()
@@ -358,8 +407,10 @@ class GameWindow:
                 self.observer.finish_action(result, self.engine.public_state())
             self.message = f"{result.code}: {result.message}"
             if result.code == 'HINT':
-                self.hints_used += 1
-            elif result.code in ('ACCEPTED', 'SOLVED'):
+                if result.cell and result.cell not in self.hinted_cells:
+                    self.hinted_cells.add(result.cell)
+                    self.hints_used = len(self.hinted_cells)
+            elif result.code in ('ACCEPTED', 'SOLVED', 'CONTRADICTED', 'NOT_PROVABLE'):
                 self.moves += 1
             if result.code in ('CONTRADICTED', 'NOT_PROVABLE'):
                 self.notification = result
@@ -406,8 +457,21 @@ class GameWindow:
     def logical_position(self, position):
         if self.output_surface is None:
             return position
-        return (round(position[0]*self.screen.get_width()/self.output_surface.get_width()),
-                round(position[1]*self.screen.get_height()/self.output_surface.get_height()))
+        out_w, out_h = self.output_surface.get_size()
+        frame_w, frame_h = self.frame_surface.get_size()
+        fx = position[0] * frame_w / max(1, out_w)
+        fy = position[1] * frame_h / max(1, out_h)
+        return (round(fx - self.viewport_rect.x), round(fy - self.viewport_rect.y))
+
+    def window_position(self, position):
+        if self.output_surface is None:
+            return position
+        out_w, out_h = self.output_surface.get_size()
+        frame_w, frame_h = self.frame_surface.get_size()
+        return (
+            round((position[0] + self.viewport_rect.x) * out_w / max(1, frame_w)),
+            round((position[1] + self.viewport_rect.y) * out_h / max(1, frame_h)),
+        )
 
     def mouse_position(self):
         return self.logical_position(pygame.mouse.get_pos())
@@ -431,6 +495,64 @@ class GameWindow:
         self.reveal_started.clear()
         self.last_revealed = None
 
+    def _content_size(self):
+        width, height = cfg.WINDOW_SIZE
+        if self.inspector.open:
+            width += cfg.AGENT_PANEL_WIDTH
+        return (width, height)
+
+    def _target_window_size(self):
+        content_w, content_h = self._content_size()
+        if not self.inspector.open and pygame.display.get_driver() == 'dummy':
+            return (content_w, content_h)
+        desktop_sizes = pygame.display.get_desktop_sizes()
+        if not desktop_sizes:
+            return (content_w, content_h)
+        desktop_w, desktop_h = desktop_sizes[0]
+        scale = min(1.0, max(1, desktop_w - 48) / content_w, max(1, desktop_h - 80) / content_h)
+        return (max(1, round(content_w * scale)), max(1, round(content_h * scale)))
+
+    def _resize_window_for_mode(self):
+        target = self._target_window_size()
+        display_surface = pygame.display.set_mode(target, pygame.RESIZABLE)
+        pygame.display.set_caption('Griductive | Deduction desk')
+        self._windowed_inspector_open = self.inspector.open
+        self._sync_display_surface(display_surface)
+        self.last_cursor = None
+
+    def _sync_display_surface(self, display_surface=None):
+        display_surface = display_surface or pygame.display.get_surface()
+        if display_surface is None:
+            return
+        out_w, out_h = display_surface.get_size()
+        if out_w <= 0 or out_h <= 0:
+            return
+        content_w, content_h = self._content_size()
+        self._last_display_size = (out_w, out_h)
+        if (out_w, out_h) == (content_w, content_h) and not self.inspector.open and not self.maximized:
+            self.output_surface = None
+            self.viewport_rect = pygame.Rect(0, 0, content_w, content_h)
+            self.frame_surface = display_surface
+            self.screen = display_surface
+            return
+        self.output_surface = display_surface
+        pad = 24 if (self.maximized and self.inspector.open) else 0
+        min_w, min_h = content_w + pad, content_h + pad
+        if out_w * min_h >= out_h * min_w:
+            logical_h = min_h
+            logical_w = max(min_w, round(min_h * out_w / max(1, out_h)))
+        else:
+            logical_w = min_w
+            logical_h = max(min_h, round(min_w * out_h / max(1, out_w)))
+        offset_x = (logical_w - content_w) // 2
+        offset_y = (logical_h - content_h) // 2
+        self.viewport_rect = pygame.Rect(offset_x, offset_y, content_w, content_h)
+        self.frame_surface = pygame.Surface((logical_w, logical_h)).convert()
+        if self.viewport_rect.size == (logical_w, logical_h):
+            self.screen = self.frame_surface
+        else:
+            self.screen = self.frame_surface.subsurface(self.viewport_rect)
+
     def set_inspector_open(self, opened):
         if self.inspector.open == opened:
             return
@@ -439,25 +561,10 @@ class GameWindow:
         if not opened:
             self.inspector.reset()
             self.clear_replay_view()
-        width, height = cfg.WINDOW_SIZE
-        if opened:
-            width += cfg.AGENT_PANEL_WIDTH
-        # SDL's SCALED renderer must be recreated when its logical size changes.
-        # Keep fonts, audio, cached artwork, and the running engine intact.
-        pygame.display.quit()
-        pygame.display.init()
-        if opened:
-            desktop_width, desktop_height = pygame.display.get_desktop_sizes()[0]
-            scale = min(1.0, max(1,desktop_width-48)/width,
-                        max(1,desktop_height-80)/height)
-            self.output_surface = pygame.display.set_mode((max(1,round(width*scale)),
-                                                          max(1,round(height*scale))))
-            self.screen = pygame.Surface((width,height)).convert()
+        if self.maximized:
+            self._sync_display_surface()
         else:
-            self.screen = pygame.display.set_mode((width,height), pygame.SCALED)
-            self.output_surface = None
-        pygame.display.set_caption('Griductive | Deduction desk')
-        self.last_cursor = None
+            self._resize_window_for_mode()
 
     def action(self, key):
         if key == 'pause':
@@ -746,6 +853,28 @@ class GameWindow:
             return False
         if event.type == pygame.WINDOWFOCUSLOST:
             self.stage_drag_offset = None
+        if event.type == pygame.WINDOWMAXIMIZED:
+            self.maximized = True
+            self._minimized = False
+            self._sync_display_surface()
+            return True
+        if event.type == pygame.WINDOWMINIMIZED:
+            self._minimized = True
+            return True
+        if event.type == pygame.WINDOWRESTORED:
+            if self._minimized:
+                self._minimized = False
+                self._sync_display_surface()
+            else:
+                self.maximized = False
+                if self.inspector.open != self._windowed_inspector_open:
+                    self._resize_window_for_mode()
+                else:
+                    self._sync_display_surface()
+            return True
+        if event.type in (pygame.WINDOWSIZECHANGED, pygame.VIDEORESIZE):
+            self._sync_display_surface()
+            return True
         if self.notification:
             if event.type == pygame.KEYDOWN and event.key in (pygame.K_ESCAPE, pygame.K_RETURN, pygame.K_SPACE):
                 self.notification = None
@@ -919,15 +1048,15 @@ class GameWindow:
             self.file_scroll = round(position/travel*max(0,len(self.files)-8))
 
     def draw(self):
+        display_surface = pygame.display.get_surface()
+        if display_surface is not None and display_surface.get_size() != self._last_display_size:
+            self._sync_display_surface(display_surface)
         tick = pygame.time.get_ticks()
         self.hover_delta = min(50, max(0,tick-self.hover_time))
         self.hover_time = tick
         self.maybe_open_cleared(tick)
         self.hover_scope = 'main'
         self.pointer_hover = False
-        self.screen.fill(BG)
-        if self.background:
-            self.screen.blit(self.background, (0, 0))
         self.buttons = {}
         if self.screen_state == 'home':
             screens.draw_home(self)
@@ -942,6 +1071,10 @@ class GameWindow:
             if self.music_picker:
                 self.draw_music_picker()
         else:
+            self.frame_surface.fill(BG)
+            bg = self.frame_background()
+            if bg:
+                self.frame_surface.blit(bg, (0, 0))
             self._draw_gameplay(tick)
             if self.inspector.open:
                 self.inspector.draw(self)
@@ -965,7 +1098,7 @@ class GameWindow:
             pygame.mouse.set_cursor(cursor)
             self.last_cursor = cursor
         if self.output_surface is not None:
-            pygame.transform.smoothscale(self.screen, self.output_surface.get_size(), self.output_surface)
+            pygame.transform.smoothscale(self.frame_surface, self.output_surface.get_size(), self.output_surface)
         pygame.display.flip()
 
     def _draw_gameplay(self, now):
@@ -1063,9 +1196,7 @@ class GameWindow:
 
     def draw_music_picker(self):
         self.hover_scope = 'music'
-        veil = pygame.Surface(self.screen.get_size(),pygame.SRCALPHA)
-        veil.fill((0,0,0,180))
-        self.screen.blit(veil,(0,0))
+        self.draw_veil((0, 0, 0, 180))
         rect = pygame.Rect(0,0,700,540)
         rect.center = self.screen.get_rect().center
         pygame.draw.rect(self.screen,PANEL,rect,border_radius=14)
@@ -1096,9 +1227,7 @@ class GameWindow:
                 'Read the clues again and try another verdict.' if contradicted else
                 f'The revealed clues do not yet prove whether {name} is criminal or innocent. '
                 'Solve another character first, or use Hint to find a provable move.')
-        veil = pygame.Surface(self.screen.get_size(), pygame.SRCALPHA)
-        veil.fill((0, 0, 0, 165))
-        self.screen.blit(veil, (0, 0))
+        self.draw_veil((0, 0, 0, 165))
         rect = pygame.Rect(0, 0, 520, 240)
         rect.center = main_canvas_rect().center
         pygame.draw.rect(self.screen, PANEL, rect, border_radius=14)
@@ -1109,9 +1238,7 @@ class GameWindow:
 
     def draw_verdict_popup(self):
         self.hover_scope = 'verdict'
-        veil = pygame.Surface(self.screen.get_size(), pygame.SRCALPHA)
-        veil.fill((0, 0, 0, 135))
-        self.screen.blit(veil, (0, 0))
+        self.draw_veil((0, 0, 0, 135))
         card = self.cards[self.verdict_cell]
         rect = pygame.Rect(card.centerx-180, card.centery-92, 360, 184)
         rect.clamp_ip(self.screen.get_rect().inflate(-32, -32))
@@ -1131,9 +1258,7 @@ class GameWindow:
 
     def draw_picker(self):
         self.hover_scope = 'stage'
-        veil = pygame.Surface(self.screen.get_size(), pygame.SRCALPHA)
-        veil.fill((0, 0, 0, 190))
-        self.screen.blit(veil, (0, 0))
+        self.draw_veil((0, 0, 0, 190))
         pygame.draw.rect(self.screen, PANEL, (190, 115, 800, 565), border_radius=14)
         self.label('Choose a stage', (215, 138), ACCENT, self.heading)
         self.label('Select a stage. Scroll or drag the bar to see more.', (215, 185), MUTED, self.small)
@@ -1161,9 +1286,7 @@ class GameWindow:
 
     def draw_help(self):
         self.hover_scope = 'help'
-        veil = pygame.Surface(self.screen.get_size(), pygame.SRCALPHA)
-        veil.fill((0, 0, 0, 180))
-        self.screen.blit(veil, (0, 0))
+        self.draw_veil((0, 0, 0, 180))
         rect = pygame.Rect(0, 0, 680, 610)
         rect.center = self.screen.get_rect().center
         pygame.draw.rect(self.screen, PANEL, rect, border_radius=14)

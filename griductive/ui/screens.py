@@ -31,10 +31,17 @@ def short_stage_title(title):
     return parts[2].strip() if len(parts) == 3 and parts[2].strip() else title
 
 
+_SHADOW_CACHE = {}
+
+
 def draw_panel(surface, rect, fill=cfg.PANEL, border=cfg.BORDER_SUBTLE, border_width=1, radius=14, shadow=True):
     if shadow:
-        shadow_surf = pygame.Surface((rect.width + 16, rect.height + 16), pygame.SRCALPHA)
-        pygame.draw.rect(shadow_surf, (0, 0, 0, 95), shadow_surf.get_rect(), border_radius=radius + 4)
+        key = (rect.width, rect.height, radius)
+        shadow_surf = _SHADOW_CACHE.get(key)
+        if shadow_surf is None:
+            shadow_surf = pygame.Surface((rect.width + 16, rect.height + 16), pygame.SRCALPHA)
+            pygame.draw.rect(shadow_surf, (0, 0, 0, 95), shadow_surf.get_rect(), border_radius=radius + 4)
+            _SHADOW_CACHE[key] = shadow_surf
         surface.blit(shadow_surf, (rect.x - 8, rect.y - 2))
     pygame.draw.rect(surface, fill, rect, border_radius=radius)
     if border and border_width > 0:
@@ -120,14 +127,11 @@ def draw_game_hud(view):
 
 
 def draw_home(view):
-    """Home Screen with hero logo, animated character preview, and main navigation menu."""
+    """Home Screen with hero logo, character preview, and main navigation menu."""
     view.hover_scope = "home"
     canvas = main_canvas_rect()
-    tick = pygame.time.get_ticks()
 
-    veil = pygame.Surface(canvas.size, pygame.SRCALPHA)
-    veil.fill((10, 16, 24, 130))
-    view.screen.blit(veil, (0, 0))
+    view.draw_backdrop((10, 16, 24, 130))
 
     # Top utility strip
     badge = pygame.Rect(34, 24, 290, 36)
@@ -169,8 +173,7 @@ def draw_home(view):
     base_y = showcase.y + 20
 
     for idx, ((status_tag, card_bg, tag_color, caption), record) in enumerate(zip(preview_specs, portraits)):
-        bob = round(math.sin(tick / 540.0 + idx * 1.45) * 4.5)
-        card = pygame.Rect(start_x + idx * (card_w + gap), base_y + bob, card_w, card_h)
+        card = pygame.Rect(start_x + idx * (card_w + gap), base_y, card_w, card_h)
         draw_panel(view.screen, card, fill=card_bg, border=tag_color, border_width=2 if idx == 2 else 1, radius=12, shadow=False)
 
         portrait_size = 76
@@ -222,9 +225,7 @@ def draw_stage_select(view):
     view.hover_scope = "stage_select"
     canvas = main_canvas_rect()
 
-    veil = pygame.Surface(canvas.size, pygame.SRCALPHA)
-    veil.fill((10, 16, 24, 155))
-    view.screen.blit(veil, (0, 0))
+    view.draw_backdrop((10, 16, 24, 155))
 
     # Header
     view.button("stage_back", "Back", pygame.Rect(36, 26, 114, 40), style="default")
@@ -360,11 +361,9 @@ def draw_stage_select(view):
 def draw_pause_overlay(view):
     """Pause menu overlay on top of active gameplay."""
     view.hover_scope = "pause"
-    veil = pygame.Surface(view.screen.get_size(), pygame.SRCALPHA)
-    veil.fill((8, 12, 18, 190))
-    view.screen.blit(veil, (0, 0))
+    view.draw_veil((8, 12, 18, 190))
 
-    canvas = main_canvas_rect()
+    canvas = view.screen.get_rect()
     rect = pygame.Rect(0, 0, 446, 478)
     rect.center = canvas.center
     draw_panel(view.screen, rect, fill=cfg.PANEL, border=cfg.ACCENT, border_width=2, radius=16)
@@ -398,11 +397,9 @@ def draw_cleared_overlay(view):
     """Stage Cleared overlay (star-free, focused on deduction stats and Next Stage navigation)."""
     view.hover_scope = "cleared"
     tick = pygame.time.get_ticks()
-    canvas = main_canvas_rect()
+    canvas = view.screen.get_rect()
 
-    veil = pygame.Surface(view.screen.get_size(), pygame.SRCALPHA)
-    veil.fill((8, 16, 22, 192))
-    view.screen.blit(veil, (0, 0))
+    view.draw_veil((8, 16, 22, 192))
 
     draw_cleared_particles(view.screen, view.cleared_particles, view.hover_delta, canvas, tick)
 
